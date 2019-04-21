@@ -18,9 +18,9 @@ using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Theatreers.Show
 {
-    public static class SentimentAnalyser
+    public static class NewsAssociator
     {
-        [FunctionName("SentimentAnalyser")]
+        [FunctionName("NewsAssociator")]
         
         public static void Run(
             [ServiceBusTrigger("newshow", "news", Connection = "topicConnectionString")]string topicMessage,
