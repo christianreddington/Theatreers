@@ -1,0 +1,232 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {        
+        "templateContainerUri": {
+            "type": "string",
+            "metadata": {
+                "description": "URI of the Blob Storage Container containing the ARM Templates"
+            }
+        },
+        "templateContainerSasToken": {
+            "type": "string",
+            "metadata": {
+                "description": "The SAS token of the container containing the ARM Templates"
+            }
+        },        
+        "tenantId": {
+            "type": "string",
+            "metadata": {
+                "description": "GUID of the Azure AD Tenant associated with the Azure KeyVault"
+            }
+        },
+        "serviceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Which service is being deployed, e.g. show, venue, etc."
+            }
+        },     
+        "environmentName": {
+            "type": "string",
+            "allowedValues": [
+                "devvy",
+                "test",
+                "qa",
+                "prod"
+            ],
+            "defaultValue": "devvy",
+            "metadata": {
+                "description": "Which environment to deploy, dev or prod"
+            }
+        },         
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },        
+        "servicePrincipalObjectId": {
+            "type": "string",
+            "metadata": {
+                "description": "Object ID (not application ID) of the service principal to be granted access to the KeyVault."
+            }
+        },       
+        "appInsightsName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the App Insights resources to send function telemetry to"
+            }
+        },     
+        "appInsightsResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource Group name of the App Insights resources to send function telemetry to"
+            }
+        }
+    },
+    "variables": {
+        "orgNamePrefix": "th",            
+        "namePrefix": "[concat(variables('orgNamePrefix'),'-', parameters('serviceName'), '-', parameters('environmentName'),'-')]",
+        "namePrefixWithoutDashes": "[replace(variables('namePrefix'), '-', '')]",
+        "keyvaultName": "[concat(variables('namePrefix'), 'kv')]",
+        "storageAccount": {
+            "name": "[concat(variables('namePrefixWithoutDashes'), 'messages')]",
+            "containers": [
+                "showsimage",
+                "showsnews"
+            ]
+        },
+        "serviceBusTopics": [
+                {
+                    "topicName": "newshow",
+                    "subscriptions": [
+                        "aggregator",
+                        "image",
+                        "news"
+                    ]
+                }
+        ]
+    },
+    "resources": [        
+        {
+            "apiVersion": "2017-05-10",
+            "name": "keyVaultDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/keyVault.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vaultName": {
+                        "value": "[variables('keyvaultName')]"
+                    },
+                    "tenantId": {
+                        "value": "[parameters('tenantId')]"
+                    },
+                    "objectId": {
+                        "value": "[parameters('servicePrincipalObjectId')]"
+                    }
+                }
+            }
+        },      
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('topicDeployment-', copyIndex())]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'keyVaultDeployment')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/servicebusTopic.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "keyvaultName": {
+                        "value": "[variables('keyvaultName')]"
+                    },
+                    "serviceName": {
+                        "value": "[parameters('serviceName')]"
+                    },
+                    "environmentName": {
+                        "value": "[parameters('environmentName')]"
+                    },
+                    "serviceBusTopicName": {
+                        "value": "[variables('serviceBusTopics')[copyIndex()].topicName]"
+                    },
+                    "serviceBusSubscriptionNames": {
+                        "value": "[variables('serviceBusTopics')[copyIndex()].subscriptions]"
+                    }
+                }
+            },
+            "copy": {
+                "name": "topicloop",
+                "count": "[length(variables('serviceBusTopics'))]"
+            }
+        },   
+        {
+            "apiVersion": "2017-05-10",
+            "name": "functionDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'topicDeployment')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/function.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "namePrefix": {
+                        "value": "[variables('namePrefix')]"
+                    },
+                    "namePrefixWithoutDashes": {
+                        "value": "[variables('namePrefixWithoutDashes')]"
+                    },
+                    "appInsightsName": {
+                        "value": "[parameters('appInsightsName')]"
+                    },
+                    "appInsightsResourceGroup": {
+                        "value": "[parameters('appInsightsResourceGroup')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "messagesStoreDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'keyVaultDeployment')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/messagesStore.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[variables('storageAccount').name]"
+                    },
+                    "keyvaultName": {
+                        "value": "[variables('keyvaultName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('storageAccountContainerDeployment-', copyIndex())]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'messagesStoreDeployment')]"
+            ],
+            "copy": {
+                "name": "storageAccountContainerLoop",
+                "count": "[length(variables('storageAccount').containers)]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/storageAccountContainer.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[variables('storageAccount').name]"
+                    },
+                    "containerName": {
+                        "value": "[variables('storageAccount').containers[copyIndex()]]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

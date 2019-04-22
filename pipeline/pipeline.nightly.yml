@@ -29,8 +29,14 @@ steps:
   inputs:
     rootFolderOrFile: '$(dotnetBuildOutputPath)'
     includeRootFolder: false
-    archiveFile: '$(buildPublishPath)/$(Build.BuildId).zip'
-# Publish the 
+    archiveFile: '$(buildPublishPath)/src/$(Build.BuildId).zip'
+# Copy the template to the deploy folder
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(buildPublishPath)/templates'
+  inputs:
+    SourceFolder: deploy
+    TargetFolder: '$(buildPublishPath)/deploy'
+# Publish the artifacts
 - task: PublishPipelineArtifact@0
   displayName: 'Publish Pipeline Artifact'
   inputs:
