@@ -63,6 +63,12 @@
             "metadata": {
                 "description": "Resource Group name of the App Insights resources to send function telemetry to"
             }
+        },
+        "serviceBusNamespaceResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource Group for the Service Bus Namespace"
+            }
         }
     },
     "variables": {
@@ -140,6 +146,9 @@
                     },
                     "serviceBusSubscriptionNames": {
                         "value": "[variables('serviceBusTopics')[copyIndex()].subscriptions]"
+                    },
+                    "serviceBusNamespaceResourceGroup": {
+                        "value": "[parameters('serviceBusNamespaceResourceGroup')]"
                     }
                 }
             },
