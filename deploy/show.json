@@ -29,12 +29,12 @@
         "environmentName": {
             "type": "string",
             "allowedValues": [
-                "devvy",
+                "dev",
                 "test",
                 "qa",
                 "prod"
             ],
-            "defaultValue": "devvy",
+            "defaultValue": "dev",
             "metadata": {
                 "description": "Which environment to deploy, dev or prod"
             }
