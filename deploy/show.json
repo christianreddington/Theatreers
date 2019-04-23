@@ -149,11 +149,7 @@
                     },
                     "serviceBusSubscriptionNames": {
                         "value": "[variables('serviceBusTopics')[copyIndex()].subscriptions]"
-                    },
-                    "serviceBusNamespaceResourceGroup": {
-                        "value": "[parameters('serviceBusNamespaceResourceGroup')]"
                     }
-                }
             },
             "copy": {
                 "name": "topicloop",
