@@ -85,9 +85,9 @@
             ]
         },
         "sharedAccessPolicyName": "[concat(parameters('serviceName'), 'service')]",
+        "serviceBusNamespace": "[concat('theatreers-', parameters('environmentName'))]",
         "serviceBusTopics": [
                 {
-                    "namespace": "[concat('theatreers-', parameters('environmentName'))]",
                     "topicName": "newshow",
                     "subscriptions": [
                         "aggregator",
@@ -125,6 +125,7 @@
             "apiVersion": "2017-05-10",
             "name": "[concat('topicDeployment-', copyIndex())]",
             "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('serviceBusNamespaceResourceGroup')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'keyVaultDeployment')]"
             ],
@@ -153,7 +154,7 @@
                 }
             },
             "copy": {
-                "name": "topicloop",
+                "name": "serviceBusTopicLoop",
                 "count": "[length(variables('serviceBusTopics'))]"
             }
         },   
@@ -162,7 +163,7 @@
             "name": "functionDeployment",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "topicloop"
+                "serviceBusTopicLoop"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -185,7 +186,7 @@
                     }
                 }
             }
-        },
+        },    
         {
             "apiVersion": "2017-05-10",
             "name": "messagesStoreDeployment",
@@ -213,7 +214,6 @@
             "apiVersion": "2017-05-10",
             "name": "[concat('storageAccountContainerDeployment-', copyIndex())]",
             "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[parameters('serviceBusNamespaceResourceGroup')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'messagesStoreDeployment')]"
             ],
@@ -236,17 +236,41 @@
                     }
                 }
             }
+        },   
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('authorizationRule-', copyIndex())]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('serviceBusNamespaceResourceGroup')]",
+            "dependsOn": [
+                "serviceBusTopicLoop"
+            ],     
+            "copy": {
+                "name": "topicAuthLoop",
+                "count": "[length(variables('serviceBusTopics'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/servicebusAuthorization.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "authorizationRuleName": {
+                        "value": "[concat(variables('serviceBusNamespace'), '/', variables('serviceBusTopics')[copyIndex()].topicName, '/', variables('sharedAccessPolicyName'))]"
+                    }
+                }
+            }
         },
         {
             "apiVersion": "2018-02-14",
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "name": "[concat(variables('keyVaultName'), '/', variables('serviceBusTopics')[copyIndex()].name, variables('keyvaultSecretName'))]",
+            "name": "[concat(variables('keyVaultName'), '/', 'Connection', copyIndex())]",
             "properties": {
-                "value": "[listkeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules', variables('serviceBusTopics').namespace, variables('serviceBusTopics')[copyIndex()].name, variables('sharedAccessPolicyName')), '2017-04-01').primaryConnectionString]"
+                "value": "[listkeys(resourceId(parameters('serviceBusNamespaceResourceGroup'), 'Microsoft.ServiceBus/namespaces/topics/authorizationRules', variables('serviceBusNamespace'), variables('serviceBusTopics')[copyIndex()].topicName, variables('sharedAccessPolicyName')), '2017-04-01').primaryConnectionString]"
             },
             "dependsOn": [
-                "topicLoop",
-                "keyvaultDeployment"
+                "topicAuthLoop"
             ],            
             "copy": {
                 "name": "topicSecretLoop",
