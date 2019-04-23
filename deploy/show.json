@@ -76,7 +76,7 @@
         "namePrefix": "[concat(variables('orgNamePrefix'),'-', parameters('serviceName'), '-', parameters('environmentName'),'-')]",
         "namePrefixWithoutDashes": "[replace(variables('namePrefix'), '-', '')]",
         "keyvaultName": "[concat(variables('namePrefix'), 'kv')]",
-        "keyvaultSecretName": "topicConnectionString",
+        "keyvaultSecretName": "TopicConnectionString",
         "storageAccount": {
             "name": "[concat(variables('namePrefixWithoutDashes'), 'messages')]",
             "containers": [
@@ -240,9 +240,9 @@
         {
             "apiVersion": "2018-02-14",
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "name": "[concat(variables('keyVaultName'), '/', variables('keyvaultSecretName'))]",
+            "name": "[concat(variables('keyVaultName'), '/', variables('serviceBusTopics')[copyIndex()].name, variables('keyvaultSecretName'))]",
             "properties": {
-                "value": "[listkeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules', variables('serviceBusTopics').namespace, variables('serviceBusTopics').name, variables('sharedAccessPolicyName')), '2017-04-01').primaryConnectionString]"
+                "value": "[listkeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules', variables('serviceBusTopics').namespace, variables('serviceBusTopics')[copyIndex()].name, variables('sharedAccessPolicyName')), '2017-04-01').primaryConnectionString]"
             },
             "dependsOn": [
                 "topicLoop",
