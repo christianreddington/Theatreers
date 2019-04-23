@@ -76,6 +76,7 @@
         "namePrefix": "[concat(variables('orgNamePrefix'),'-', parameters('serviceName'), '-', parameters('environmentName'),'-')]",
         "namePrefixWithoutDashes": "[replace(variables('namePrefix'), '-', '')]",
         "keyvaultName": "[concat(variables('namePrefix'), 'kv')]",
+        "keyvaultSecretName": "topicConnectionString",
         "storageAccount": {
             "name": "[concat(variables('namePrefixWithoutDashes'), 'messages')]",
             "containers": [
@@ -83,8 +84,10 @@
                 "showsnews"
             ]
         },
+        "sharedAccessPolicyName": "[concat(parameters('serviceName'), 'service')]",
         "serviceBusTopics": [
                 {
+                    "namespace": "[concat('theatreers-', parameters('environmentName'))]",
                     "topicName": "newshow",
                     "subscriptions": [
                         "aggregator",
@@ -213,6 +216,7 @@
             "apiVersion": "2017-05-10",
             "name": "[concat('storageAccountContainerDeployment-', copyIndex())]",
             "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('serviceBusNamespaceResourceGroup')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/deployments', 'messagesStoreDeployment')]"
             ],
@@ -234,6 +238,22 @@
                         "value": "[variables('storageAccount').containers[copyIndex()]]"
                     }
                 }
+            }
+        },
+        {
+            "apiVersion": "2018-02-14",
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "name": "[concat(variables('keyVaultName'), '/', variables('keyvaultSecretName'))]",
+            "properties": {
+                "value": "[listkeys(resourceId('Microsoft.ServiceBus/namespaces/topics/authorizationRules', variables('serviceBusTopics').namespace, variables('serviceBusTopics').name, variables('sharedAccessPolicyName')), '2017-04-01').primaryConnectionString]"
+            },
+            "dependsOn": [
+                "topicLoop",
+                "keyvaultDeployment"
+            ],            
+            "copy": {
+                "name": "topicSecretLoop",
+                "count": "[length(variables('serviceBusTopics'))]"
             }
         }
     ],
