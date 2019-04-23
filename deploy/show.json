@@ -150,6 +150,7 @@
                     "serviceBusSubscriptionNames": {
                         "value": "[variables('serviceBusTopics')[copyIndex()].subscriptions]"
                     }
+                }
             },
             "copy": {
                 "name": "topicloop",
