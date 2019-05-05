@@ -75,6 +75,12 @@
             "metadata": {
                 "description": "Name of the CosmosDB account where the information is stored"
             }
+        },
+        "cosmosDbResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource group  of the CosmosDB account where the information is stored"
+            }
         }
     },
     "variables": {
@@ -288,7 +294,7 @@
             "type": "Microsoft.KeyVault/vaults/secrets",
             "name": "[concat(variables('keyVaultName'), '/', 'cosmosConnectionString')]",
             "properties": {
-                "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2015-11-06').primaryMasterKey]"
+                "value": "[listKeys(resourceId(parameters('cosmosDbResourceGroup'), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2015-11-06').primaryMasterKey]"
             },
             "dependsOn": [
                 "keyVaultDeployment"
