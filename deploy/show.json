@@ -294,7 +294,7 @@
             "type": "Microsoft.KeyVault/vaults/secrets",
             "name": "[concat(variables('keyVaultName'), '/', 'cosmosConnectionString')]",
             "properties": {
-                "value": "[listKeys(resourceId(parameters('cosmosDbResourceGroup'), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2015-11-06').primaryMasterKey]"
+                "value": "[concat('AccountEndpoint=https://', parameters('cosmosDbAccountName'), '.documents.azure.com:443/;AccountKey=', listKeys(resourceId(parameters('cosmosDbResourceGroup'), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2015-11-06').primaryMasterKey)]"
             },
             "dependsOn": [
                 "keyVaultDeployment"
