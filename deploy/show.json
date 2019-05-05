@@ -69,6 +69,12 @@
             "metadata": {
                 "description": "Resource Group for the Service Bus Namespace"
             }
+        },
+        "cosmosDbAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the CosmosDB account where the information is stored"
+            }
         }
     },
     "variables": {
@@ -276,6 +282,17 @@
                 "name": "topicSecretLoop",
                 "count": "[length(variables('serviceBusTopics'))]"
             }
+        },
+        {
+            "apiVersion": "2018-02-14",
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "name": "[concat(variables('keyVaultName'), '/', 'cosmosConnectionString')]",
+            "properties": {
+                "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2015-11-06').primaryMasterKey]"
+            },
+            "dependsOn": [
+                "keyVaultDeployment"
+            ]
         }
     ],
     "outputs": {}
