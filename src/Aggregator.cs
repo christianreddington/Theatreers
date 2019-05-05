@@ -39,12 +39,13 @@ namespace Theatreers.Show
             CloudBlockBlob newsBlob = newsBlobContainer.GetBlockBlobReference(filename);
             int backoff = 300;
 
-            IList<Microsoft.Azure.CognitiveServices.Search.ImageSearch.Models.ImageObject> imageObject = await findBlob<IList<Microsoft.Azure.CognitiveServices.Search.ImageSearch.Models.ImageObject>>(imageBlob, backoff);
-            IList<Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.NewsArticle> newsObject = await findBlob<IList<Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.NewsArticle>>(newsBlob, backoff);
+            IList<ImageObject> imageObject = await findBlob<IList<ImageObject>>(imageBlob, backoff);
+            IList<NewsObject> newsObject = await findBlob<IList<NewsObject>>(newsBlob, backoff);
             
             decoratedMessage.images = imageObject;
             decoratedMessage.news = newsObject;
             decoratedMessage.doctype = "show";
+            decoratedMessage.partitionKey = decoratedMessage.ShowName.ToLower().Substring(0, 4);
 
             log.LogInformation($"[Request Correlation ID: {decoratedMessage.MessageProperties.RequestCorrelationId}] :: entity downloaded :: {imageObject.FirstOrDefault().ToString()}");
             log.LogInformation($"[Request Correlation ID: {decoratedMessage.MessageProperties.RequestCorrelationId}] :: entity downloaded :: {newsObject.FirstOrDefault().ToString()}");

@@ -7,9 +7,12 @@ using Microsoft.Azure.CognitiveServices.Search;
 namespace Theatreers.Show
 {
     public class ShowMessage {
+        public string id { get; set; }
+        public string partitionKey { get; set; }
+        //public string showId {get; set;}
         public string doctype {get; set;}
-        public IList<Microsoft.Azure.CognitiveServices.Search.ImageSearch.Models.ImageObject> images {get; set;}
-        public IList<Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.NewsArticle> news {get; set;}
+        public IList<ImageObject> images {get; set;}
+        public IList<NewsObject> news {get; set;}
         public string ShowName {get; set;}
         public string description {get; set;}
         public string relatesto {get; set;}
@@ -24,6 +27,17 @@ namespace Theatreers.Show
         public string RequestCorrelationId {get; set;}
         public string RequestCreatedAt {get; set;}
         public string RequestStatus {get; set;}
+    }
+
+    public class ImageObject {
+        public string imageId {get; set;}
+        public string contentUrl {get; set;}
+        public string hostPageUrl {get; set;}
+        public string name {get; set;}
+    }
+    public class NewsObject {
+        public string name {get; set;}
+        public string url {get; set;}
     }
 
     public class EnvelopedMessage {

@@ -18,7 +18,7 @@ namespace Theatreers.Show
         
         [FunctionName("SubmitShowAsync")]
         public static async Task<IActionResult> RunAsync(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "show")] HttpRequest req,
             ILogger log,
             [ServiceBus("newshow", EntityType.Topic, Connection = "topicConnectionString")] IAsyncCollector<string> outputs
             )

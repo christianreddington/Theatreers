@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AzureFunctionsVersion>V2</AzureFunctionsVersion>
-    <RootNamespace>scratchpad_2</RootNamespace>
+    <RootNamespace>Theatreers.Show</RootNamespace>
     <ProjectGuid>{CD5682C3-DF1D-4AF0-B5F9-848F58DE5D93}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
