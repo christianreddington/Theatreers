@@ -279,7 +279,7 @@
             "type": "Microsoft.KeyVault/vaults/secrets",
             "name": "[concat(variables('keyVaultName'), '/', 'Connection', copyIndex())]",
             "properties": {
-                "value": "[listkeys(resourceId(parameters('serviceBusNamespaceResourceGroup'), 'Microsoft.ServiceBus/namespaces/topics/authorizationRules', variables('serviceBusNamespace'), variables('serviceBusTopics')[copyIndex()].topicName, variables('sharedAccessPolicyName')), '2017-04-01').primaryConnectionString]"
+                "value": "[replace(listkeys(resourceId(parameters('serviceBusNamespaceResourceGroup'), 'Microsoft.ServiceBus/namespaces/topics/authorizationRules', variables('serviceBusNamespace'), variables('serviceBusTopics')[copyIndex()].topicName, variables('sharedAccessPolicyName')), '2017-04-01').primaryConnectionString, concat('EntityPath=newshow', variables('serviceBusTopics')[copyIndex()].topicName), '')]"
             },
             "dependsOn": [
                 "topicAuthLoop"
