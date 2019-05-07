@@ -1,0 +1,20 @@
+# cert-manager/certificate.yaml
+kind: Certificate
+apiVersion: certmanager.k8s.io/v1alpha1
+metadata:
+  name: api-dev-theatreers-com
+spec:
+  secretName: api-dev-theatreers-com-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: api.dev.theatreers.com
+  dnsNames:
+  - api.dev.theatreers.com
+  acme:
+    config:
+    - dns01:
+        ingress: theatreers-ingress
+        provider: AzureDNS
+      domains:
+      - api.dev.theatreers.com

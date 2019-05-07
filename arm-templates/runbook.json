@@ -1,0 +1,56 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "accountName": {
+           "type": "string",
+           "metadata": {
+                "description": "Name of the Azure Automation Account"
+            }
+        },
+        "runbookName": {
+           "type": "string",
+           "metadata": {
+                "description": "Name of the runbook"
+            }
+        },
+        "containerUri": {
+           "type": "string",
+           "metadata": {
+                "description": "Base URL of the container"
+            }
+        },
+        "containerSasToken": {
+           "type": "string",
+           "metadata": {
+                "description": "SAS Token for the container"
+            }
+        },
+        "fileName": {
+           "type": "string",
+           "metadata": {
+                "description": "Name of the file to use"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [        
+        {
+            "name": "[concat(parameters('accountName'), '/', parameters('runbookName'))]",
+            "type": "Microsoft.Automation/automationAccounts/runbooks",
+            "apiVersion": "2015-01-01-preview",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "runbookType": "PowerShell",
+                "logProgress": "false",
+                "logVerbose": "false",
+                "publishContentLink": {
+                    "uri": "[concat(parameters('containerUri'), '/', parameters('fileName'), parameters('containerSasToken'))]",
+                    "version": "1.0.0.0"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

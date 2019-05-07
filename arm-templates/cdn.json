@@ -1,0 +1,166 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "cdnOriginStgAccountName": {
+            "type": "string",
+            "defaultValue": "thcoredevassets",
+            "metadata": {
+                "description": "Storage Account Name of the Origin"
+            }
+        },
+        "cdnEndpointName": {
+            "type": "string",
+            "defaultValue": "th-cdn-dev",
+            "metadata": {
+                "description": "Endpoint name for the URI of the CDN"
+            }
+        },
+        "cdnProfileName": {
+            "type": "string",
+            "defaultValue": "th-cdn-dev-profile",
+            "metadata": {
+                "description": "Name of the CDN Profile resource to be deployed"
+            }
+        },
+        "cdnCustomDomain": {
+            "type": "string",
+            "defaultValue": "cdn.dev.theatreers.com",
+            "metadata": {
+                "description": "Custom Domain Name of the CDN Endpoint"
+            }
+        },
+        "templateContainerUri": {
+           "type": "string",
+           "metadata": {
+                "description": "URI of the Blob Storage Container containing the ARM Templates"
+            }
+        },
+        "templateContainerSasToken": {
+           "type": "string",
+           "metadata": {
+                "description": "The SAS token of the container containing the ARM Templates"
+            }
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "storageAccountDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/storageAccount.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[parameters('cdnOriginStgAccountName')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[parameters('cdnProfileName')]",
+            "type": "Microsoft.Cdn/profiles",
+            "location": "[parameters('location')]",
+            "apiVersion": "2016-04-02",
+            "sku": {
+                "name": "Standard_Microsoft"
+            },
+            "properties": {}
+        },
+        {
+            "apiVersion": "2016-04-02",
+            "name": "[concat(parameters('cdnProfileName'), '/', parameters('cdnEndpointName'))]",
+            "type": "Microsoft.Cdn/profiles/endpoints",
+            "dependsOn": [                
+                "[resourceId('Microsoft.Cdn/profiles', parameters('cdnProfileName'))]",
+                "[resourceId('Microsoft.Resources/deployments', 'storageAccountDeployment')]"
+            ],
+            "location": "[parameters('location')]",
+            "tags": {
+                "displayName": "[parameters('cdnEndpointName')]"
+            },
+            "properties": {
+                "originHostHeader": "[replace(replace(reference('storageAccountDeployment').outputs.blobEndpoint.value,'https://',''),'/','')]",
+                "originPath": "/assets",
+                "isHttpAllowed": true,
+                "isHttpsAllowed": true,
+                "queryStringCachingBehavior": "IgnoreQueryString",
+                "isCompressionEnabled": true,
+                "contentTypesToCompress": [
+                    "application/eot",
+                    "application/font",
+                    "application/font-sfnt",
+                    "application/javascript",
+                    "application/json",
+                    "application/opentype",
+                    "application/otf",
+                    "application/pkcs7-mime",
+                    "application/truetype",
+                    "application/ttf",
+                    "application/vnd.ms-fontobject",
+                    "application/xhtml+xml",
+                    "application/xml",
+                    "application/xml+rss",
+                    "application/x-font-opentype",
+                    "application/x-font-truetype",
+                    "application/x-font-ttf",
+                    "application/x-httpd-cgi",
+                    "application/x-javascript",
+                    "application/x-mpegurl",
+                    "application/x-opentype",
+                    "application/x-otf",
+                    "application/x-perl",
+                    "application/x-ttf",
+                    "font/eot",
+                    "font/ttf",
+                    "font/otf",
+                    "font/opentype",
+                    "image/svg+xml",
+                    "text/css",
+                    "text/csv",
+                    "text/html",
+                    "text/javascript",
+                    "text/js",
+                    "text/plain",
+                    "text/richtext",
+                    "text/tab-separated-values",
+                    "text/xml",
+                    "text/x-script",
+                    "text/x-component",
+                    "text/x-java-source"
+                ],
+                "origins": [
+                    {
+                        "name": "origin1",
+                        "properties": {
+                            "hostName": "[replace(replace(reference('storageAccountDeployment').outputs.blobEndpoint.value,'https://',''),'/','')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[concat(parameters('cdnProfileName'), '/', parameters('cdnEndpointName'), '/customDomain')]",
+            "type": "Microsoft.Cdn/profiles/endpoints/customDomains",
+            "apiVersion": "2017-04-02",
+            "properties": {
+                "hostName": "[parameters('cdnCustomDomain')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/Profiles/Endpoints/', parameters('cdnProfileName'), parameters('cdnEndpointName'))]"
+            ]
+        }
+    ],
+    "outputs": {}
+}

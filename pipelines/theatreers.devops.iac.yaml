@@ -1,0 +1,11 @@
+steps:
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: ''# Optional
+    contents: '**' 
+    targetFolder: '$(Build.ArtifactStagingDirectory)/'
+# Publish Pipeline Artifact
+- task: PublishPipelineArtifact@0
+  inputs:
+    artifactName: 'drop'
+    targetPath: '$(Build.ArtifactStagingDirectory)/'

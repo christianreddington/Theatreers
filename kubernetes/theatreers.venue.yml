@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: theatreers-venue-deployment
+  labels:
+    app: theatreers-venue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: theatreers-venue
+  template:
+    metadata:
+      labels:
+        app: theatreers-venue
+    spec:
+      containers:
+      - name: theatreers-venue
+        image: #{containerRegistry}#.azurecr.io/#{imageName}#:latest
+        imagePullPolicy: "Always"
+        resources:
+          limits:
+            cpu: 125m
+            memory: 250Mi
+          requests:
+            cpu: 75m
+            memory: 150Mi
+        ports:
+        - containerPort: 80
+        env:          
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: #{podSecretReference}#
+              key: ConnectionStrings__DefaultConnection
+        - name: ApplicationInsights__InstrumentationKey
+          valueFrom:
+            secretKeyRef:
+              name: #{podSecretReference}#
+              key: ApplicationInsights__InstrumentationKey
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: theatreers-venue-svc
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: theatreers-venue

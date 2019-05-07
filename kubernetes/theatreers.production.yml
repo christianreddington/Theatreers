@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: theatreers-production-deployment
+  labels:
+    app: theatreers-production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: theatreers-production
+  template:
+    metadata:
+      labels:
+        app: theatreers-production
+    spec:
+      containers:
+      - name: theatreers-production
+        image: #{containerRegistry}#.azurecr.io/#{imageName}#:latest
+        imagePullPolicy: "Always"
+        resources:
+          limits:
+            cpu: 125m
+            memory: 250Mi
+          requests:
+            cpu: 75m
+            memory: 150Mi
+        ports:
+        - containerPort: 80
+        env:          
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: #{podSecretReference}#
+              key: ConnectionStrings__DefaultConnection
+        - name: ApplicationInsights__InstrumentationKey
+          valueFrom:
+            secretKeyRef:
+              name: #{podSecretReference}#
+              key: ApplicationInsights__InstrumentationKey
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: theatreers-production-svc
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: theatreers-production

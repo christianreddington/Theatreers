@@ -1,0 +1,130 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "accountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Azure Automation Account"
+            }
+        },
+        "templateContainerUri": {
+            "type": "string",
+            "metadata": {
+                "description": "Base URL of the container"
+            }
+        },
+        "templateContainerSasToken": {
+            "type": "string",
+            "metadata": {
+                "description": "SAS Token for the container"
+            }
+        },
+        "automationContainerUri": {
+            "type": "string",
+            "metadata": {
+                "description": "Base URL of the container"
+            }
+        },
+        "automationContainerSasToken": {
+            "type": "string",
+            "metadata": {
+                "description": "SAS Token for the container"
+            }
+        }
+    },
+    "variables": {
+        "servicePrincipalKeyRotation": {
+            "runbookName": "AADSPKeyRotation",
+            "fileName": "aadApplicationKeyRotation.ps1"
+        },
+        "vstsDeployment": {
+            "runbookName": "VSTSReleaseTrigger",
+            "fileName": "vstsTrigger.ps1"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "automationAccountDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/automationAccount.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[parameters('accountName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "aadSPRotationRunbookDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "automationAccountDeployment"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/runbook.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[parameters('accountName')]"
+                    },
+                    "containerUri": {
+                        "value": "[parameters('automationContainerUri')]"
+                    },
+                    "containerSasToken": {
+                        "value": "[parameters('automationContainerSasToken')]"
+                    },
+                    "fileName": {
+                        "value": "[variables('servicePrincipalKeyRotation').fileName]"
+                    },
+                    "runbookName": {
+                        "value": "[variables('servicePrincipalKeyRotation').runbookName]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "vstsRunbookDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "automationAccountDeployment"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/runbook.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[parameters('accountName')]"
+                    },
+                    "containerUri": {
+                        "value": "[parameters('automationContainerUri')]"
+                    },
+                    "containerSasToken": {
+                        "value": "[parameters('automationContainerSasToken')]"
+                    },
+                    "fileName": {
+                        "value": "[variables('vstsDeployment').fileName]"
+                    },
+                    "runbookName": {
+                        "value": "[variables('vstsDeployment').runbookName]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

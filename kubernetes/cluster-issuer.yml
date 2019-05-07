@@ -1,0 +1,62 @@
+# cert-manager/issuer.yaml
+kind: ClusterIssuer
+apiVersion: certmanager.k8s.io/v1alpha1
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: christian.reddington@outlook.com
+    privateKeySecretRef:
+      name: letsencrypt-prod-private-key
+    dns01:
+      # Here we define a list of DNS-01 providers that can solve DNS challenges
+      providers:
+      - name: AzureDNS
+        AzureDNS:
+          # Service principal clientId (also called appId)
+          clientID: "#{devopsSPClientID}#"
+          # A secretKeyRef to a service principal ClientSecret (password)
+          clientSecretSecretRef:
+            name: azure-cert-manager-ad-principal-client-secret
+            key: client-secret
+          # Azure subscription Id
+          subscriptionID: "#{dnsSubscriptionID}#"
+          # Azure AD tenant Id
+          tenantID: "#{tenantID}#"
+          # ResourceGroup name where dns zone is provisioned
+          resourceGroupName: "#{dnsResourceGroupName}#"
+          # Name of the hosted zone, if ommited it will be computed from domain provided during certificate creation
+          # hosted zone name is always part of domain name from certificate request
+          hostedZoneName: "#{dnsZone}#"
+---
+kind: ClusterIssuer
+apiVersion: certmanager.k8s.io/v1alpha1
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: christian.reddington@outlook.com
+    privateKeySecretRef:
+      name: letsencrypt-staging-private-key
+    dns01:
+      # Here we define a list of DNS-01 providers that can solve DNS challenges
+      providers:
+      - name: AzureDNS
+        AzureDNS:
+          # Service principal clientId (also called appId)
+          clientID: "#{devopsSPClientID}#"
+          # A secretKeyRef to a service principal ClientSecret (password)
+          clientSecretSecretRef:
+            name: azure-cert-manager-ad-principal-client-secret
+            key: client-secret
+          # Azure subscription Id
+          subscriptionID: "#{dnsSubscriptionID}#"
+          # Azure AD tenant Id
+          tenantID: "#{tenantID}#"
+          # ResourceGroup name where dns zone is provisioned
+          resourceGroupName: "#{dnsResourceGroupName}#"
+          # Name of the hosted zone, if ommited it will be computed from domain provided during certificate creation
+          # hosted zone name is always part of domain name from certificate request
+          hostedZoneName: "#{dnsZone}#"

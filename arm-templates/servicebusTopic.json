@@ -1,0 +1,82 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environmentName": {
+            "type": "string",
+            "metadata": {
+                "description": "Environment Identifier"
+            }
+        },
+        "keyvaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Azure KeyVault where the secret will be held"
+            }
+        },
+        "serviceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Microservice Being Deployed"
+            }
+        },
+        "serviceBusTopicName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Topic"
+            }
+        },
+        "serviceBusSubscriptionNames": {
+            "type": "array",
+            "metadata": {
+                "description": "Name of the Subscription"
+            }
+        }
+    },
+    "variables": {
+        "sharedAccessPolicyName": "[concat(parameters('serviceName'), 'service')]",
+        "serviceBusNamespaceName": "[concat('theatreers-', parameters('environmentName'))]"
+    },
+    "resources": [        
+        {
+            "apiVersion": "2017-04-01",
+            "name": "[concat(variables('serviceBusNamespaceName'), '/', parameters('serviceBusTopicName'))]",
+            "type": "Microsoft.ServiceBus/namespaces/topics",
+            "properties": {
+                "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S",
+                "maxSizeInMegabytes": "1024",
+                "requiresDuplicateDetection": "false",
+                "duplicateDetectionHistoryTimeWindow": "PT10M",
+                "enableBatchedOperations": "false",
+                "supportOrdering": "false",
+                "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S",
+                "enablePartitioning": "false",
+                "enableExpress": "false"
+            },
+            "resources": [
+            ]
+        },
+        {
+            "apiVersion": "2017-04-01",
+            "type": "Microsoft.ServiceBus/namespaces/Topics/Subscriptions",            
+            "name": "[concat(variables('serviceBusNamespaceName'), '/', parameters('serviceBusTopicName'), '/', parameters('serviceBusSubscriptionNames')[copyIndex()])]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces/topics/', variables('serviceBusNamespaceName'), parameters('serviceBusTopicName'))]"
+            ],
+            "properties": {
+                "lockDuration": "PT30S",
+                "requiresSession": "false",
+                "defaultMessageTimeToLive": "P14D",
+                "deadLetteringOnMessageExpiration": true,
+                "deadLetteringOnFilterEvaluationExceptions": true,
+                "maxDeliveryCount": "10",
+                "enableBatchedOperations": "false",
+                "autoDeleteOnIdle": "P10675199DT2H48M5.4775807S"
+            },
+            "copy": {
+                "name": "subscriptionsLoop",
+                "count": "[length(parameters('serviceBusSubscriptionNames'))]"
+            }
+        }
+    ]
+}

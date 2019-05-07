@@ -1,0 +1,130 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "templateContainerUri": {
+           "type": "string",
+           "metadata": {
+                "description": "URI of the Blob Storage Container containing the ARM Templates"
+            }
+        },
+        "templateContainerSasToken": {
+           "type": "string",
+           "metadata": {
+                "description": "The SAS token of the container containing the ARM Templates"
+            }
+        },
+        "cdnOriginStgAccountName": {
+           "type": "string",
+           "metadata": {
+                "description": "Storage Account Name for the origin"
+            }
+        },
+        "cdnEndpointName": {
+           "type": "string",
+           "metadata": {
+                "description": "CDN Endpoint Name"
+            }
+        },
+        "cdnProfileName": {
+           "type": "string",
+           "metadata": {
+                "description": "Name of the CDN Profile resource"
+            }
+        },
+        "dnsZoneName": {
+           "type": "string",
+           "defaultValue": "theatreers.com",
+           "metadata": {
+                "description": "Overall DNS Zone Name - e.g. theatreers.com"
+            }
+        },
+        "dnsRecordName": {
+           "type": "string",
+           "metadata": {
+                "description": "DNS Record Name e.g. 'cdn.dev' from cdn.dev.theatreers.com"
+            }
+        },
+        "dnsZoneSubscriptionId": {
+           "type": "securestring",
+           "metadata": {
+                "description": "Subscription of the DNS Zone Resource"
+            }
+        },
+        "dnsZoneRG": {
+           "type": "string",
+           "metadata": {
+                "description": "Resource Group of the DNS Zone Resource"
+            }
+        }  
+    },
+    "variables": {
+        "CNAMEMapping": "[concat(parameters('cdnEndpointName'),'.azureedge.net')]"
+    },
+    "resources": [      
+        {
+            "apiVersion": "2017-05-10",
+            "name": "dnsZoneDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "subscriptionId": "[parameters('dnsZoneSubscriptionId')]",
+            "resourceGroup": "[parameters('dnsZoneRG')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                  "uri": "[concat(parameters('templateContainerUri'), '/dnsZone.json', parameters('templateContainerSasToken'))]",
+                  "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZoneName": {"value": "[parameters('dnsZoneName')]"}
+                }
+            }
+        },     
+        {
+            "apiVersion": "2017-05-10",
+            "name": "cnameRecordDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "subscriptionId": "[parameters('dnsZoneSubscriptionId')]",
+            "resourceGroup": "[parameters('dnsZoneRG')]",
+            "dependsOn": [
+                "dnsZoneDeployment"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                  "uri": "[concat(parameters('templateContainerUri'), '/cname.json', parameters('templateContainerSasToken'))]",
+                  "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZoneName": {"value": "[parameters('dnsZoneName')]"},
+                    "dnsRecordName": {"value": "[parameters('dnsRecordName')]"},
+                    "CNAMEMapping": {"value": "[variables('CNAMEMapping')]"}
+                }
+            }
+        },     
+        {
+            "apiVersion": "2017-05-10",
+            "name": "cdnDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "dnsZoneDeployment"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                  "uri": "[concat(parameters('templateContainerUri'), '/cdn.json', parameters('templateContainerSasToken'))]",
+                  "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "cdnOriginStgAccountName": {"value": "[parameters('cdnOriginStgAccountName')]"},
+                    "cdnEndpointName": {"value": "[parameters('cdnEndpointName')]"},
+                    "cdnProfileName": {"value": "[parameters('cdnProfileName')]"},
+                    "cdnCustomDomain": {"value": "[concat(parameters('dnsRecordName'),'.',parameters('dnsZoneName'))]"},
+                    "templateContainerUri": {"value": "[parameters('templateContainerUri')]"},
+                    "templateContainerSasToken": {"value": "[parameters('templateContainerSasToken')]"}
+                    
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

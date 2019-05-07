@@ -1,0 +1,174 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "templateContainerUri": {
+            "type": "string",
+            "metadata": {
+                "description": "URI of the Blob Storage Container containing the ARM Templates"
+            }
+        },
+        "templateContainerSasToken": {
+            "type": "string",
+            "metadata": {
+                "description": "The SAS token of the container containing the ARM Templates"
+            }
+        },
+        "automationContainerUri": {
+            "type": "string",
+            "metadata": {
+                "description": "Base URL of the Automation Account container"
+            }
+        },
+        "automationContainerSasToken": {
+            "type": "string",
+            "metadata": {
+                "description": "SAS Token for the Automation Account container"
+            }
+        },
+        "tenantId": {
+            "type": "string",
+            "metadata": {
+                "description": "GUID of the Azure AD Tenant associated with the Azure KeyVault"
+            }
+        },
+        "environmentName": {
+            "type": "string",
+            "allowedValues": [
+                "dev",
+                "prod"
+            ],
+            "defaultValue": "dev",
+            "metadata": {
+                "description": "Which environment to deploy, dev or prod"
+            }
+        }
+    },
+    "variables": {
+        "environmentSettings": {
+            "dev": {
+                "automationAccountName": "th-mgt-dev-aa",
+                "containerRegistryName": "thmgtdevacr",
+                "keyvaultName": "th-mgt-dev-kv",
+                "logAnalyticsWorkspaceName": "th-mgt-dev-log",
+                "storageAccountName": "thmgtdevartifactstg"
+            },
+            "prod": {
+                "automationAccountName": "th-mgt-prd-aa",
+                "containerRegistryName": "thmgtprdacr",
+                "keyvaultName": "th-mgt-prd-kv",
+                "logAnalyticsWorkspaceName": "th-mgt-prd-log",
+                "storageAccountName": "thmgtprdartifactstg"
+            }
+        },
+        "currentEnvironmentSettings": "[variables('environmentSettings')[parameters('environmentName')]]",
+        "automationAccountName": "[variables('currentEnvironmentSettings').automationAccountName]",
+        "containerRegistryName": "[variables('currentEnvironmentSettings').containerRegistryName]",
+        "keyvaultName": "[variables('currentEnvironmentSettings').keyvaultName]",
+        "logAnalyticsWorkspaceName": "[variables('currentEnvironmentSettings').logAnalyticsWorkspaceName]",
+        "storageAccountName": "[variables('currentEnvironmentSettings').storageAccountName]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "storageAccountDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/storageAccount.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[variables('storageAccountName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "containerRegistryDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/containerRegistry.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "registryName": {
+                        "value": "[variables('containerRegistryName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "keyVaultDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/keyVault.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vaultName": {
+                        "value": "[variables('keyvaultName')]"
+                    },
+                    "tenantId": {
+                        "value": "[parameters('tenantId')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "logAnalyticsWorkspaceDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/logAnalyticsWorkspace.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "workspaceName": {
+                        "value": "[variables('logAnalyticsWorkspaceName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "automationAccountWithScriptsDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/automationAccountOrchestrator.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[variables('automationAccountName')]"
+                    },
+                    "templateContainerUri": {
+                        "value": "[parameters('templateContainerUri')]"
+                    },
+                    "templateContainerSasToken": {
+                        "value": "[parameters('templateContainerSasToken')]"
+                    },
+                    "automationContainerURI": {
+                        "value": "[parameters('automationContainerUri')]"
+                    },
+                    "automationContainerSasToken": {
+                        "value": "[parameters('automationContainerSasToken')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

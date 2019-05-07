@@ -1,0 +1,10 @@
+{
+  "kind": "Namespace",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "theatreers-ops-#{environmentName}#",
+    "labels": {
+      "name": "theatreers-ops-#{environmentName}#"
+    }
+  }
+}
