@@ -45,7 +45,7 @@
             "metadata": {
                 "description": "Location for all resources."
             }
-        },        
+        },           
         "servicePrincipalObjectId": {
             "type": "string",
             "metadata": {
@@ -109,7 +109,36 @@
                 }
         ]
     },
-    "resources": [        
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "functionDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "serviceBusTopicLoop"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/function.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "namePrefix": {
+                        "value": "[variables('namePrefix')]"
+                    },
+                    "namePrefixWithoutDashes": {
+                        "value": "[variables('namePrefixWithoutDashes')]"
+                    },
+                    "appInsightsName": {
+                        "value": "[parameters('appInsightsName')]"
+                    },
+                    "appInsightsResourceGroup": {
+                        "value": "[parameters('appInsightsResourceGroup')]"
+                    }
+                }
+            }
+        },       
         {
             "apiVersion": "2017-05-10",
             "name": "keyVaultDeployment",
@@ -132,7 +161,33 @@
                     }
                 }
             }
-        },      
+        }, 
+        {
+            "apiVersion": "2018-02-14",
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "name": "[concat(variables('keyVaultName'), '/', 'Connection', copyIndex())]",
+            "properties": {
+                "value": "[replace(listkeys(resourceId(parameters('serviceBusNamespaceResourceGroup'), 'Microsoft.ServiceBus/namespaces/topics/authorizationRules', variables('serviceBusNamespace'), variables('serviceBusTopics')[copyIndex()].topicName, variables('sharedAccessPolicyName')), '2017-04-01').primaryConnectionString, concat('EntityPath=', variables('serviceBusTopics')[copyIndex()].topicName), '')]"
+            },
+            "dependsOn": [
+                "topicAuthLoop"
+            ],            
+            "copy": {
+                "name": "topicSecretLoop",
+                "count": "[length(variables('serviceBusTopics'))]"
+            }
+        },
+        {
+            "apiVersion": "2018-02-14",
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "name": "[concat(variables('keyVaultName'), '/', 'cosmosConnectionString')]",
+            "properties": {
+                "value": "[concat('AccountEndpoint=https://', parameters('cosmosDbAccountName'), '.documents.azure.com:443/;AccountKey=', listKeys(resourceId(parameters('cosmosDbResourceGroup'), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2015-11-06').primaryMasterKey)]"
+            },
+            "dependsOn": [
+                "keyVaultDeployment"
+            ]
+        },     
         {
             "apiVersion": "2017-05-10",
             "name": "[concat('topicDeployment-', copyIndex())]",
@@ -172,33 +227,29 @@
         },   
         {
             "apiVersion": "2017-05-10",
-            "name": "functionDeployment",
+            "name": "[concat('authorizationRule-', copyIndex())]",
             "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('serviceBusNamespaceResourceGroup')]",
             "dependsOn": [
                 "serviceBusTopicLoop"
-            ],
+            ],     
+            "copy": {
+                "name": "topicAuthLoop",
+                "count": "[length(variables('serviceBusTopics'))]"
+            },
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('templateContainerUri'), '/function.json', parameters('templateContainerSasToken'))]",
+                    "uri": "[concat(parameters('templateContainerUri'), '/servicebusAuthorization.json', parameters('templateContainerSasToken'))]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "namePrefix": {
-                        "value": "[variables('namePrefix')]"
-                    },
-                    "namePrefixWithoutDashes": {
-                        "value": "[variables('namePrefixWithoutDashes')]"
-                    },
-                    "appInsightsName": {
-                        "value": "[parameters('appInsightsName')]"
-                    },
-                    "appInsightsResourceGroup": {
-                        "value": "[parameters('appInsightsResourceGroup')]"
+                    "authorizationRuleName": {
+                        "value": "[concat(variables('serviceBusNamespace'), '/', variables('serviceBusTopics')[copyIndex()].topicName, '/', variables('sharedAccessPolicyName'))]"
                     }
                 }
             }
-        },    
+        },              
         {
             "apiVersion": "2017-05-10",
             "name": "messagesStoreDeployment",
@@ -248,57 +299,6 @@
                     }
                 }
             }
-        },   
-        {
-            "apiVersion": "2017-05-10",
-            "name": "[concat('authorizationRule-', copyIndex())]",
-            "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[parameters('serviceBusNamespaceResourceGroup')]",
-            "dependsOn": [
-                "serviceBusTopicLoop"
-            ],     
-            "copy": {
-                "name": "topicAuthLoop",
-                "count": "[length(variables('serviceBusTopics'))]"
-            },
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('templateContainerUri'), '/servicebusAuthorization.json', parameters('templateContainerSasToken'))]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "authorizationRuleName": {
-                        "value": "[concat(variables('serviceBusNamespace'), '/', variables('serviceBusTopics')[copyIndex()].topicName, '/', variables('sharedAccessPolicyName'))]"
-                    }
-                }
-            }
-        },
-        {
-            "apiVersion": "2018-02-14",
-            "type": "Microsoft.KeyVault/vaults/secrets",
-            "name": "[concat(variables('keyVaultName'), '/', 'Connection', copyIndex())]",
-            "properties": {
-                "value": "[replace(listkeys(resourceId(parameters('serviceBusNamespaceResourceGroup'), 'Microsoft.ServiceBus/namespaces/topics/authorizationRules', variables('serviceBusNamespace'), variables('serviceBusTopics')[copyIndex()].topicName, variables('sharedAccessPolicyName')), '2017-04-01').primaryConnectionString, concat('EntityPath=', variables('serviceBusTopics')[copyIndex()].topicName), '')]"
-            },
-            "dependsOn": [
-                "topicAuthLoop"
-            ],            
-            "copy": {
-                "name": "topicSecretLoop",
-                "count": "[length(variables('serviceBusTopics'))]"
-            }
-        },
-        {
-            "apiVersion": "2018-02-14",
-            "type": "Microsoft.KeyVault/vaults/secrets",
-            "name": "[concat(variables('keyVaultName'), '/', 'cosmosConnectionString')]",
-            "properties": {
-                "value": "[concat('AccountEndpoint=https://', parameters('cosmosDbAccountName'), '.documents.azure.com:443/;AccountKey=', listKeys(resourceId(parameters('cosmosDbResourceGroup'), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2015-11-06').primaryMasterKey)]"
-            },
-            "dependsOn": [
-                "keyVaultDeployment"
-            ]
         }
     ],
     "outputs": {}
