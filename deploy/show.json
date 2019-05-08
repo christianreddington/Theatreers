@@ -1,31 +1,31 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {        
-        "templateContainerUri": {
+    "parameters": {         
+        "appInsightsName": {
             "type": "string",
             "metadata": {
-                "description": "URI of the Blob Storage Container containing the ARM Templates"
-            }
-        },
-        "templateContainerSasToken": {
-            "type": "string",
-            "metadata": {
-                "description": "The SAS token of the container containing the ARM Templates"
-            }
-        },        
-        "tenantId": {
-            "type": "string",
-            "metadata": {
-                "description": "GUID of the Azure AD Tenant associated with the Azure KeyVault"
-            }
-        },
-        "serviceName": {
-            "type": "string",
-            "metadata": {
-                "description": "Which service is being deployed, e.g. show, venue, etc."
+                "description": "Name of the App Insights resource where Azure Functions telemetry should be sent"
             }
         },     
+        "appInsightsResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource Group of the App Insights resource where Azure Functions telemetry should be sent. If this is incorrect, deployment will fail as ARM cannot find the specific resource"
+            }
+        },        
+        "cosmosDbAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the CosmosDB account where the backend data is stored"
+            }
+        },
+        "cosmosDbResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource group for the CosmosDB account, where the backend data is stored. If this is incorrect, deployment will fail as ARM cannot find the specific resource."
+            }
+        },          
         "environmentName": {
             "type": "string",
             "allowedValues": [
@@ -36,78 +36,76 @@
             ],
             "defaultValue": "dev",
             "metadata": {
-                "description": "Which environment to deploy, dev or prod"
+                "description": "Define which environment is being deployed, this will affect naming convention of all resources"
             }
-        },         
+        },            
         "location": {
             "type": "string",
             "defaultValue": "[resourceGroup().location]",
             "metadata": {
                 "description": "Location for all resources."
             }
-        },           
-        "servicePrincipalObjectId": {
-            "type": "string",
-            "metadata": {
-                "description": "Object ID (not application ID) of the service principal to be granted access to the KeyVault."
-            }
-        },       
-        "appInsightsName": {
-            "type": "string",
-            "metadata": {
-                "description": "Name of the App Insights resources to send function telemetry to"
-            }
         },     
-        "appInsightsResourceGroup": {
-            "type": "string",
-            "metadata": {
-                "description": "Resource Group name of the App Insights resources to send function telemetry to"
-            }
-        },
         "serviceBusNamespaceResourceGroup": {
             "type": "string",
             "metadata": {
-                "description": "Resource Group for the Service Bus Namespace"
+                "description": "Resource Group for the Service Bus Namespace, where the Service Bus topics will be housed."
             }
         },
-        "cosmosDbAccountName": {
+        "servicePrincipalObjectId": {
             "type": "string",
             "metadata": {
-                "description": "Name of the CosmosDB account where the information is stored"
+                "description": "Object ID (not application ID) of the Azure DevOps service principal to be granted access to the KeyVault."
+            }
+        },        
+        "tenantId": {
+            "type": "string",
+            "metadata": {
+                "description": "GUID of the Azure AD Tenant associated with the Azure KeyVault"
+            }
+        },      
+        "templateContainerUri": {
+            "type": "string",
+            "metadata": {
+                "description": "URI of the Blob Storage Container containing the ARM Template building blocks"
             }
         },
-        "cosmosDbResourceGroup": {
+        "templateContainerSasToken": {
             "type": "string",
             "metadata": {
-                "description": "Resource group  of the CosmosDB account where the information is stored"
+                "description": "The SAS token of the container containing the ARM Template building blocks"
             }
         }
     },
     "variables": {
-        "orgNamePrefix": "th",            
-        "namePrefix": "[concat(variables('orgNamePrefix'),'-', parameters('serviceName'), '-', parameters('environmentName'),'-')]",
-        "namePrefixWithoutDashes": "[replace(variables('namePrefix'), '-', '')]",
+        "abbreviations": {
+            "North Europe": "neu",
+            "West Europe": "weu"
+        },
         "keyvaultName": "[concat(variables('namePrefix'), 'kv')]",
-        "keyvaultSecretName": "TopicConnectionString",
+        "namePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', variables('abbreviations')[parameters('location')], '-', parameters('environmentName'),'-')]",
+        "namePrefixWithoutDashes": "[replace(variables('namePrefix'), '-', '')]",
+        "organisationPrefix": "th",      
+        "serviceBusNamespace": "[concat('theatreers-', parameters('environmentName'))]",
+        "serviceBusTopics": [
+            {
+                "topicName": "newshow",
+                "subscriptions": [
+                    "aggregator",
+                    "image",
+                    "news"
+                ]
+            }
+        ],
+        "serviceName": "show",
+        "sharedAccessPolicyName": "[concat(variables('serviceName'), 'service')]",
         "storageAccount": {
             "name": "[concat(variables('namePrefixWithoutDashes'), 'messages')]",
             "containers": [
                 "showsimage",
                 "showsnews"
             ]
-        },
-        "sharedAccessPolicyName": "[concat(parameters('serviceName'), 'service')]",
-        "serviceBusNamespace": "[concat('theatreers-', parameters('environmentName'))]",
-        "serviceBusTopics": [
-                {
-                    "topicName": "newshow",
-                    "subscriptions": [
-                        "aggregator",
-                        "image",
-                        "news"
-                    ]
-                }
-        ]
+        }
     },
     "resources": [
         {
@@ -137,7 +135,8 @@
                         "value": "[parameters('appInsightsResourceGroup')]"
                     }
                 }
-            }
+            },
+            "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
         },       
         {
             "apiVersion": "2017-05-10",
@@ -160,7 +159,8 @@
                         "value": "[parameters('servicePrincipalObjectId')]"
                     }
                 }
-            }
+            },
+            "comments": "Downstream template to deploy Azure KeyVault, associate it with a gievn tenant and assign a Service Principal Object with access to secrets. This uses the Theatreers Azure KeyVault Building Block."
         }, 
         {
             "apiVersion": "2018-02-14",
@@ -175,7 +175,8 @@
             "copy": {
                 "name": "topicSecretLoop",
                 "count": "[length(variables('serviceBusTopics'))]"
-            }
+            },
+            "comments": "Resource to deploy the Topic Connection String as a  KeyVault Secret. Pass in the resource group and service bus namespace name and appropriate topic, while also removing the EntityPath aspect from the connection string. This has to be removed, due to the Azure Function host not being able to handle it."
         },
         {
             "apiVersion": "2018-02-14",
@@ -186,7 +187,8 @@
             },
             "dependsOn": [
                 "keyVaultDeployment"
-            ]
+            ],
+            "comments": "Resource to deploy the Azure CosmosDB Connection String as a  KeyVault Secret."
         },     
         {
             "apiVersion": "2017-05-10",
@@ -223,8 +225,9 @@
             "copy": {
                 "name": "serviceBusTopicLoop",
                 "count": "[length(variables('serviceBusTopics'))]"
-            }
-        },   
+            },            
+            "comments": "Downstream template to deploy Service Bus Topic onto a pre-existing service bus namespace. This uses the Theatreers Service Bus Topic Building Block."
+        }, 
         {
             "apiVersion": "2017-05-10",
             "name": "[concat('authorizationRule-', copyIndex())]",
@@ -248,7 +251,8 @@
                         "value": "[concat(variables('serviceBusNamespace'), '/', variables('serviceBusTopics')[copyIndex()].topicName, '/', variables('sharedAccessPolicyName'))]"
                     }
                 }
-            }
+            },
+            "comments": "Downstream template to deploy a Shared Access Policy at the scope of a Service Bus Topic. This uses the Theatreers Service Bus Authorization Building Block."
         },              
         {
             "apiVersion": "2017-05-10",
@@ -271,7 +275,8 @@
                         "value": "[variables('keyvaultName')]"
                     }
                 }
-            }
+            },
+            "comments": "Downstream template to deploy an Azure Storage account to be used as a temporary message store (holds transient data related to the microservice). This uses the Theatreers Azure Storage Account Building Block."
         },
         {
             "apiVersion": "2017-05-10",
@@ -298,7 +303,8 @@
                         "value": "[variables('storageAccount').containers[copyIndex()]]"
                     }
                 }
-            }
+            },
+            "comments": "Downstream template to deploy a container to a given Azure Storage Account (that has already been deployed in this template). This uses the Theatreers Azure Storage Account Container Building Block."
         }
     ],
     "outputs": {}
