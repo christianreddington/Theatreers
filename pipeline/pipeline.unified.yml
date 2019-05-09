@@ -85,22 +85,22 @@ stages:
             ContainerName: 'templates'
             outputStorageUri: 'templateContainerUri'
             outputStorageContainerSasToken: 'templateContainerSasToken'
-        #- task: CmdLine@2
+        - task: CmdLine@2
+          inputs:
+            script: 'ls -la
+               cd "$(System.DefaultWorkingDirectory)/deploy"
+               ls -la'
+        #- task: AzureResourceGroupDeployment@2
         #  inputs:
-        #    script: 'ls -la
-        #       cd "$(System.DefaultWorkingDirectory)"
-        #       ls -la'
-        - task: AzureResourceGroupDeployment@2
-          inputs:
-            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
-            action: 'Create Or Update Resource Group'
-            resourceGroupName: '$(serviceResourceGroupName)'
-            location: '$(region)'
-            templateLocation: 'Linked artifact'
-            csmFile: '$(System.DefaultWorkingDirectory)/deploy/show.json'
-            csmParametersFile: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -serviceBusNamespaceResourceGroup $(serviceBusNamespaceResourceGroup) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup)'
-            deploymentMode: 'Incremental'
-        - task: AzureKeyVault@1
-          inputs:
-            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
-            KeyVaultName: '$(keyvaultName)'
+        #    azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+        #    action: 'Create Or Update Resource Group'
+        #    resourceGroupName: '$(serviceResourceGroupName)'
+        #    location: '$(region)'
+        #    templateLocation: 'Linked artifact'
+        #    csmFile: '$(System.DefaultWorkingDirectory)/deploy/show.json'
+        #    csmParametersFile: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -serviceBusNamespaceResourceGroup $(serviceBusNamespaceResourceGroup) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup)'
+        #    deploymentMode: 'Incremental'
+        #- task: AzureKeyVault@1
+        #  inputs:
+        #    azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+        #    KeyVaultName: '$(keyvaultName)'
