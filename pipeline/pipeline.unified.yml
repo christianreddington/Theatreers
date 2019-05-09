@@ -1,51 +1,47 @@
 stages:
-- stage: build  # name of the stage, A-Z, a-z, 0-9, and underscore
-  displayName: Build  # friendly name to display in the UI
-  dependsOn: string | [ string ]
-  condition: string
+- stage: 'build'
+  displayName: 'Build'
   variables:
     buildPublishPath: '$(Build.ArtifactStagingDirectory)/publish-path/'
     dotnetBuildOutputPath: '$(Build.ArtifactStagingDirectory)/build-output/'
     projectName: 'Theatreers.Show'
   jobs:
-- job: build  # name of the job, A-Z, a-z, 0-9, and underscore
-  displayName: Nightly Build  # friendly name to display in the UI
-  pool:
-    name: Hosted Ubuntu 1604
-  steps:
-    # Setup the Sonar Cloud for analysis
-    - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
-    displayName: 'Prepare analysis on SonarCloud'
-    inputs:
-        SonarCloud: 'Theatreers Sonarcloud'
-        organization: 'theatreers'
-        projectKey: $(projectName)
-        projectName: $(projectName)
-    # Build the solution natively on the agent
-    # Allow sonar cloud to analyse as part of the next task.
-    - task: DotNetCoreCLI@2
-    displayName: 'Build project'
-    inputs:
-        projects: 'src/*.csproj'
-        arguments: '--output $(dotnetBuildOutputPath) --configuration Release'
-    # Execute the Sonar Cloud Analysis, and push to Sonar Cloud
-    - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
-    displayName: 'Run Code Analysis'
-    # Zip the files to be published
-    - task: ArchiveFiles@2
-    displayName: 'Archive files'
-    inputs:
-        rootFolderOrFile: '$(dotnetBuildOutputPath)'
-        includeRootFolder: false
-        archiveFile: '$(buildPublishPath)/src/$(Build.BuildId).zip'
-    # Copy the template to the deploy folder
-    - task: CopyFiles@2
-    displayName: 'Copy Files to: $(buildPublishPath)/templates'
-    inputs:
-        SourceFolder: deploy
-        TargetFolder: '$(buildPublishPath)/deploy'
-    # Publish the artifacts
-    - task: PublishPipelineArtifact@0
-    displayName: 'Publish Pipeline Artifact'
-    inputs:
-        targetPath: '$(buildPublishPath)'
+    - job: 'build'
+      displayName: 'Nightly Build'
+      pool:
+        name: Hosted Ubuntu 1604
+        steps:
+        # Setup the Sonar Cloud for analysis
+          - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+            displayName: 'Prepare analysis on SonarCloud'
+            inputs:
+              SonarCloud: 'Theatreers Sonarcloud'
+              organization: 'theatreers'
+              projectKey: $(projectName)
+              projectName: $(projectName)
+          - task: DotNetCoreCLI@2
+            displayName: 'Build project'
+            inputs:
+                projects: 'src/*.csproj'
+                arguments: '--output $(dotnetBuildOutputPath) --configuration Release'
+            # Execute the Sonar Cloud Analysis, and push to Sonar Cloud
+          - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
+            displayName: 'Run Code Analysis'
+        # Zip the files to be published
+          - task: ArchiveFiles@2
+            displayName: 'Archive files'
+            inputs:
+                rootFolderOrFile: '$(dotnetBuildOutputPath)'
+                includeRootFolder: false
+                archiveFile: '$(buildPublishPath)/src/$(Build.BuildId).zip'
+            # Copy the template to the deploy folder
+          - task: CopyFiles@2
+            displayName: 'Copy Files to: $(buildPublishPath)/templates'
+            inputs:
+                SourceFolder: deploy
+                TargetFolder: '$(buildPublishPath)/deploy'
+            # Publish the artifacts
+          - task: PublishPipelineArtifact@0
+            displayName: 'Publish Pipeline Artifact'
+            inputs:
+                targetPath: '$(buildPublishPath)'
