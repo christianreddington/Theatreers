@@ -65,7 +65,7 @@ stages:
     - job: 'devrelease'
       displayName: 'Nightly Build'
       pool:
-        name: Hosted Ubuntu 1604
+        name: 'Hosted'
       steps:
       # Setup the Sonar Cloud for analysis
         - task: DownloadPipelineArtifact@1
