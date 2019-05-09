@@ -88,7 +88,7 @@ stages:
         - task: CmdLine@2
           inputs:
             script: 'ls -la
-               cd ''$(System.DefaultWorkingDirectory)
+               cd "$(System.DefaultWorkingDirectory)"
                ls -la'
         - task: AzureResourceGroupDeployment@2
           inputs:
