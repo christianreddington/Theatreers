@@ -209,7 +209,7 @@
                         "value": "[variables('keyvaultName')]"
                     },
                     "serviceName": {
-                        "value": "[parameters('serviceName')]"
+                        "value": "[variables('serviceName')]"
                     },
                     "environmentName": {
                         "value": "[parameters('environmentName')]"
