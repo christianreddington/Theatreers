@@ -79,8 +79,8 @@
     },
     "variables": {
         "abbreviations": {
-            "North Europe": "neu",
-            "West Europe": "weu"
+            "northeurope": "neu",
+            "westeurope": "weu"
         },
         "keyvaultName": "[concat(variables('namePrefix'), 'kv')]",
         "namePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', variables('abbreviations')[parameters('location')], '-', parameters('environmentName'),'-')]",
