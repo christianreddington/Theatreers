@@ -104,3 +104,11 @@ stages:
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             KeyVaultName: '$(keyvaultName)'
+        - task: AzureFunctionApp@1
+          inputs:
+            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+            appType: 'functionApp'
+            appName: 'th-show-weu-dev-func'
+            package: '$(System.DefaultWorkingDirectory)/src/*.zip'
+            appSettings: '-storageConnectionString $(storageConnectionString) -topicConnectionString $(Connection0) -cosmosConnectionString $(cosmosConnectionString)'
+            deploymentMethod: 'auto'
