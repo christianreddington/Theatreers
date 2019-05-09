@@ -62,7 +62,7 @@ stages:
     serviceResourceGroupName: 'th-show-dev-rg'
     tenantId: '8d56b40f-772a-4828-bf64-91905baabc85'
   jobs:
-    - job: 'dev-release'      
+    - job: 'devrelease'
       displayName: 'Nightly Build'
       pool:
         name: Hosted Ubuntu 1604
@@ -99,7 +99,3 @@ stages:
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             KeyVaultName: '$(keyvaultName)'
-            SecretsFilter: '*'
-        
-
-    
