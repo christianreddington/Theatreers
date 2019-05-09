@@ -87,11 +87,9 @@ stages:
             outputStorageContainerSasToken: 'templateContainerSasToken'
         - task: CmdLine@2
           inputs:
-            script: 'ls
+            script: 'ls -la
                cd ''$(System.DefaultWorkingDirectory)
-               ls
-               cd drop
-               ls'
+               ls -la'
         - task: AzureResourceGroupDeployment@2
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
