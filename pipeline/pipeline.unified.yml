@@ -97,8 +97,8 @@ stages:
             resourceGroupName: '$(serviceResourceGroupName)'
             location: '$(region)'
             templateLocation: 'Linked artifact'
-            csmFile: '$(System.DefaultWorkingDirectory)\deploy\show.json'
-            csmParametersFile: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -serviceBusNamespaceResourceGroup $(serviceBusNamespaceResourceGroup) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup)'
+            csmFile: '$(System.DefaultWorkingDirectory)/deploy/show.json'
+            overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -serviceBusNamespaceResourceGroup $(serviceBusNamespaceResourceGroup) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup)'
             deploymentMode: 'Incremental'
         - task: AzureKeyVault@1
           inputs:
