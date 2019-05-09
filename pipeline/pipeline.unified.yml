@@ -85,6 +85,7 @@ stages:
             ContainerName: 'templates'
             outputStorageUri: 'templateContainerUri'
             outputStorageContainerSasToken: 'templateContainerSasToken'
+            
         - task: AzureResourceGroupDeployment@2
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
