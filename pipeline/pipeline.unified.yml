@@ -60,57 +60,59 @@ stages:
     serviceBusNamespaceResourceGroup: 'th-core-dev-rg'
     servicePrincipalObjectId: '6ee1bb40-e589-4884-90bc-c705d88bb3e0'
   jobs:
-    - job: 'devrelease'
+    - deployment: 'devrelease'
       displayName: 'Nightly Build'
       pool:
         name: 'Hosted Windows 2019 with VS2019'
+      environment: 'theatreers-dev'
       strategy:
         matrix: { westeurope: 
           { region: 'West Europe', functionAppName: 'th-show-weu-dev-func', keyvaultName: 'th-show-weu-dev-kv', serviceResourceGroupName: 'th-show-dev-weu-rg' },
           northeurope: { region: 'North Europe', functionAppName: 'th-show-neu-dev-func', keyvaultName: 'th-show-neu-dev-kv', serviceResourceGroupName: 'th-show-dev-neu-rg' } }
-      steps:
-      # Setup the Sonar Cloud for analysis
-        - task: DownloadPipelineArtifact@1
-          inputs:
-            buildType: 'current'
-            artifactName: 'drop'
-            targetPath: '$(System.DefaultWorkingDirectory)/'
-        - task: CmdLine@2
-          inputs:
-            script: 'touch dummy.txt'
-        - task: AzureFileCopy@3
-          inputs:
-            SourcePath: '$(System.DefaultWorkingDirectory)/dummy.txt'
-            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
-            Destination: 'AzureBlob'
-            storage: '$(artifactsAccountName)'
-            ContainerName: 'templates'
-            outputStorageUri: 'templateContainerUri'
-            outputStorageContainerSasToken: 'templateContainerSasToken'
-        #- task: CmdLine@2
-        #  inputs:
-        #    script: 'ls -la
-        #       cd "$(System.DefaultWorkingDirectory)/deploy"
-        #       ls -la'
-        - task: AzureResourceGroupDeployment@2
-          inputs:
-            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
-            action: 'Create Or Update Resource Group'
-            resourceGroupName: '$(serviceResourceGroupName)'
-            location: '$(region)'
-            templateLocation: 'Linked artifact'
-            csmFile: '$(System.DefaultWorkingDirectory)/deploy/show.json'
-            overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -serviceBusNamespaceResourceGroup $(serviceBusNamespaceResourceGroup) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup)'
-            deploymentMode: 'Incremental'
-        - task: AzureKeyVault@1
-          inputs:
-            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
-            KeyVaultName: '$(keyvaultName)'
-        - task: AzureFunctionApp@1
-          inputs:
-            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
-            appType: 'functionApp'
-            appName: '$(functionAppName)'
-            package: '$(System.DefaultWorkingDirectory)/src/*.zip'
-            appSettings: '-storageConnectionString $(storageConnectionString) -topicConnectionString $(Connection0) -cosmosConnectionString $(cosmosConnectionString)'
-            deploymentMethod: 'auto'
+        deploy:
+          steps:
+          # Setup the Sonar Cloud for analysis
+            - task: DownloadPipelineArtifact@1
+              inputs:
+                buildType: 'current'
+                artifactName: 'drop'
+                targetPath: '$(System.DefaultWorkingDirectory)/'
+            - task: CmdLine@2
+              inputs:
+                script: 'touch dummy.txt'
+            - task: AzureFileCopy@3
+              inputs:
+                SourcePath: '$(System.DefaultWorkingDirectory)/dummy.txt'
+                azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+                Destination: 'AzureBlob'
+                storage: '$(artifactsAccountName)'
+                ContainerName: 'templates'
+                outputStorageUri: 'templateContainerUri'
+                outputStorageContainerSasToken: 'templateContainerSasToken'
+            #- task: CmdLine@2
+            #  inputs:
+            #    script: 'ls -la
+            #       cd "$(System.DefaultWorkingDirectory)/deploy"
+            #       ls -la'
+            - task: AzureResourceGroupDeployment@2
+              inputs:
+                azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+                action: 'Create Or Update Resource Group'
+                resourceGroupName: '$(serviceResourceGroupName)'
+                location: '$(region)'
+                templateLocation: 'Linked artifact'
+                csmFile: '$(System.DefaultWorkingDirectory)/deploy/show.json'
+                overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -serviceBusNamespaceResourceGroup $(serviceBusNamespaceResourceGroup) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup)'
+                deploymentMode: 'Incremental'
+            - task: AzureKeyVault@1
+              inputs:
+                azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+                KeyVaultName: '$(keyvaultName)'
+            - task: AzureFunctionApp@1
+              inputs:
+                azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+                appType: 'functionApp'
+                appName: '$(functionAppName)'
+                package: '$(System.DefaultWorkingDirectory)/src/*.zip'
+                appSettings: '-storageConnectionString $(storageConnectionString) -topicConnectionString $(Connection0) -cosmosConnectionString $(cosmosConnectionString)'
+                deploymentMethod: 'auto'
