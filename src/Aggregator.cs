@@ -24,7 +24,7 @@ namespace Theatreers.Show
     public static class Aggregator
     {
 
-        [FunctionName("Aggregator")]
+       /* [FunctionName("Aggregator")]
         public static async void Run(
             [ServiceBusTrigger("newshow", "aggregator", Connection = "topicConnectionString")]string topicMessage,
             ILogger log,
@@ -72,6 +72,6 @@ namespace Theatreers.Show
             }
 
             return JsonConvert.DeserializeObject<T>(await blob.DownloadTextAsync());
-        }
+        }*/
     }
 }

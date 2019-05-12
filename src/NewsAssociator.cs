@@ -1,49 +1,67 @@
 
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.CognitiveServices.Search.NewsSearch;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System.Linq;
-using Microsoft.Azure.CognitiveServices.Search.NewsSearch;
+using System;
 using System.Collections.Generic;
-using Microsoft.Rest;
-using System.Threading;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.WindowsAzure.Storage.Blob;
+using System.Threading.Tasks;
 
 namespace Theatreers.Show
 {
     public static class NewsAssociator
     {
-        [FunctionName("NewsAssociator")]
-        
-        public static void Run(
-            [ServiceBusTrigger("newshow", "news", Connection = "topicConnectionString")]string topicMessage,
+        [FunctionName("SubmitNewsAsync")]
+
+        public static async Task<IActionResult> RunAsync(
+            [OrchestrationTrigger] DurableOrchestrationContext context,
             ILogger log,
-            [Blob("showsnews", FileAccess.Read, Connection = "storageConnectionString")] CloudBlobContainer blobContainer
+            [CosmosDB(databaseName: "theatreers", collectionName: "items", ConnectionStringSetting = "cosmosConnectionString")] IAsyncCollector<NewsObject> outputs
         )
-       
         {
+            //Take the input as a string from the orchestrator function context
+            //Deserialize into a transport object
+            string rawRequestBody = context.GetInput<string>();
+            DecoratedShowMessage transitObject = JsonConvert.DeserializeObject<DecoratedShowMessage>(rawRequestBody);
+
+            //Leverage the Cognitive Services Bing Search API and log out the action
             INewsSearchClient client = new NewsSearchClient(new ApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
-            DecoratedShowMessage decoratedMessage = JsonConvert.DeserializeObject<DecoratedShowMessage>(topicMessage);
-            CloudBlockBlob blob = blobContainer.GetBlockBlobReference($"{decoratedMessage.MessageProperties.RequestCorrelationId}.json");
+            log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: Searching for associated images");
+            Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.News newsResults = client.News.SearchAsync(query: transitObject.ShowName).Result;
 
-            ShowMessage showMessage = JsonConvert.DeserializeObject<ShowMessage>(topicMessage);
-            
-            log.LogInformation($"[Request Correlation ID: {decoratedMessage.MessageProperties.RequestCorrelationId}] :: Searching for associated news");
-            var newsResults = client.News.SearchAsync(query: showMessage.ShowName, market: "en-us", count: 10).Result;
-
-            try {
-                blob.UploadTextAsync(JsonConvert.SerializeObject(newsResults.Value));
-                log.LogInformation($"[Request Correlation ID: {decoratedMessage.MessageProperties.RequestCorrelationId}] :: Image JSON upload completed :: {newsResults.Value.Count} items found");
-            } catch(Exception ex) {
-                log.LogInformation($"[Request Correlation ID: {decoratedMessage.MessageProperties.RequestCorrelationId}] :: Image JSON upload failed :: {ex.Message}");
+            //Initialise a temporaryObject and loop through the results
+            //For each result, create a new NewsObject which has a condensed set 
+            //of properties, for storage in CosmosDB in line with the show data model
+            //Once looped through send an OK Result
+            //TODO: There is definitely a better way of doing this, but got a rough working approach out
+            NewsObject tempObject = new NewsObject();
+            foreach (Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.NewsArticle newsItem in newsResults.Value)
+            {
+                try
+                {
+                    tempObject.name = newsItem.Name;
+                    tempObject.url = newsItem.Url;
+                    tempObject.DatePublished = newsItem.DatePublished;
+                    tempObject.DatePublished = newsItem.BingId;
+                    tempObject.BingId = transitObject.partitionKey;
+                    tempObject.doctype = "news";
+                    await outputs.AddAsync(tempObject);
+                    log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: News Article Creation Success :: Image ID: {tempObject.BingId} ");
+                }
+                catch (Exception ex)
+                {
+                    log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: News Article Creation Fail ::  :: Image ID: {tempObject.BingId} - {ex.Message}");
+                    return new BadRequestResult();
+                }
+                finally
+                {
+                    IDisposable disposable = tempObject as IDisposable;
+                    if (disposable != null) disposable.Dispose();
+                }
             }
+
+            return new OkResult();
         }
     }
 }
