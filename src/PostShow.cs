@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace Theatreers.Show
 {
-    public static class HttpStartOrchestrator
+    public static class PostShow
     {        
         [FunctionName("PostShow")]
         public static async Task<HttpResponseMessage> Run(
-            [HttpTrigger(AuthorizationLevel.Function, methods: "post", Route = "show")] HttpRequestMessage req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, methods: "post", Route = "show")] HttpRequestMessage req,
             [OrchestrationClient] DurableOrchestrationClientBase starter,
             ILogger log)
         {
