@@ -18,7 +18,7 @@ namespace Theatreers.Show
             [OrchestrationClient] DurableOrchestrationClientBase starter,
             ILogger log)
         {
-            if (Thread.CurrentPrincipal.Identity.IsAuthenticated)
+            if (Thread.CurrentPrincipal != null && Thread.CurrentPrincipal.Identity.IsAuthenticated)
             {
                 //Initialise the message for transport
                 //Generate correllation ID and initial request timestamp
@@ -43,7 +43,7 @@ namespace Theatreers.Show
             } else
             {
                 HttpResponseMessage response = new HttpResponseMessage();
-                response.StatusCode = System.Net.HttpStatusCode.Forbidden;
+                response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
                 response.ReasonPhrase = "The user is not logged in";
                 return response;
             }
