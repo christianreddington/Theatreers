@@ -18,16 +18,18 @@ namespace Theatreers.Show
             [OrchestrationClient] DurableOrchestrationClientBase starter,
             ILogger log)
         {
-            if (Thread.CurrentPrincipal != null && Thread.CurrentPrincipal.Identity.IsAuthenticated)
-            {
+           // if (Thread.CurrentPrincipal != null && Thread.CurrentPrincipal.Identity.IsAuthenticated)
+          //  {
                 //Initialise the message for transport
                 //Generate correllation ID and initial request timestamp
                 string CorrelationId = Guid.NewGuid().ToString();
+                string showId = Guid.NewGuid().ToString();
                 DecoratedShowMessage showObjectInput = await req.Content.ReadAsAsync<DecoratedShowMessage>();
                 MessageHeaders messageHeaders = new MessageHeaders();
                 messageHeaders.RequestCorrelationId = CorrelationId;
                 messageHeaders.RequestCreatedAt = DateTime.Now.ToString();
                 showObjectInput.MessageProperties = messageHeaders;
+                showObjectInput.showId = showId;
                 string eventData = JsonConvert.SerializeObject(showObjectInput);
 
                 //Call the downstream "Activity" functions
@@ -35,18 +37,18 @@ namespace Theatreers.Show
                 string submitNewsInstanceId = await starter.StartNewAsync("SubmitNewsAsync", eventData);
                 string submitImageInstanceId = await starter.StartNewAsync("SubmitImageAsync", eventData);
 
-                log.LogInformation($"[Request Correlation ID: {messageHeaders.RequestCorrelationId}] :: Begin Orchestration :: SubmitShowAsync instance ID: {submitImageInstanceId}");
+                log.LogInformation($"[Request Correlation ID: {messageHeaders.RequestCorrelationId}] :: Begin Orchestration :: SubmitShowAsync instance ID: {submitShowInstanceId}");
                 log.LogInformation($"[Request Correlation ID: {messageHeaders.RequestCorrelationId}] :: Begin Orchestration :: SubmitNewsAsync instance ID: {submitNewsInstanceId}");
                 log.LogInformation($"[Request Correlation ID: {messageHeaders.RequestCorrelationId}] :: Begin Orchestration :: SubmitImageAsync instance ID: {submitImageInstanceId}");
 
                 return starter.CreateCheckStatusResponse(req, submitShowInstanceId);
-            } else
+           /* } else
             {
                 HttpResponseMessage response = new HttpResponseMessage();
                 response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
                 response.ReasonPhrase = "The user is not logged in";
                 return response;
-            }
+            }*/
         }
     }
 }

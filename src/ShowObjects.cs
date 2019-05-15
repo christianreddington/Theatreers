@@ -6,13 +6,19 @@ using Microsoft.Azure.CognitiveServices.Search;
 
 namespace Theatreers.Show
 {
-    public class ShowMessage {
+
+    public class ShowBaseObject
+    {
+        public string showId { get; set; }
+    }
+
+    public class ShowMessage : ShowBaseObject {
         public string id { get; set; }
-        public string partitionKey { get; set; }
+        public string showId { get; set; }
         //public string showId {get; set;}
         public string doctype {get; set;}
         //public IList<NewsObject> news {get; set;}
-        public string ShowName {get; set;}
+        public string showName {get; set;}
         public string description {get; set;}
         //public string relatesto {get; set;}
     }
@@ -28,23 +34,30 @@ namespace Theatreers.Show
         public string RequestStatus {get; set;}
     }
 
-    public class ImageObject
+    public class ImageObject : ShowBaseObject
     {
-        public string partitionKey { get; set; }
+        public string showId { get; set; }
         public string imageId {get; set;}
         public string contentUrl {get; set;}
         public string hostPageUrl {get; set;}
         public string name {get; set; }
         public string doctype { get; set; }
     }
-    public class NewsObject
+    public class NewsObject : ShowBaseObject
     {
-        public string partitionKey { get; set; }
+        public string showId { get; set; }
         public string DatePublished { get; set; }
         public string BingId { get; set; }
         public string name {get; set;}
         public string url {get; set; }
         public string doctype { get; set; }
+    }
+
+    public class AlphabetisedShow
+    {
+        public string showId { get; set; }
+        public string showName { get; set; }
+        public string partition { get; set; }
     }
 
     public class EnvelopedMessage {

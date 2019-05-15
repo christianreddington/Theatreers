@@ -17,7 +17,9 @@ namespace Theatreers.Show
         public static async Task<IActionResult> RunAsync(
             [OrchestrationTrigger] DurableOrchestrationContext context,
             ILogger log,
-            [CosmosDB(databaseName: "theatreers", collectionName: "items", ConnectionStringSetting = "cosmosConnectionString")] IAsyncCollector<NewsObject> outputs
+            [CosmosDB(databaseName: "theatreers", 
+            collectionName: "shows", 
+            ConnectionStringSetting = "cosmosConnectionString")] IAsyncCollector<NewsObject> outputs
         )
         {
             //Take the input as a string from the orchestrator function context
@@ -28,7 +30,7 @@ namespace Theatreers.Show
             //Leverage the Cognitive Services Bing Search API and log out the action
             INewsSearchClient client = new NewsSearchClient(new ApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
             log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: Searching for associated images");
-            Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.News newsResults = client.News.SearchAsync(query: transitObject.ShowName).Result;
+            Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.News newsResults = client.News.SearchAsync(query: transitObject.showName).Result;
 
             //Initialise a temporaryObject and loop through the results
             //For each result, create a new NewsObject which has a condensed set 
@@ -43,8 +45,8 @@ namespace Theatreers.Show
                     tempObject.name = newsItem.Name;
                     tempObject.url = newsItem.Url;
                     tempObject.DatePublished = newsItem.DatePublished;
-                    tempObject.DatePublished = newsItem.BingId;
-                    tempObject.BingId = transitObject.partitionKey;
+                    tempObject.BingId = newsItem.BingId;
+                    tempObject.showId = transitObject.showId;
                     tempObject.doctype = "news";
                     await outputs.AddAsync(tempObject);
                     log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: News Article Creation Success :: Image ID: {tempObject.BingId} ");

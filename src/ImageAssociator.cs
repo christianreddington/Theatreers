@@ -18,7 +18,7 @@ namespace Theatreers.Show
         public static async Task<IActionResult> RunAsync(
             [OrchestrationTrigger] DurableOrchestrationContext context,
             ILogger log,
-            [CosmosDB(databaseName: "theatreers", collectionName: "items", ConnectionStringSetting = "cosmosConnectionString")] IAsyncCollector<ImageObject> outputs
+            [CosmosDB(databaseName: "theatreers", collectionName: "shows", ConnectionStringSetting = "cosmosConnectionString")] IAsyncCollector<ImageObject> outputs
         )
         {
             //Take the input as a string from the orchestrator function context
@@ -29,7 +29,7 @@ namespace Theatreers.Show
             //Leverage the Cognitive Services Bing Search API and log out the action
             IImageSearchClient client = new ImageSearchClient(new ApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
             log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: Searching for associated images");
-            Images imageResults = client.Images.SearchAsync(query: transitObject.ShowName).Result;
+            Images imageResults = client.Images.SearchAsync(query: transitObject.showName).Result;
 
             //Initialise a temporaryObject and loop through the results
             //For each result, create a new NewsObject which has a condensed set 
@@ -45,7 +45,7 @@ namespace Theatreers.Show
                     tempObject.hostPageUrl = image.HostPageUrl;
                     tempObject.imageId = image.ImageId;
                     tempObject.name = image.Name;
-                    tempObject.partitionKey = transitObject.partitionKey;
+                    tempObject.showId = transitObject.showId;
                     tempObject.doctype = "image";
                     await outputs.AddAsync(tempObject);
                     log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: Image Creation Success :: Image ID: {tempObject.imageId} ");

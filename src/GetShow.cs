@@ -25,36 +25,103 @@ using Microsoft.Azure.Documents.Client;
 
 namespace Theatreers.Show
 {
-    public static class GetShowOrShows
+    public static class GetShow
     {
-
-        public static class GetShow
-        {
-            [FunctionName("GetShowAsync")]
-            public static async Task<IActionResult> GetShowAsync(
-                [HttpTrigger(AuthorizationLevel.Anonymous, "get",
-                Route = "show/{id}")]HttpRequest req,
-                [CosmosDB(
+        [FunctionName("GetShow_ShowObjects")]
+        public static async Task<IActionResult> GetShowObjectsAsync(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get",
+                Route = "show/{id}/show")]HttpRequest req,
+            [CosmosDB(
                 databaseName: "theatreers",
-                collectionName: "items",
+                collectionName: "shows",
                 ConnectionStringSetting = "cosmosConnectionString",
                 Id = "{id}",
-                PartitionKey = "{id}")] ShowMessage showMessage,
-                ILogger log)
-            {
-                string CorrelationId = Guid.NewGuid().ToString();
-                String requestId = req.HttpContext.Request.Path.ToString().Replace("/api/show/","");
+                PartitionKey = "{id}")] IDocumentClient documentClient,
+            ILogger log)
+        {
+            string CorrelationId = Guid.NewGuid().ToString();
+            String requestId = req.HttpContext.Request.Path.ToString().Replace("/api/show/", "").Replace("/show", "");
 
-                if (showMessage == null)
-                {
-                    log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: GetShow API Request failure :: ID {requestId}");
-                    return new NotFoundResult();
-                }
-                else
-                {
-                    log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: GetShow API Request success :: ID {requestId}");
-                    return new OkObjectResult(showMessage);
-                }
+            Uri collectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "shows");
+            dynamic results = documentClient.CreateDocumentQuery<ShowMessage>(collectionUri)
+                                        .Where(c => c.showId == requestId && c.doctype == "show")
+                                        .AsEnumerable();
+
+            if (results == null)
+            {
+                log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: GetShow API Request failure :: ID {requestId}");
+                return new NotFoundResult();
+            }
+            else
+            {
+                log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: GetShow API Request success :: ID {requestId}");
+                return new OkObjectResult(results);
+            }
+        }
+
+
+        [FunctionName("GetShow_ImageObjects")]
+        public static async Task<IActionResult> GetShowImageObjectsAsync(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get",
+                Route = "show/{id}/image")]HttpRequest req,
+            [CosmosDB(
+                databaseName: "theatreers",
+                collectionName: "shows",
+                ConnectionStringSetting = "cosmosConnectionString",
+                Id = "{id}",
+                PartitionKey = "{id}")] IDocumentClient documentClient,
+            ILogger log)
+        {
+            string CorrelationId = Guid.NewGuid().ToString();
+            String requestId = req.HttpContext.Request.Path.ToString().Replace("/api/show/", "").Replace("/image", "");
+
+            Uri collectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "shows");
+            dynamic results = documentClient.CreateDocumentQuery<ImageObject>(collectionUri)
+                                        .Where(c => c.showId == requestId && c.doctype == "image")
+                                        .AsEnumerable();
+
+            if (results == null)
+            {
+                log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: GetShow API Request failure :: ID {requestId}");
+                return new NotFoundResult();
+            }
+            else
+            {
+                log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: GetShow API Request success :: ID {requestId}");
+                return new OkObjectResult(results);
+            }
+        }
+
+
+        [FunctionName("GetShow_NewsObjects")]
+        public static async Task<IActionResult> GetShowNewsObjectsAsync(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get",
+                Route = "show/{id}/news")]HttpRequest req,
+            [CosmosDB(
+                databaseName: "theatreers",
+                collectionName: "shows",
+                ConnectionStringSetting = "cosmosConnectionString",
+                Id = "{id}",
+                PartitionKey = "{id}")] IDocumentClient documentClient,
+            ILogger log)
+        {
+            string CorrelationId = Guid.NewGuid().ToString();
+            String requestId = req.HttpContext.Request.Path.ToString().Replace("/api/show/", "").Replace("/news", "");
+
+            Uri collectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "shows");
+            dynamic results = documentClient.CreateDocumentQuery<NewsObject>(collectionUri)
+                                        .Where(c => c.showId == requestId && c.doctype == "news")
+                                        .AsEnumerable();
+
+            if (results == null)
+            {
+                log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: GetShow API Request failure :: ID {requestId}");
+                return new NotFoundResult();
+            }
+            else
+            {
+                log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: GetShow API Request success :: ID {requestId}");
+                return new OkObjectResult(results);
             }
         }
     }
