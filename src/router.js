@@ -8,8 +8,21 @@ export default new Router({
   routes: [
     {
       path: '/',
+      name: 'root',
+      component: Home
+    },
+    {
+      path: '/',
       name: 'home',
       component: Home
+    },
+    { path: '/show/',
+      name: 'getshows',
+      component: () => import(/* webpackChunkName: "about" */ './views/GetShows.vue')
+    },
+    { path: '/show/:id',
+      name: 'getshow',
+      component: () => import(/* webpackChunkName: "about" */ './views/GetShow.vue')
     },
     {
       path: '/about',
