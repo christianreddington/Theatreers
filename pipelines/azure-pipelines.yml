@@ -10,9 +10,7 @@ stages:
 - stage: 'build'
   displayName: 'Build'
   variables:
-    buildPublishPath: '$(Build.ArtifactStagingDirectory)/publish-path/'
-    dotnetBuildOutputPath: '$(Build.ArtifactStagingDirectory)/build-output/'
-    projectName: 'Theatreers.Show'
+    artifactName: 'drop'
   jobs:
     - job: 'build'
       displayName: 'Nightly Build'
@@ -29,7 +27,7 @@ stages:
         displayName: 'npm install and build'
       - task: PublishPipelineArtifact@0
         inputs:
-          artifactName: 'drop'
+          artifactName: '$(artifactName)'
           targetPath: '$(System.DefaultWorkingDirectory)/dist/'
     - job: 'release_dev'
       displayName: "Release to Dev"
@@ -43,7 +41,7 @@ stages:
           targetPath: '$(System.ArtifactsDirectory)'
       - task: AzureFileCopy@3
         inputs:
-          SourcePath: '$(System.ArtifactsDirectory)/'
+          SourcePath: '$(System.ArtifactsDirectory)/$(artifactName)'
           azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
           Destination: 'AzureBlob'
           storage: 'thfrontenddev'
@@ -51,5 +49,5 @@ stages:
       - task: AzureCLI@1
         inputs:
           azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
-          scriptLocation: 'scriptPath'
-          scriptPath: 'az network front-door purge-endpoint --content-paths  "*" --name "theatreers-dev" --resource-group "th-core-dev-rg"'
+          scriptLocation: 'inlineScript'
+          inlineScript: 'az network front-door purge-endpoint --content-paths  "*" --name "theatreers-dev" --resource-group "th-core-dev-rg"'
