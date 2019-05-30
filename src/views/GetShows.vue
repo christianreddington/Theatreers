@@ -1,5 +1,6 @@
 <template>
   <div class="overflow-auto">
+    <b-breadcrumb :items="breadcrumbs" id="breadcrumbs"></b-breadcrumb>
     <h1 v-if="!selectedPartition">Shows</h1>
     <h1 v-if="selectedPartition">Shows beginning with {{ selectedPartition }}</h1>
 
@@ -45,13 +46,22 @@
     <p v-if="selectedPartition && items.length === 0">Sorry, there were no results for letter {{ selectedPartition }}</p>
   </div>
 </template>
-
 <script>
 export default {
   data () {
     return {
       perPage: 3,
       currentPage: 1,
+      breadcrumbs: [        
+        {
+          text: 'Theatreers',
+          href: this.$router.resolve({ name: 'root' }).href
+        },
+        {
+          text: 'Shows',
+          active: true
+        }
+      ],
       items: [],
       isLoading: false,
       selectedPartition: null,

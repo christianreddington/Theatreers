@@ -11,11 +11,6 @@ export default new Router({
       name: 'root',
       component: Home
     },
-    {
-      path: '/',
-      name: 'home',
-      component: Home
-    },
     { path: '/show/',
       name: 'getshows',
       component: () => import(/* webpackChunkName: "about" */ './views/GetShows.vue')
@@ -24,13 +19,21 @@ export default new Router({
       name: 'getshow',
       component: () => import(/* webpackChunkName: "about" */ './views/GetShow.vue')
     },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+    { path: '/event/',
+      name: 'getevents',
+      component: () => import(/* webpackChunkName: "about" */ './views/GetEvents.vue')
+    },
+    { path: '/event/:id',
+      name: 'getevent',
+      component: () => import(/* webpackChunkName: "about" */ './views/GetEvent.vue')
+    },
+    { path: '/group/',
+      name: 'getgroups',
+      component: () => import(/* webpackChunkName: "about" */ './views/GetGroups.vue')
+    },
+    { path: '/group/:id',
+      name: 'getgroup',
+      component: () => import(/* webpackChunkName: "about" */ './views/GetGroup.vue')
     }
   ]
 })

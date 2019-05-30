@@ -10,8 +10,8 @@
           <b-navbar-nav>
             <b-nav-item to="/">Home</b-nav-item>
             <b-nav-item to="/show">Shows</b-nav-item>
-            <b-nav-item to="/events">Events</b-nav-item>
-            <b-nav-item to="/groups">Groups</b-nav-item>
+            <b-nav-item to="/event">Events</b-nav-item>
+            <b-nav-item to="/group">Groups</b-nav-item>
           </b-navbar-nav>
 
           <!-- Right aligned nav items -->
@@ -31,7 +31,7 @@
         </b-collapse>
       </b-navbar>
     </div>
-    <b-container>
+    <b-container class="app-content">
       <router-view></router-view>
     </b-container>
   </div>
@@ -56,5 +56,9 @@
 
 #nav a.router-link-exact-active {
   color: #42b983;
+}
+
+#breadcrumbs {
+  margin-top: 10px
 }
 </style>
