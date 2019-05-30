@@ -24,3 +24,15 @@ steps:
   inputs:
     artifactName: 'drop'
     targetPath: 'dist/'
+- task: AzureFileCopy@3
+  inputs:
+    SourcePath: 'dist/'
+    azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+    Destination: 'AzureBlob'
+    storage: 'thfrontenddev'
+    ContainerName: '$web'
+- task: AzureCLI@1
+  inputs:
+    azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+    scriptLocation: 'scriptPath'
+    scriptPath: 'az network front-door purge-endpoint --content-paths  ''*'' --name ''theatreers-dev'' --resource-group '' th-core-dev-rg'''
