@@ -34,4 +34,4 @@ steps:
   inputs:
     azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
     scriptLocation: 'scriptPath'
-    scriptPath: 'az network front-door purge-endpoint --content-paths  *' --name 'theatreers-dev --resource-group 'th-core-dev-rg'
+    scriptPath: 'az network front-door purge-endpoint --content-paths  "*" --name "theatreers-dev" --resource-group "th-core-dev-rg"'
