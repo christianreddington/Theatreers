@@ -7,31 +7,50 @@ trigger:
 - master
 
 pool:
-  vmImage: 'vs2017-win2016'
-
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
-
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
-- task: PublishPipelineArtifact@0
-  inputs:
-    artifactName: 'drop'
-    targetPath: '$(System.DefaultWorkingDirectory)/dist/'
-- task: AzureFileCopy@3
-  inputs:
-    SourcePath: '$(System.DefaultWorkingDirectory)/dist/'
-    azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
-    Destination: 'AzureBlob'
-    storage: 'thfrontenddev'
-    ContainerName: '$web'
-- task: AzureCLI@1
-  inputs:
-    azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
-    scriptLocation: 'scriptPath'
-    scriptPath: 'az network front-door purge-endpoint --content-paths  "*" --name "theatreers-dev" --resource-group "th-core-dev-rg"'
+stages:
+- stage: 'build'
+  displayName: 'Build'
+  variables:
+    buildPublishPath: '$(Build.ArtifactStagingDirectory)/publish-path/'
+    dotnetBuildOutputPath: '$(Build.ArtifactStagingDirectory)/build-output/'
+    projectName: 'Theatreers.Show'
+  jobs:
+    - job: 'build'
+      displayName: 'Nightly Build'
+      pool:
+        name: Hosted Ubuntu 1604
+      steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '10.x'
+        displayName: 'Install Node.js'
+      - script: |
+          npm install
+          npm run build
+        displayName: 'npm install and build'
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'drop'
+          targetPath: '$(System.DefaultWorkingDirectory)/dist/'
+    - job: 'release-dev'
+      displayName: "Release to Dev"
+      dependsOn: 'build'
+      pool:
+        name: 'vs2017-win2016'
+      steps:
+      - task: DownloadPipelineArtifact@1
+        inputs:
+          buildType: 'current'
+          targetPath: '$(System.ArtifactsDirectory)'
+      - task: AzureFileCopy@3
+        inputs:
+          SourcePath: '$(System.ArtifactsDirectory)/'
+          azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+          Destination: 'AzureBlob'
+          storage: 'thfrontenddev'
+          ContainerName: '$web'
+      - task: AzureCLI@1
+        inputs:
+          azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+          scriptLocation: 'scriptPath'
+          scriptPath: 'az network front-door purge-endpoint --content-paths  "*" --name "theatreers-dev" --resource-group "th-core-dev-rg"'
