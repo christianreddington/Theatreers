@@ -50,5 +50,9 @@ stages:
         inputs:
           azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
           scriptLocation: 'inlineScript'
-          inlineScript: 'call az extension add --name front-door
-            call az network front-door purge-endpoint --content-paths  "*" --name "theatreers-dev" --resource-group "th-core-dev-rg"'
+          inlineScript: 'az extension add --name front-door'
+      - task: AzureCLI@1
+        inputs:
+          azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+          scriptLocation: 'inlineScript'
+          inlineScript: 'az network front-door purge-endpoint --content-paths  "*" --name "theatreers-dev" --resource-group "th-core-dev-rg"'
