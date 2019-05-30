@@ -19,14 +19,13 @@ steps:
     npm install
     npm run build
   displayName: 'npm install and build'
-
 - task: PublishPipelineArtifact@0
   inputs:
     artifactName: 'drop'
-    targetPath: 'dist/'
+    targetPath: '$(System.DefaultWorkingDirectory)/dist/'
 - task: AzureFileCopy@3
   inputs:
-    SourcePath: 'dist/'
+    SourcePath: '$(System.DefaultWorkingDirectory)/dist/'
     azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
     Destination: 'AzureBlob'
     storage: 'thfrontenddev'
@@ -35,4 +34,4 @@ steps:
   inputs:
     azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
     scriptLocation: 'scriptPath'
-    scriptPath: 'az network front-door purge-endpoint --content-paths  ''*'' --name ''theatreers-dev'' --resource-group '' th-core-dev-rg'''
+    scriptPath: 'az network front-door purge-endpoint --content-paths  *' --name 'theatreers-dev --resource-group 'th-core-dev-rg'
