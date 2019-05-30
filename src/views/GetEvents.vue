@@ -71,14 +71,14 @@
         </b-card>
       </b-col>
     </b-row>
-    
+
   </div>
 </template>
 <script>
 export default {
   data () {
     return {
-      breadcrumbs: [        
+      breadcrumbs: [
         {
           text: 'Theatreers',
           href: this.$router.resolve({ name: 'root' }).href

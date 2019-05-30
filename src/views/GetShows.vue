@@ -52,7 +52,7 @@ export default {
     return {
       perPage: 3,
       currentPage: 1,
-      breadcrumbs: [        
+      breadcrumbs: [
         {
           text: 'Theatreers',
           href: this.$router.resolve({ name: 'root' }).href

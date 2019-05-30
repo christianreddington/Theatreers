@@ -8,7 +8,7 @@
 export default {
   data () {
     return {
-      breadcrumbs: [        
+      breadcrumbs: [
         {
           text: 'Theatreers',
           href: this.$router.resolve({ name: 'root' }).href
