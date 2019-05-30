@@ -6,7 +6,6 @@
 trigger:
 - master
 
-pool:
 stages:
 - stage: 'build'
   displayName: 'Build'
