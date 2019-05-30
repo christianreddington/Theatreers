@@ -31,7 +31,7 @@ stages:
         inputs:
           artifactName: 'drop'
           targetPath: '$(System.DefaultWorkingDirectory)/dist/'
-    - job: 'release-dev'
+    - job: 'release_dev'
       displayName: "Release to Dev"
       dependsOn: 'build'
       pool:
