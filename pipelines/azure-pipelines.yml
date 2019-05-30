@@ -35,7 +35,7 @@ stages:
       displayName: "Release to Dev"
       dependsOn: 'build'
       pool:
-        name: 'vs2017-win2016'
+        name: 'Hosted Windows 2019 with VS2019'
       steps:
       - task: DownloadPipelineArtifact@1
         inputs:
