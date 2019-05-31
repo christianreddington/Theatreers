@@ -56,20 +56,20 @@ export default class AuthService {
     return this.app.acquireTokenSilent(this.applicationConfig.graphScopes).then(
       accessToken => {
         return accessToken
-      },
-      error => {
+      })
+      .catch(function (error) {
+        console.log(error)
         return this.app
           .acquireTokenPopup(this.applicationConfig.graphScopes)
           .then(
             accessToken => {
               return accessToken
-            },
-            err => {
-              console.error(err)
             }
           )
-      }
-    )
+          .catch(function (error) {
+            console.log('could not get offers', error)
+          })
+      })
   }
 
   getGraphUserInfo (token) {
