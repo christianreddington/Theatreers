@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 
 namespace Theatreers.Show
 {
-    public static class ImageAssociator
+    public static class CreateShowImageObject
     {
-        [FunctionName("SubmitImageAsync")]
+        [FunctionName("CreateShowImageObject")]
 
         public static async Task<IActionResult> RunAsync(
             [OrchestrationTrigger] DurableOrchestrationContext context,
@@ -24,7 +24,7 @@ namespace Theatreers.Show
             //Take the input as a string from the orchestrator function context
             //Deserialize into a transport object
             string rawRequestBody = context.GetInput<string>();
-            DecoratedShowMessage transitObject = JsonConvert.DeserializeObject<DecoratedShowMessage>(rawRequestBody);
+            DecoratedShowObject transitObject = JsonConvert.DeserializeObject<DecoratedShowObject>(rawRequestBody);
 
             //Leverage the Cognitive Services Bing Search API and log out the action
             IImageSearchClient client = new ImageSearchClient(new ApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));

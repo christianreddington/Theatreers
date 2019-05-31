@@ -1,30 +1,28 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.CosmosDB;
+using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Azure.Documents.Client;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Theatreers.Show
 {
-    public static class SubmitShowAsync
+    public static class UpdateShow
     {        
-        
-        [FunctionName("SubmitShowAsync")]
-        public static async Task<IActionResult> RunAsync(
-            [OrchestrationTrigger] DurableOrchestrationContext context,
+        [FunctionName("UpdateShow")]
+        public static async Task<IActionResult> Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, methods: "post", Route = "updateshow")] HttpRequestMessage req,
             ILogger log,
             [CosmosDB(
-                databaseName: "theatreers", 
+                databaseName: "theatreers",
                 collectionName: "shows",
                 ConnectionStringSetting = "cosmosConnectionString"
-            )] IAsyncCollector<ShowMessage> outputs
-        )
+            )] IAsyncCollector<ShowObject> outputs)
         {
-
+            string CorrelationId = Guid.NewGuid().ToString();
             Uri collectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "shows");
 
             //var collectionLink = outputs.get.CreateDocumentCollectionUri(databaseId, collectionId);
@@ -32,9 +30,8 @@ namespace Theatreers.Show
             //Take the input as a string from the orchestrator function context
             //Deserialize into a transport and "returned" object
             //These have subtly different types, the latter having fewer properties for storage in CosmosDB
-            string rawRequestBody = context.GetInput<string>();
-            DecoratedShowMessage transitObject = JsonConvert.DeserializeObject<DecoratedShowMessage>(rawRequestBody);
-            ShowMessage returnedObject = JsonConvert.DeserializeObject<ShowMessage>(rawRequestBody);
+
+            ShowObject returnedObject = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync());
             returnedObject.doctype = "show";
 
             //If successful, push the output to CosmosDB, log the creation and return an OkObjectResult
@@ -42,11 +39,12 @@ namespace Theatreers.Show
             try
             {
                 await outputs.AddAsync(returnedObject);
-                log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: Show Creation Success");
-                return new OkObjectResult(outputs);
-            } catch (Exception ex)
+                log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: Show Creation Success");
+                return new OkResult();
+            }
+            catch (Exception ex)
             {
-                log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: Show Creation Fail :: {ex.Message}");
+                log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: Show Creation Fail :: {ex.Message}");
                 return new BadRequestResult();
             }
         }

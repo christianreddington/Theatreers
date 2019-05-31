@@ -11,9 +11,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Theatreers.Show
 {
-    public static class CreateAlphabetisedShow
+    public static class CreateShowListObject
     {
-        [FunctionName("CreateAlphabetisedShow")]
+        [FunctionName("CreateShowListObject")]
         public static async void Run([CosmosDBTrigger(
             databaseName: "theatreers",
             collectionName: "shows",
@@ -22,7 +22,7 @@ namespace Theatreers.Show
             CreateLeaseCollectionIfNotExists = true)]IReadOnlyList<Document> inputs, ILogger log,
             [CosmosDB(
                 databaseName: "theatreers",
-                collectionName: "showsAlphabetised",
+                collectionName: "showListObjects",
                 ConnectionStringSetting = "cosmosConnectionString"
             )] IDocumentClient outputs
         )
@@ -35,7 +35,7 @@ namespace Theatreers.Show
                     {
                         if (show.GetPropertyValue<string>("doctype") == "show")
                         {
-                            string firstCharacter = show.GetPropertyValue<string>("showName")[0].ToString();
+                            string firstCharacter = show.GetPropertyValue<string>("showName")[0].ToString().ToUpper();
                             int number;
                             bool isNumber = int.TryParse(firstCharacter, out number);
                             show.SetPropertyValue("id", show.GetPropertyValue<string>("showId"));
@@ -51,14 +51,14 @@ namespace Theatreers.Show
                             await outputs.UpsertDocumentAsync(
                               UriFactory.CreateDocumentCollectionUri("theatreers", "showsAlphabetised"),
                               show);
-                            log.LogInformation($"Reacting to change feed... Alphabetised show creation succeeded");
+                            log.LogInformation($"Reacting to change feed... Creating a Show List Objectsucceeded");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                log.LogInformation($"Reacting to change feed... Alphabetised show creation fail :: {ex.Message}");
+                log.LogInformation($"Reacting to change feed... Creating a Show List Object failed :: {ex.Message}");
             }
         }
     }

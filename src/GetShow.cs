@@ -43,7 +43,7 @@ namespace Theatreers.Show
             String requestId = req.HttpContext.Request.Path.ToString().Replace("/api/show/", "").Replace("/show", "");
 
             Uri collectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "shows");
-            dynamic results = documentClient.CreateDocumentQuery<ShowMessage>(collectionUri)
+            dynamic results = documentClient.CreateDocumentQuery<ShowObject>(collectionUri)
                                         .Where(c => c.showId == requestId && c.doctype == "show")
                                         .AsEnumerable();
 
@@ -54,7 +54,7 @@ namespace Theatreers.Show
             }
             else
             {
-                log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: GetShow API Request success :: ID {requestId}");
+                 log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: GetShow API Request success :: ID {requestId}");
                 return new OkObjectResult(results);
             }
         }

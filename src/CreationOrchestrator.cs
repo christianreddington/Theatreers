@@ -10,9 +10,9 @@ using System.Threading;
 
 namespace Theatreers.Show
 {
-    public static class PostShow
+    public static class CreationOrchestrator
     {        
-        [FunctionName("PostShow")]
+        [FunctionName("CreationOrchestrator")]
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, methods: "post", Route = "show")] HttpRequestMessage req,
             [OrchestrationClient] DurableOrchestrationClientBase starter,
@@ -24,7 +24,7 @@ namespace Theatreers.Show
                 //Generate correllation ID and initial request timestamp
                 string CorrelationId = Guid.NewGuid().ToString();
                 string showId = Guid.NewGuid().ToString();
-                DecoratedShowMessage showObjectInput = await req.Content.ReadAsAsync<DecoratedShowMessage>();
+                DecoratedShowObject showObjectInput = await req.Content.ReadAsAsync<DecoratedShowObject>();
                 MessageHeaders messageHeaders = new MessageHeaders();
                 messageHeaders.RequestCorrelationId = CorrelationId;
                 messageHeaders.RequestCreatedAt = DateTime.Now.ToString();
