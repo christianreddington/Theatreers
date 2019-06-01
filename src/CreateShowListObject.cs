@@ -49,7 +49,7 @@ namespace Theatreers.Show
                                 show.SetPropertyValue("partition", firstCharacter);
                             }
                             await outputs.UpsertDocumentAsync(
-                              UriFactory.CreateDocumentCollectionUri("theatreers", "showsAlphabetised"),
+                              UriFactory.CreateDocumentCollectionUri("theatreers", "showListObjects"),
                               show);
                             log.LogInformation($"Reacting to change feed... Creating a Show List Objectsucceeded");
                         }
