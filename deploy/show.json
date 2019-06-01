@@ -77,7 +77,6 @@
             "name": "functionDeployment",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "serviceBusTopicLoop",
                 "appInsightsDeployment"
             ],
             "properties": {
