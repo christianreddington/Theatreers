@@ -27,6 +27,7 @@ namespace Theatreers.Show
             )] IDocumentClient outputs
         )
         {
+            string showName = "";
             try
             {
                 if (inputs != null && inputs.Count > 0)
@@ -48,17 +49,18 @@ namespace Theatreers.Show
                             {
                                 show.SetPropertyValue("partition", firstCharacter);
                             }
+                            showName = show.GetPropertyValue<string>("showName");
                             await outputs.UpsertDocumentAsync(
                               UriFactory.CreateDocumentCollectionUri("theatreers", "showListObjects"),
                               show);
-                            log.LogInformation($"Reacting to change feed... Creating a Show List Objectsucceeded");
+                            log.LogInformation($"[Reacting to Change Feed :: Creation of ShowListObject for {show.GetPropertyValue<string>("showName")} succeeded");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                log.LogInformation($"Reacting to change feed... Creating a Show List Object failed :: {ex.Message}");
+                log.LogInformation($"[Reacting to Change Feed :: Creation of ShowListObject for {showName} failed :: {ex.Message}");
             }
         }
     }

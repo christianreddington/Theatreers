@@ -43,11 +43,11 @@ namespace Theatreers.Show
             try
             {
                 await outputs.AddAsync(returnedObject);
-                log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: Show Creation Success");
+                log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: Created of Show {transitObject.showName} succeeded");
                 return new OkObjectResult(outputs);
             } catch (Exception ex)
             {
-                log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: Show Creation Fail :: {ex.Message}");
+                log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: Creation of Show {transitObject.showName} failed :: {ex.Message}");
                 return new BadRequestResult();
             }
         }
