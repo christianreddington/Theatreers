@@ -24,7 +24,7 @@ namespace Theatreers.Show
                 //Generate correllation ID and initial request timestamp
                 string CorrelationId = Guid.NewGuid().ToString();
                 string showId = Guid.NewGuid().ToString();
-                DecoratedShowObject showObjectInput = await req.Content.ReadAsAsync<DecoratedShowObject>();
+                DecoratedShowObject showObjectInput = JsonConvert.DeserializeObject<DecoratedShowObject>(await req.Content.ReadAsStringAsync());
                 MessageHeaders messageHeaders = new MessageHeaders();
                 messageHeaders.RequestCorrelationId = CorrelationId;
                 messageHeaders.RequestCreatedAt = DateTime.Now.ToString();
