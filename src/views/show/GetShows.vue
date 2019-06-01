@@ -35,18 +35,7 @@
         <!-- b-[Optional: add media children here for nesting] -->
       </b-media>
     </div>
-
-    <b-table
-      id="my-table"
-      :items="items"
-      :per-page="perPage"
-      :current-page="currentPage"
-      small
-      v-if="items"
-    >
-
-    </b-table>
-    <p v-if="selectedPartition && items.length === 0">Sorry, there were no results for letter {{ selectedPartition }}</p>
+    <p v-if="selectedPartition && items.length === 0 && !isLoading">Sorry, there were no results for letter {{ selectedPartition }}</p>
   </div>
 </template>
 <script>
