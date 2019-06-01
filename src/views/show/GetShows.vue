@@ -1,6 +1,9 @@
 <template>
   <div class="overflow-auto">
     <b-breadcrumb :items="breadcrumbs" id="breadcrumbs"></b-breadcrumb>
+    <div align="right">
+      <b-button variant="primary" :to="{ name: 'createshow' }">Create</b-button>
+    </div>
     <h1 v-if="!selectedPartition">Shows</h1>
     <h1 v-if="selectedPartition">Shows beginning with {{ selectedPartition }}</h1>
 

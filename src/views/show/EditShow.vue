@@ -1,95 +1,26 @@
 <template>
   <div class="about">
-    <b-breadcrumb :items="breadcrumbs" id="breadcrumbs"></b-breadcrumb>
+    <b-breadcrumb :items="breadcrumbs" id="breadcrumbs" v-if="show"></b-breadcrumb>
     <h1 v-if="show">Edit {{ show.showName }}</h1>
-    <div>
-    <b-form @submit="onSubmit" v-if="visible">
-      <b-form-group
-        id="label-showName"
-        label="Show Name:"
-        label-for="showName"
-      >
-        <b-form-input
-          id="input-showName"
-          v-model="form.showName"
-          type="text"
-          required
-          placeholder="Enter the name of the show"
-          v-if="show"
-        ></b-form-input>
-      </b-form-group>
-
-      <b-form-group id="label-description" label="Description" label-for="input-description">
-        <b-form-textarea
-          id="input-description"
-          v-model="form.description"
-          placeholder="Enter a synposis of the show and any other important details."
-          rows="3"
-          max-rows="6"
-        ></b-form-textarea>
-      </b-form-group>
-      
-      <b-form-group
-        id="label-author"
-        label="Author:"
-        label-for="input-author"
-      >
-        <b-form-input
-          id="input-author"
-          v-model="form.author"
-          type="text"
-          required
-          placeholder="Name of the Author"
-        ></b-form-input>
-      </b-form-group>
-
-      <b-form-group
-        id="label-composer"
-        label="Composer:"
-        label-for="input-composer"
-      >
-        <b-form-input
-          id="input-composer"
-          v-model="form.composer"
-          type="text"
-          required
-          placeholder="Name of the Composer"
-        ></b-form-input>
-      </b-form-group>
-
-      <b-button type="submit" variant="primary">Submit</b-button>
-    </b-form>
-    <b-card class="mt-3" header="Form Data Result">
-      <pre class="m-0">{{ form }}</pre>
-    </b-card>
-  </div>
+    <ShowForm v-model="show" />
   </div>
 </template>
 
 <script>
+import ShowForm from '../../components/ShowForm'
+
 export default {
-      data() {
+    components: {
+      ShowForm
+    }, 
+    data() {
       return {
-        form: {
+        show: {
           id: this.$route.params.id,
           showId: this.$route.params.id
         },
         visible: true,
-        show: null,
-        breadcrumbs: [
-          {
-            text: 'Theatreers',
-            href: this.$router.resolve({ name: 'root' }).href
-          },
-          {
-            text: 'Shows',
-            href: this.$router.resolve({ name: 'getshows' }).href
-          },
-          {
-            text: 'Show',
-            active: true
-          }
-        ]
+        breadcrumbs: null
       }
     },
     methods: {
@@ -99,7 +30,7 @@ export default {
           'Accept': 'application/json'
           },
           method: 'POST',
-          body: JSON.stringify(this.form)
+          body: JSON.stringify(this.show)
         })
         .then(function (response) {      
           alert("Form submitted")
@@ -120,11 +51,25 @@ export default {
         })
         .then((jsonData) => {
           this.isLoading = false
-          this.show = jsonData[0]
-          this.form.showName = this.show.showName
-          this.form.description = this.show.description
-          this.form.author = this.show.author
-          this.form.composer = this.show.composer
+          this.show = jsonData[0],          
+          this.breadcrumbs = [
+            {
+              text: 'Theatreers',
+              href: this.$router.resolve({ name: 'root' }).href
+            },
+            {
+              text: 'Shows',
+              href: this.$router.resolve({ name: 'getshows' }).href
+            },
+            {
+              text: this.show.showName,
+              href: this.$router.resolve({ name: 'getshow', params: { id: this.$route.params.id } }).href
+            },
+            {
+              text: 'Edit',
+              active: true
+            }
+          ]
         })
     }
 }

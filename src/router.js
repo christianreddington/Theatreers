@@ -19,12 +19,13 @@ const GetGroup = () => import('@/views/group/GetGroup')
 const GetGroups = () => import('@/views/group/GetGroups')
 
 // Show
+const CreateShow = () => import('@/views/show/CreateShow')
 const EditShow = () => import('@/views/show/EditShow')
 const GetShow = () => import('@/views/show/GetShow')
 const GetShows = () => import('@/views/show/GetShows')
 
 export default new Router({
-  mode: 'history', // https://router.vuejs.org/api/#mode
+  // mode: 'history', // https://router.vuejs.org/api/#mode
   routes: [
     { path: '/auth',
       name: 'Auth',
@@ -46,6 +47,7 @@ export default new Router({
     { path: '/show', name: 'getshows', component: GetShows },
     { path: '/show/:id', name: 'getshow', component: GetShow},
     { path: '/show/:id/edit', name: 'editshow', component: EditShow },
+    { path: '/show/create', name: 'createshow', component: CreateShow },
     { path: '/', name: 'root', component: Home }
   ]
 })
