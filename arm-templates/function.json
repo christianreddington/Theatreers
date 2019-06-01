@@ -59,6 +59,15 @@
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('function').stgName)]"
             ],
             "properties": {
+                "cors": {
+                  "allowedOrigins": [
+                    "https://www.theatreers.com",
+                    "http://localhost:8080",
+                    "https://functions-next.azure.com",
+                    "https://functions-staging.azure.com",
+                    "https://functions.azure.com"
+                    ]
+                },
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('function').planName)]",
                 "siteConfig": {
                     "appSettings": [
