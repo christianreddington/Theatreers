@@ -18,9 +18,11 @@ export default class AuthService {
       this.applicationConfig.authority,
       () => {
         // callback for login redirect
+        //cacheLocation: 'localStorage'
       },
       {
-        redirectUri
+        redirectUri,
+        cacheLocation: 'localStorage'
       }
     )
   }

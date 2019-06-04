@@ -4,12 +4,6 @@ import Home from './views/Home.vue'
 
 Vue.use(Router)
 
-// Authentication
-const AuthCallback = () => import('@/views/auth/Callback')
-const AuthLogin = () => import('@/views/auth/Login')
-const AuthRegister = () => import('@/views/auth/Register')
-const AuthTest = () => import('@/views/auth/Test')
-
 // Event
 const GetEvent = () => import('@/views/event/GetEvent')
 const GetEvents = () => import('@/views/event/GetEvents')
@@ -27,19 +21,6 @@ const GetShows = () => import('@/views/show/GetShows')
 export default new Router({
   mode: 'history', // https://router.vuejs.org/api/#mode
   routes: [
-    { path: '/auth',
-      name: 'Auth',
-      redirect: '/auth/login',
-      component: {
-        render (c) { return c('router-view') }
-      },
-      children: [
-        { path: 'callback', name: 'Callback', component: AuthCallback },
-        { path: 'test', name: 'Test', component: AuthTest },
-        { path: 'login', name: 'Login', component: AuthLogin },
-        { path: 'register', name: 'Register', component: AuthRegister }
-      ]
-    },
     { path: '/event', name: 'getevents', component: GetEvents },
     { path: '/event/:id', name: 'getevent', component: GetEvent },
     { path: '/group', name: 'getgroups', component: GetGroups },
