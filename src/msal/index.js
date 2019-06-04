@@ -7,7 +7,7 @@ export default class AuthService {
   constructor () {
     // let redirectUri = window.location.origin;
     let redirectUri = config.redirecturl
-    // let PostLogoutRedirectUri = '/'
+    let postLogoutRedirectUri = '/'
     this.graphUrl = config.graphendpoint
     this.applicationConfig = {
       clientID: config.clientid,
@@ -22,6 +22,7 @@ export default class AuthService {
       },
       {
         redirectUri,
+        postLogoutRedirectUri,
         cacheLocation: 'localStorage'
       }
     )
