@@ -18,13 +18,6 @@
       "type": "Microsoft.ApiManagement/service/backends",
       "apiVersion": "2019-01-01",
       "properties": {
-        "credentials": {
-          "header": {
-            "x-functions-key": [
-              "[listsecrets(resourceId(parameters('functionResourceGroup'), 'Microsoft.Web/sites/functions', parameters('functionName'), 'admin'),'2015-08-01').key]"
-            ]
-          }
-        },
         "url": "[concat('https://', parameters('functionName'), '.azurewebsites.net/api')]",
         "protocol": "http"
       }
