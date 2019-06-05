@@ -100,7 +100,7 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/get-getshow-showobjects')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/get-getshow-showsbyletter')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
