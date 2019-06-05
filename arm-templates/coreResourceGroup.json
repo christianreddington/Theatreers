@@ -54,7 +54,7 @@
                 },
                 "parameters": {
                     "namePrefix": {
-                        "value": "[concat(parameters('namingPrefix'),'-apim')]"
+                        "value": "[concat(parameters('namingPrefix'))]"
                     }
                 }
             }
