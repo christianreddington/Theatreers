@@ -10,9 +10,9 @@ using System.Threading;
 
 namespace Theatreers.Show
 {
-    public static class PostShow
+    public static class CreationOrchestrator
     {        
-        [FunctionName("PostShow")]
+        [FunctionName("CreationOrchestrator")]
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, methods: "post", Route = "show")] HttpRequestMessage req,
             [OrchestrationClient] DurableOrchestrationClientBase starter,
@@ -24,7 +24,7 @@ namespace Theatreers.Show
                 //Generate correllation ID and initial request timestamp
                 string CorrelationId = Guid.NewGuid().ToString();
                 string showId = Guid.NewGuid().ToString();
-                DecoratedShowMessage showObjectInput = await req.Content.ReadAsAsync<DecoratedShowMessage>();
+                DecoratedShowObject showObjectInput = JsonConvert.DeserializeObject<DecoratedShowObject>(await req.Content.ReadAsStringAsync());
                 MessageHeaders messageHeaders = new MessageHeaders();
                 messageHeaders.RequestCorrelationId = CorrelationId;
                 messageHeaders.RequestCreatedAt = DateTime.Now.ToString();
@@ -33,9 +33,9 @@ namespace Theatreers.Show
                 string eventData = JsonConvert.SerializeObject(showObjectInput);
 
                 //Call the downstream "Activity" functions
-                string submitShowInstanceId = await starter.StartNewAsync("SubmitShowAsync", eventData);
-                string submitNewsInstanceId = await starter.StartNewAsync("SubmitNewsAsync", eventData);
-                string submitImageInstanceId = await starter.StartNewAsync("SubmitImageAsync", eventData);
+                string submitShowInstanceId = await starter.StartNewAsync("CreateShowObject", eventData);
+                string submitNewsInstanceId = await starter.StartNewAsync("CreateShowNewsObject", eventData);
+                string submitImageInstanceId = await starter.StartNewAsync("CreateShowImageObject", eventData);
 
                 log.LogInformation($"[Request Correlation ID: {messageHeaders.RequestCorrelationId}] :: Begin Orchestration :: SubmitShowAsync instance ID: {submitShowInstanceId}");
                 log.LogInformation($"[Request Correlation ID: {messageHeaders.RequestCorrelationId}] :: Begin Orchestration :: SubmitNewsAsync instance ID: {submitNewsInstanceId}");

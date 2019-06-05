@@ -11,9 +11,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Theatreers.Show
 {
-    public static class CreateAlphabetisedShow
+    public static class CreateShowListObject
     {
-        [FunctionName("CreateAlphabetisedShow")]
+        [FunctionName("CreateShowListObject")]
         public static async void Run([CosmosDBTrigger(
             databaseName: "theatreers",
             collectionName: "shows",
@@ -22,11 +22,12 @@ namespace Theatreers.Show
             CreateLeaseCollectionIfNotExists = true)]IReadOnlyList<Document> inputs, ILogger log,
             [CosmosDB(
                 databaseName: "theatreers",
-                collectionName: "showsAlphabetised",
+                collectionName: "showListObjects",
                 ConnectionStringSetting = "cosmosConnectionString"
             )] IDocumentClient outputs
         )
         {
+            string showName = "";
             try
             {
                 if (inputs != null && inputs.Count > 0)
@@ -35,7 +36,7 @@ namespace Theatreers.Show
                     {
                         if (show.GetPropertyValue<string>("doctype") == "show")
                         {
-                            string firstCharacter = show.GetPropertyValue<string>("showName")[0].ToString();
+                            string firstCharacter = show.GetPropertyValue<string>("showName")[0].ToString().ToUpper();
                             int number;
                             bool isNumber = int.TryParse(firstCharacter, out number);
                             show.SetPropertyValue("id", show.GetPropertyValue<string>("showId"));
@@ -48,17 +49,18 @@ namespace Theatreers.Show
                             {
                                 show.SetPropertyValue("partition", firstCharacter);
                             }
+                            showName = show.GetPropertyValue<string>("showName");
                             await outputs.UpsertDocumentAsync(
-                              UriFactory.CreateDocumentCollectionUri("theatreers", "showsAlphabetised"),
+                              UriFactory.CreateDocumentCollectionUri("theatreers", "showListObjects"),
                               show);
-                            log.LogInformation($"Reacting to change feed... Alphabetised show creation succeeded");
+                            log.LogInformation($"[Reacting to Change Feed :: Creation of ShowListObject for {show.GetPropertyValue<string>("showName")} succeeded");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                log.LogInformation($"Reacting to change feed... Alphabetised show creation fail :: {ex.Message}");
+                log.LogInformation($"[Reacting to Change Feed :: Creation of ShowListObject for {showName} failed :: {ex.Message}");
             }
         }
     }

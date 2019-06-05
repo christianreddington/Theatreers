@@ -12,18 +12,16 @@ namespace Theatreers.Show
         public string showId { get; set; }
     }
 
-    public class ShowMessage : ShowBaseObject {
+    public class ShowObject : ShowBaseObject {
         public string id { get; set; }
-        public string showId { get; set; }
-        //public string showId {get; set;}
         public string doctype {get; set;}
-        //public IList<NewsObject> news {get; set;}
-        public string showName {get; set;}
-        public string description {get; set;}
-        //public string relatesto {get; set;}
+        public string showName {get; set; }
+        public string description { get; set; }
+        public string composer { get; set; }
+        public string author { get; set; }
     }
 
-    public class DecoratedShowMessage : ShowMessage {        
+    public class DecoratedShowObject : ShowObject {        
         public MessageHeaders MessageProperties {get; set;}
     }
 
@@ -36,7 +34,6 @@ namespace Theatreers.Show
 
     public class ImageObject : ShowBaseObject
     {
-        public string showId { get; set; }
         public string imageId {get; set;}
         public string contentUrl {get; set;}
         public string hostPageUrl {get; set;}
@@ -45,7 +42,6 @@ namespace Theatreers.Show
     }
     public class NewsObject : ShowBaseObject
     {
-        public string showId { get; set; }
         public string DatePublished { get; set; }
         public string BingId { get; set; }
         public string name {get; set;}
@@ -53,7 +49,7 @@ namespace Theatreers.Show
         public string doctype { get; set; }
     }
 
-    public class AlphabetisedShow
+    public class ShowListObject
     {
         public string showId { get; set; }
         public string showName { get; set; }

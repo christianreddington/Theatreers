@@ -33,13 +33,7 @@
             "metadata": {
                 "description": "Location for all resources."
             }
-        },     
-        "serviceBusNamespaceResourceGroup": {
-            "type": "string",
-            "metadata": {
-                "description": "Resource Group for the Service Bus Namespace, where the Service Bus topics will be housed."
-            }
-        },
+        },   
         "servicePrincipalObjectId": {
             "type": "string",
             "metadata": {
@@ -70,31 +64,16 @@
             "northeurope": "neu",
             "westeurope": "weu"
         },
-        "appInsightsName": "[concat(variables('namePrefix'), 'ai')]",
-        "keyvaultName": "[concat(variables('namePrefix'), 'kv')]",
-        "namePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', variables('abbreviations')[parameters('location')], '-', parameters('environmentName'),'-')]",
-        "namePrefixWithoutDashes": "[replace(variables('namePrefix'), '-', '')]",
-        "organisationPrefix": "th",      
-        "serviceBusNamespace": "[concat('theatreers-', parameters('environmentName'))]",
-        "serviceBusTopics": [
-            {
-                "topicName": "newshow",
-                "subscriptions": [
-                    "aggregator",
-                    "image",
-                    "news"
-                ]
-            }
-        ],
-        "serviceName": "show",
-        "sharedAccessPolicyName": "[concat(variables('serviceName'), 'service')]",
-        "storageAccount": {
-            "name": "[concat(variables('namePrefixWithoutDashes'), 'messages')]",
-            "containers": [
-                "showsimage",
-                "showsnews"
-            ]
-        }
+        "apimServiceName": "[concat(variables('coreNamePrefix'),'apim')]",
+        "serviceAppinsightsName": "[concat(variables('serviceNamePrefix'), 'ai')]",
+        "coreNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-', variables('abbreviations')[parameters('location')], '-')]",
+        "functionName": "[concat(variables('serviceNamePrefix'), 'func')]",
+        "keyvaultName": "[concat(variables('serviceNamePrefix'), 'kv')]",
+        "serviceNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'),'-', variables('abbreviations')[parameters('location')], '-')]",
+        "serviceResourceGroupName": "[concat(variables('serviceNamePrefix'), 'rg')]",
+        "namePrefixWithoutDashes": "[replace(variables('serviceNamePrefix'), '-', '')]",
+        "organisationPrefix": "th",
+        "serviceName": "show"
     },
     "resources": [
         {
@@ -102,7 +81,6 @@
             "name": "functionDeployment",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "serviceBusTopicLoop",
                 "appInsightsDeployment"
             ],
             "properties": {
@@ -113,17 +91,64 @@
                 },
                 "parameters": {
                     "namePrefix": {
-                        "value": "[variables('namePrefix')]"
+                        "value": "[variables('serviceNamePrefix')]"
                     },
                     "namePrefixWithoutDashes": {
                         "value": "[variables('namePrefixWithoutDashes')]"
                     },
                     "appInsightsName": {
-                        "value": "[variables('appInsightsName')]"
+                        "value": "[variables('serviceAppinsightsName')]"
                     }
                 }
             },
             "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('functionName'), 'ServiceAPIsDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[concat(variables('coreNamePrefix'), 'rg')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'apim-apis.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "apimServiceName": {
+                        "value": "[variables('apimServiceName')]"
+                    },
+                    "functionName": {
+                        "value": "[variables('functionName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy an APIs for the given Microservice."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('functionName'), 'BackendDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[concat(variables('coreNamePrefix'), 'rg')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'apim-backend.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "apimServiceName": {
+                        "value": "[variables('apimServiceName')]"
+                    },
+                    "functionName": {
+                        "value": "[variables('functionName')]"
+                    },
+                    "functionResourceGroup": {
+                        "value": "[variables('serviceResourceGroupName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy an APIs for the given Microservice."
         },
         {
             "apiVersion": "2017-05-10",
@@ -136,8 +161,8 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "appInsightsName": {
-                        "value": "[variables('appInsightsName')]"
+                    "appinsightsName": {
+                        "value": "[variables('serviceAppinsightsName')]"
                     }
                 }
             },
@@ -170,22 +195,6 @@
         {
             "apiVersion": "2018-02-14",
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "name": "[concat(variables('keyVaultName'), '/', 'Connection', copyIndex())]",
-            "properties": {
-                "value": "[replace(listkeys(resourceId(parameters('serviceBusNamespaceResourceGroup'), 'Microsoft.ServiceBus/namespaces/topics/authorizationRules', variables('serviceBusNamespace'), variables('serviceBusTopics')[copyIndex()].topicName, variables('sharedAccessPolicyName')), '2017-04-01').primaryConnectionString, concat('EntityPath=', variables('serviceBusTopics')[copyIndex()].topicName), '')]"
-            },
-            "dependsOn": [
-                "topicAuthLoop"
-            ],            
-            "copy": {
-                "name": "topicSecretLoop",
-                "count": "[length(variables('serviceBusTopics'))]"
-            },
-            "comments": "Resource to deploy the Topic Connection String as a  KeyVault Secret. Pass in the resource group and service bus namespace name and appropriate topic, while also removing the EntityPath aspect from the connection string. This has to be removed, due to the Azure Function host not being able to handle it."
-        },
-        {
-            "apiVersion": "2018-02-14",
-            "type": "Microsoft.KeyVault/vaults/secrets",
             "name": "[concat(variables('keyVaultName'), '/', 'cosmosConnectionString')]",
             "properties": {
                 "value": "[concat('AccountEndpoint=https://', parameters('cosmosDbAccountName'), '.documents.azure.com:443/;AccountKey=', listKeys(resourceId(parameters('cosmosDbResourceGroup'), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2015-11-06').primaryMasterKey)]"
@@ -194,122 +203,6 @@
                 "keyVaultDeployment"
             ],
             "comments": "Resource to deploy the Azure CosmosDB Connection String as a  KeyVault Secret."
-        },     
-        {
-            "apiVersion": "2017-05-10",
-            "name": "[concat('topicDeployment-', copyIndex())]",
-            "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[parameters('serviceBusNamespaceResourceGroup')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'keyVaultDeployment')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('templateContainerUri'), 'servicebusTopic.json', parameters('templateContainerSasToken'))]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "keyvaultName": {
-                        "value": "[variables('keyvaultName')]"
-                    },
-                    "serviceName": {
-                        "value": "[variables('serviceName')]"
-                    },
-                    "environmentName": {
-                        "value": "[parameters('environmentName')]"
-                    },
-                    "serviceBusTopicName": {
-                        "value": "[variables('serviceBusTopics')[copyIndex()].topicName]"
-                    },
-                    "serviceBusSubscriptionNames": {
-                        "value": "[variables('serviceBusTopics')[copyIndex()].subscriptions]"
-                    }
-                }
-            },
-            "copy": {
-                "name": "serviceBusTopicLoop",
-                "count": "[length(variables('serviceBusTopics'))]"
-            },            
-            "comments": "Downstream template to deploy Service Bus Topic onto a pre-existing service bus namespace. This uses the Theatreers Service Bus Topic Building Block."
-        }, 
-        {
-            "apiVersion": "2017-05-10",
-            "name": "[concat('authorizationRule-', copyIndex())]",
-            "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[parameters('serviceBusNamespaceResourceGroup')]",
-            "dependsOn": [
-                "serviceBusTopicLoop"
-            ],     
-            "copy": {
-                "name": "topicAuthLoop",
-                "count": "[length(variables('serviceBusTopics'))]"
-            },
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('templateContainerUri'), 'servicebusAuthorization.json', parameters('templateContainerSasToken'))]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "authorizationRuleName": {
-                        "value": "[concat(variables('serviceBusNamespace'), '/', variables('serviceBusTopics')[copyIndex()].topicName, '/', variables('sharedAccessPolicyName'))]"
-                    }
-                }
-            },
-            "comments": "Downstream template to deploy a Shared Access Policy at the scope of a Service Bus Topic. This uses the Theatreers Service Bus Authorization Building Block."
-        },              
-        {
-            "apiVersion": "2017-05-10",
-            "name": "messagesStoreDeployment",
-            "type": "Microsoft.Resources/deployments",
-            "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'keyVaultDeployment')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('templateContainerUri'), 'messagesStore.json', parameters('templateContainerSasToken'))]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "accountName": {
-                        "value": "[variables('storageAccount').name]"
-                    },
-                    "keyvaultName": {
-                        "value": "[variables('keyvaultName')]"
-                    }
-                }
-            },
-            "comments": "Downstream template to deploy an Azure Storage account to be used as a temporary message store (holds transient data related to the microservice). This uses the Theatreers Azure Storage Account Building Block."
-        },
-        {
-            "apiVersion": "2017-05-10",
-            "name": "[concat('storageAccountContainerDeployment-', copyIndex())]",
-            "type": "Microsoft.Resources/deployments",
-            "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'messagesStoreDeployment')]"
-            ],
-            "copy": {
-                "name": "storageAccountContainerLoop",
-                "count": "[length(variables('storageAccount').containers)]"
-            },
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('templateContainerUri'), 'storageAccountContainer.json', parameters('templateContainerSasToken'))]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "accountName": {
-                        "value": "[variables('storageAccount').name]"
-                    },
-                    "containerName": {
-                        "value": "[variables('storageAccount').containers[copyIndex()]]"
-                    }
-                }
-            },
-            "comments": "Downstream template to deploy a container to a given Azure Storage Account (that has already been deployed in this template). This uses the Theatreers Azure Storage Account Container Building Block."
         }
     ],
     "outputs": {}

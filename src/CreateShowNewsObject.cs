@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace Theatreers.Show
 {
-    public static class NewsAssociator
+    public static class CreateShowNewsObject
     {
-        [FunctionName("SubmitNewsAsync")]
+        [FunctionName("CreateShowNewsObject")]
 
         public static async Task<IActionResult> RunAsync(
             [OrchestrationTrigger] DurableOrchestrationContext context,
@@ -25,12 +25,12 @@ namespace Theatreers.Show
             //Take the input as a string from the orchestrator function context
             //Deserialize into a transport object
             string rawRequestBody = context.GetInput<string>();
-            DecoratedShowMessage transitObject = JsonConvert.DeserializeObject<DecoratedShowMessage>(rawRequestBody);
+            DecoratedShowObject transitObject = JsonConvert.DeserializeObject<DecoratedShowObject>(rawRequestBody);
 
             //Leverage the Cognitive Services Bing Search API and log out the action
             INewsSearchClient client = new NewsSearchClient(new ApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
             log.LogInformation($"[Request Correlation ID: {transitObject.MessageProperties.RequestCorrelationId}] :: Searching for associated images");
-            Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.News newsResults = client.News.SearchAsync(query: transitObject.showName).Result;
+            Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.News newsResults = client.News.SearchAsync(query: $"{transitObject.showName} (Musical)").Result;
 
             //Initialise a temporaryObject and loop through the results
             //For each result, create a new NewsObject which has a condensed set 

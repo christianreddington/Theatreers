@@ -77,10 +77,10 @@ stages:
             targetPath: '$(System.DefaultWorkingDirectory)/'
         - task: CmdLine@2
           inputs:
-            script: 'touch dummy.txt'
+            script: 'ls -la'
         - task: AzureFileCopy@3
           inputs:
-            SourcePath: '$(System.DefaultWorkingDirectory)/dummy.txt'
+            SourcePath: '$(System.DefaultWorkingDirectory)/deploy/apim'
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             Destination: 'AzureBlob'
             storage: '$(artifactsAccountName)'
@@ -100,7 +100,7 @@ stages:
             location: '$(region)'
             templateLocation: 'Linked artifact'
             csmFile: '$(System.DefaultWorkingDirectory)/deploy/show.json'
-            overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -serviceBusNamespaceResourceGroup $(serviceBusNamespaceResourceGroup) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup)'
+            overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup)'
             deploymentMode: 'Incremental'
         - task: AzureKeyVault@1
           inputs:

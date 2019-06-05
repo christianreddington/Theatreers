@@ -33,7 +33,7 @@ namespace Theatreers.Show
                 Route = "shows/{letter}")]HttpRequest req,
                 [CosmosDB(
                 databaseName: "theatreers",
-                collectionName: "showsAlphabetised",
+                collectionName: "showListObjects",
                 ConnectionStringSetting = "cosmosConnectionString",
                 PartitionKey = "{letter}")] IDocumentClient documentClient,
                 ILogger log)
@@ -41,8 +41,8 @@ namespace Theatreers.Show
                 string CorrelationId = Guid.NewGuid().ToString();
                 String requestId = req.HttpContext.Request.Path.ToString().Replace("/api/shows/","");
 
-                Uri collectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "showsAlphabetised");
-                dynamic results = documentClient.CreateDocumentQuery<AlphabetisedShow>(collectionUri)
+                Uri collectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "showListObjects");
+                dynamic results = documentClient.CreateDocumentQuery<ShowListObject>(collectionUri)
                                             .Where(c => c.partition == requestId)
                                             .AsEnumerable();
 
