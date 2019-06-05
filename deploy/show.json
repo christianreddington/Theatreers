@@ -166,7 +166,7 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "serviceAppinsightsName": {
+                    "appinsightsName": {
                         "value": "[variables('serviceAppinsightsName')]"
                     }
                 }
