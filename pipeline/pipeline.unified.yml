@@ -66,8 +66,8 @@ stages:
         name: 'Hosted Windows 2019 with VS2019'
       strategy:
         matrix: { westeurope: 
-          { region: 'West Europe', functionAppName: 'th-show-weu-dev-func', keyvaultName: 'th-show-weu-dev-kv', serviceResourceGroupName: 'th-show-dev-weu-rg' },
-          northeurope: { region: 'North Europe', functionAppName: 'th-show-neu-dev-func', keyvaultName: 'th-show-neu-dev-kv', serviceResourceGroupName: 'th-show-dev-neu-rg' } }
+          { region: 'West Europe', functionAppName: 'th-show-dev-weu-func', keyvaultName: 'th-show-dev-weu-kv', serviceResourceGroupName: 'th-show-dev-weu-rg' },
+          northeurope: { region: 'North Europe', functionAppName: 'th-show-dev-neu-func', keyvaultName: 'th-show-dev-neu-kv', serviceResourceGroupName: 'th-show-dev-neu-rg' } }
       steps:
       # Setup the Sonar Cloud for analysis
         - task: DownloadPipelineArtifact@1
