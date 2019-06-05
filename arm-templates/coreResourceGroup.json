@@ -14,22 +14,16 @@
                  "description": "The SAS token of the container containing the ARM Templates"
              }
          },
-         "corePlatformStgAccountName": {
+         "namingPrefix": {
              "type": "string",
-             "defaultValue": "thcoredevstg",
              "metadata": {
                  "description": "Storage Account Name of the Origin"
              }
-         },         
-         "appInsightsName": {
-            "type": "string",
-            "defaultValue": "th-core-dev-ai",
-            "metadata": {
-                "description": "Name of the Core App Insights Resource"
-            }
-        }
+         }
     },
-    "variables": {},
+    "variables": {
+        "prefixNameWithoutDashes": "[replace(parameters('namingPrefix'), '-', '')]"
+    },
     "resources": [        
         {
             "apiVersion": "2017-05-10",
@@ -43,23 +37,25 @@
                 },
                 "parameters": {
                     "accountName": {
-                        "value": "[parameters('corePlatformStgAccountName')]"
+                        "value": "[concat(variables('prefixNameWithoutDashes'), 'stg')]"
                     }
                 }
             }
-        },     
+        },      
         {
             "apiVersion": "2017-05-10",
-            "name": "applicationInsightsDeployment",
+            "name": "apimDeployment",
             "type": "Microsoft.Resources/deployments",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('templateContainerUri'), '/applicationInsights.json', parameters('templateContainerSasToken'))]",
+                    "uri": "[concat(parameters('templateContainerUri'), '/apim.json', parameters('templateContainerSasToken'))]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "appInsightsName": {"value": "[parameters('appInsightsName')]"}
+                    "accountName": {
+                        "value": "[concat(parameters('namingPrefix'),'-apim')]"
+                    }
                 }
             }
         }

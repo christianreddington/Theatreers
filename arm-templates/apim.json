@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "namePrefix": {
+           "type": "string",
+           "metadata": {
+                "description": "Prefix of the resource"
+            }
+        },
+        "location": {
+           "type": "string",
+           "metadata": {
+                "description": "Location of the APIM deployment"
+            },
+            "defaultValue": "[resourceGroup().location]"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "[concat(parameters('namePrefix'), '-apim')]",
+            "type": "Microsoft.ApiManagement/service",
+            "location": "[parameters('location')]",
+            "apiVersion": "2019-01-01",
+            "properties": {
+                "publisherEmail": "chris@theatreers.com",
+                "publisherName": "Christian Reddington"
+            },
+            "sku": {
+                "name": "Consumption"
+            }
+          }
+    ],
+    "outputs": {}
+}
