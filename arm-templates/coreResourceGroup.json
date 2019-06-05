@@ -22,6 +22,8 @@
          }
     },
     "variables": {
+        "apimServiceName": "[concat(parameters('namingPrefix'), 'apim')]",
+        "appInsightsName": "[concat(parameters('namingPrefix'), 'ai')]",
         "prefixNameWithoutDashes": "[replace(parameters('namingPrefix'), '-', '')]"
     },
     "resources": [        
@@ -58,6 +60,48 @@
                     }
                 }
             }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "apiLoggerDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "apimDeployment"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'apim-backend-logger.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "apimServiceName": {
+                        "value": "[variables('apimServiceName')]"
+                    },
+                    "appinsightsName": {
+                        "value": "[variables('appInsightsName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy the logger for an API Microservice"
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "appInsightsDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'applicationInsights.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "serviceAppinsightsName": {
+                        "value": "[variables('appInsightsName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
         }
     ],
     "outputs": {}
