@@ -53,7 +53,7 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "accountName": {
+                    "namePrefix": {
                         "value": "[concat(parameters('namingPrefix'),'-apim')]"
                     }
                 }
