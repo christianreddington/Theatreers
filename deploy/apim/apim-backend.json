@@ -5,9 +5,6 @@
     "ApimServiceName": {
       "type": "string"
     },
-    "functionPlanName": {
-      "type": "string"
-    },
     "functionName": {
       "type": "string"
     },
@@ -24,7 +21,7 @@
         "credentials": {
           "header": {
             "x-functions-key": [
-              "[listsecrets(resourceId(parameters('functionResourceGroup'), 'Microsoft.Web/sites/functions', parameters('functionPlanName'), parameters('functionName')),'2015-08-01').key]"
+              "[listsecrets(resourceId(parameters('functionResourceGroup'), 'Microsoft.Web/sites/functions', parameters('functionName'), 'admin'),'2015-08-01').key]"
             ]
           }
         },

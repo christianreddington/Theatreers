@@ -68,7 +68,6 @@
         "serviceAppinsightsName": "[concat(variables('serviceNamePrefix'), 'ai')]",
         "coreNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-', variables('abbreviations')[parameters('location')], '-')]",
         "functionName": "[concat(variables('serviceNamePrefix'), 'func')]",
-        "functionPlanName": "[concat(variables('serviceNamePrefix'), 'plan')]",
         "keyvaultName": "[concat(variables('serviceNamePrefix'), 'kv')]",
         "serviceNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'),'-', variables('abbreviations')[parameters('location')], '-')]",
         "serviceResourceGroupName": "[concat(variables('serviceNamePrefix'), 'rg')]",
@@ -140,9 +139,6 @@
                 "parameters": {
                     "apimServiceName": {
                         "value": "[variables('apimServiceName')]"
-                    },
-                    "functionPlanName": {
-                        "value": "[variables('functionPlanName')]"
                     },
                     "functionName": {
                         "value": "[variables('functionName')]"
