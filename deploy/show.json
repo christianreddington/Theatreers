@@ -107,7 +107,7 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(variables('functionName'), 'Deployment')]",
+            "name": "[concat(variables('functionName'), 'ServiceAPIsDeployment')]",
             "type": "Microsoft.Resources/deployments",
             "resourceGroup": "[concat(variables('coreNamePrefix'), 'rg')]",
             "properties": {
@@ -129,7 +129,7 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(variables('functionName'), 'Deployment')]",
+            "name": "[concat(variables('functionName'), 'BackendDeployment')]",
             "type": "Microsoft.Resources/deployments",
             "resourceGroup": "[concat(variables('coreNamePrefix'), 'rg')]",
             "properties": {
