@@ -71,7 +71,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('templateContainerUri'), 'apim-backend-logger.json', parameters('templateContainerSasToken'))]",
+                    "uri": "[concat(parameters('templateContainerUri'), '/apim-backend-logger.json', parameters('templateContainerSasToken'))]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -92,7 +92,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('templateContainerUri'), 'applicationInsights.json', parameters('templateContainerSasToken'))]",
+                    "uri": "[concat(parameters('templateContainerUri'), '/applicationInsights.json', parameters('templateContainerSasToken'))]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
