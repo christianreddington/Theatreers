@@ -64,10 +64,16 @@
             "northeurope": "neu",
             "westeurope": "weu"
         },
-        "appInsightsName": "[concat(variables('namePrefix'), 'ai')]",
-        "keyvaultName": "[concat(variables('namePrefix'), 'kv')]",
-        "namePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', variables('abbreviations')[parameters('location')], '-', parameters('environmentName'),'-')]",
-        "namePrefixWithoutDashes": "[replace(variables('namePrefix'), '-', '')]",
+        "apimServiceName": "[concat(variables('coreNamePrefix'),'apim')]",
+        "serviceAppinsightsName": "[concat(variables('serviceNamePrefix'), 'ai')]",
+        "coreAppInsightsName": "[concat(variables('coreNamePrefix'), 'ai')]",
+        "coreNamePrefix": "[concat(variables('organisationPrefix'),'-core-', variables('abbreviations')[parameters('location')], '-', parameters('environmentName'),'-')]",
+        "functionName": "[concat(variables('serviceNamePrefix'), 'func')]",
+        "functionPlanName": "[concat(variables('serviceNamePrefix'), 'plan')]",
+        "keyvaultName": "[concat(variables('serviceNamePrefix'), 'kv')]",
+        "serviceNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', variables('abbreviations')[parameters('location')], '-', parameters('environmentName'),'-')]",
+        "serviceResourceGroupName": "[concat(variables('serviceNamePrefix'), 'rg')]",
+        "namePrefixWithoutDashes": "[replace(variables('serviceNamePrefix'), '-', '')]",
         "organisationPrefix": "th",
         "serviceName": "show"
     },
@@ -87,17 +93,67 @@
                 },
                 "parameters": {
                     "namePrefix": {
-                        "value": "[variables('namePrefix')]"
+                        "value": "[variables('serviceNamePrefix')]"
                     },
                     "namePrefixWithoutDashes": {
                         "value": "[variables('namePrefixWithoutDashes')]"
                     },
                     "appInsightsName": {
-                        "value": "[variables('appInsightsName')]"
+                        "value": "[variables('coreAppinsightsName')]"
                     }
                 }
             },
             "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('functionName'), 'Deployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[concat(variables('coreNamePrefix'), 'rg')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'apim-apis.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "apimServiceName": {
+                        "value": "[variables('apimServiceName')]"
+                    },
+                    "functionName": {
+                        "value": "[variables('functionName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy an APIs for the given Microservice."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('functionName'), 'Deployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[concat(variables('coreNamePrefix'), 'rg')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'apim-backend.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "apimServiceName": {
+                        "value": "[variables('apimServiceName')]"
+                    },
+                    "functionPlanName": {
+                        "value": "[variables('functionPlanName')]"
+                    },
+                    "functionName": {
+                        "value": "[variables('functionName')]"
+                    },
+                    "functionResourceGroup": {
+                        "value": "[variables('serviceResourceGroupName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy an APIs for the given Microservice."
         },
         {
             "apiVersion": "2017-05-10",
@@ -110,8 +166,8 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "appInsightsName": {
-                        "value": "[variables('appInsightsName')]"
+                    "serviceAppinsightsName": {
+                        "value": "[variables('serviceAppinsightsName')]"
                     }
                 }
             },

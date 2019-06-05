@@ -80,7 +80,7 @@ stages:
             script: 'touch dummy.txt'
         - task: AzureFileCopy@3
           inputs:
-            SourcePath: '$(System.DefaultWorkingDirectory)/dummy.txt'
+            SourcePath: '$(System.DefaultWorkingDirectory)/Theatreers.Show/deploy/apim'
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             Destination: 'AzureBlob'
             storage: '$(artifactsAccountName)'

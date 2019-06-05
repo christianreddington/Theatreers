@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ApimServiceName": {
+      "type": "string"
+    },
+    "functionPlanName": {
+      "type": "string"
+    },
+    "functionName": {
+      "type": "string"
+    },
+    "functionResourceGroup": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('functionName'))]",
+      "type": "Microsoft.ApiManagement/service/backends",
+      "apiVersion": "2019-01-01",
+      "properties": {
+        "credentials": {
+          "header": {
+            "x-functions-key": [
+              "[listsecrets(resourceId(parameters('functionResourceGroup'), 'Microsoft.Web/sites/functions', parameters('functionPlanName'), parameters('functionName')),'2015-08-01').key]"
+            ]
+          }
+        },
+        "url": "[concat('https://', parameters('functionName'), '.azurewebsites.net/api')]",
+        "protocol": "http"
+      }
+    }
+  ]
+}
