@@ -22,8 +22,8 @@
          }
     },
     "variables": {
-        "apimServiceName": "[concat(parameters('namingPrefix'), 'apim')]",
-        "appInsightsName": "[concat(parameters('namingPrefix'), 'ai')]",
+        "apimServiceName": "[concat(parameters('namingPrefix'), '-apim')]",
+        "appInsightsName": "[concat(parameters('namingPrefix'), '-ai')]",
         "prefixNameWithoutDashes": "[replace(parameters('namingPrefix'), '-', '')]"
     },
     "resources": [        
