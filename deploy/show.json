@@ -99,7 +99,7 @@
                         "value": "[variables('namePrefixWithoutDashes')]"
                     },
                     "appInsightsName": {
-                        "value": "[variables('coreAppinsightsName')]"
+                        "value": "[variables('serviceAppinsightsName')]"
                     }
                 }
             },
