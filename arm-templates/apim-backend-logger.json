@@ -11,7 +11,7 @@
   },
   "resources": [
     {
-      "name": "[concat(parameters('ApimServiceName'), '', parameters('appInsightsName'))]",
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('appInsightsName'))]",
       "type": "Microsoft.ApiManagement/service/loggers",
       "apiVersion": "2019-01-01",
       "properties": {
