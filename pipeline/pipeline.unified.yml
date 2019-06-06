@@ -59,6 +59,7 @@ stages:
     environmentName: 'dev'
     serviceBusNamespaceResourceGroup: 'th-core-dev-rg'
     servicePrincipalObjectId: '6ee1bb40-e589-4884-90bc-c705d88bb3e0'
+    serviceResourceGroupName: 'th-show-dev-rg'
   jobs:
     - job: 'microservicereleaseglobal'
       displayName: 'Microservice Release (Global)'
