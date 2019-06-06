@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {        
+        "templateContainerUri": {
+            "type": "string",
+            "metadata": {
+                 "description": "URI of the Blob Storage Container containing the ARM Templates"
+             }
+         },
+         "templateContainerSasToken": {
+            "type": "string",
+            "metadata": {
+                 "description": "The SAS token of the container containing the ARM Templates"
+             }
+         },
+         "namingPrefix": {
+             "type": "string",
+             "metadata": {
+                 "description": "Storage Account Name of the Origin"
+             }
+         }
+    },
+    "variables": {    
+        "cogSvcAccountName": "[concat(parameters('namingPrefix'), '-search')]"
+    },
+    "resources": [    
+        {
+            "apiVersion": "2017-05-10",
+            "name": "bingSearchDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/bingSearch.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "cogSvcAccountName": {
+                        "value": "[variables('cogSvcAccountName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy a Cognitive Services account for Bing Searches."
+        }
+    ],
+    "outputs": {}
+}
