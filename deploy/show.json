@@ -68,7 +68,7 @@
         "serviceAppinsightsName": "[concat(variables('serviceNamePrefix'), 'ai')]",
         "coreCogSvcSearchAccountName": "[concat(variables('coreGlobalNamePrefix'), 'search')]",
         "coreCogSvcRGName": "[concat(variables('coreGlobalNamePrefix'), 'rg')]",
-        "coreGlobalNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-')]",
+        "coreGlobalNamePrefix": "[concat(variables('organisationPrefix'), '-core', parameters('environmentName'), '-')]",
         "coreNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-', variables('abbreviations')[parameters('location')], '-')]",
         "coreResourceGroupName": "[concat(variables('coreNamePrefix'), 'rg')]",
         "functionName": "[concat(variables('serviceNamePrefix'), 'func')]",
@@ -169,7 +169,7 @@
             "apiVersion": "2017-05-10",
             "name": "[concat(variables('functionName'), 'BackendDeployment')]",
             "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[variables('coreNamePrefix')]",
+            "resourceGroup": "[variables('coreResourceGroupName')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
