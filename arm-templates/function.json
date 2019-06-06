@@ -114,5 +114,10 @@
             }
         }
     ],
-    "outputs": {}
+    "outputs": {
+        "targetResourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Web/sites', variables('function').appName)]"
+        }
+    }
 }

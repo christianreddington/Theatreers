@@ -1,0 +1,32 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {          
+        "namePrefix": {
+            "type": "string",
+            "metadata": {
+              "description": "The name prefix"
+            }
+          }
+    },
+    "variables": {},
+    "resources": [
+        {            
+            "name": "[concat(parameters('namePrefix'), 'tm')]",
+            "type": "Microsoft.Network/trafficManagerProfiles",
+            "apiVersion": "2018-04-01",
+            "location": "global",
+            "properties": {
+                "trafficRoutingMethod": "Performance",
+                "dnsConfig": {
+                    "relativeName": "[concat(parameters('namePrefix'), 'tm')]"
+                },
+                "monitorConfig": {
+                  "protocol": "HTTP",
+                  "port": 80,
+                  "path": "/api"
+                }
+            }
+        }
+    ]
+}
