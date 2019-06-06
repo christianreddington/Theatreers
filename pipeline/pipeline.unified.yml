@@ -54,8 +54,10 @@ stages:
   variables: 
     artifactsAccountName: 'thmgtdevartifactstg'
     artifactsResourceGroupName: 'th-mgt-dev-rg'
+    cosmosDbAccountName: 'th-core-dev-cosmos'
+    cosmosDbResourceGroup: 'th-core-dev-rg'
     environmentName: 'dev'
-    serviceResourceGroupName: 'th-show-dev-rg'
+    serviceBusNamespaceResourceGroup: 'th-core-dev-rg'
     servicePrincipalObjectId: '6ee1bb40-e589-4884-90bc-c705d88bb3e0'
   jobs:
     - job: 'microservicereleaseglobal'
