@@ -23,7 +23,8 @@
     },
     "variables": {
         "apimServiceName": "[concat(parameters('namingPrefix'), '-apim')]",
-        "appInsightsName": "[concat(parameters('namingPrefix'), '-ai')]",
+        "appInsightsName": "[concat(parameters('namingPrefix'), '-ai')]",        
+        "cogSvcAccountName": "[concat(parameters('namingPrefix'), '-search')]",
         "prefixNameWithoutDashes": "[replace(parameters('namingPrefix'), '-', '')]"
     },
     "resources": [        
@@ -102,6 +103,24 @@
                 }
             },
             "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "bingSearchDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/bingSearch.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "appinsightsName": {
+                        "cogSvcAccountName": "[variables('cogSvcAccountName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy a Cognitive Services account for Bing Searches."
         }
     ],
     "outputs": {}
