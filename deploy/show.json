@@ -66,9 +66,12 @@
         },
         "apimServiceName": "[concat(variables('coreNamePrefix'),'apim')]",
         "serviceAppinsightsName": "[concat(variables('serviceNamePrefix'), 'ai')]",
+        "coreCogSvcSearchAccountName": "[concat(variables('coreNamePrefix'), 'search')]",
         "coreNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-', variables('abbreviations')[parameters('location')], '-')]",
+        "coreResourceGroupName": "[concat(variables('coreNamePrefix'), 'rg')]",
         "functionName": "[concat(variables('serviceNamePrefix'), 'func')]",
         "globalServiceNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'), '-')]",
+        "globalServiceResourceGroupName": "[concat(variables('globalServiceNamePrefix'), 'rg')]",
         "keyvaultName": "[concat(variables('serviceNamePrefix'), 'kv')]",
         "serviceNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'),'-', variables('abbreviations')[parameters('location')], '-')]",
         "serviceResourceGroupName": "[concat(variables('serviceNamePrefix'), 'rg')]",
@@ -99,6 +102,12 @@
                     },
                     "appInsightsName": {
                         "value": "[variables('serviceAppinsightsName')]"
+                    },
+                    "cogSvcResourceGroup": {
+                        "value": "[variables('coreResourceGroupName')]"
+                    },
+                    "cogSvcAccountName": {
+                        "value": "[variables('coreCogSvcSearchAccountName')]"
                     }
                 }
             },
@@ -111,7 +120,7 @@
             "dependsOn": [
                 "functionDeployment"
             ],
-            "resourceGroup": "[concat(variables('globalServiceNamePrefix'), 'rg')]",
+            "resourceGroup": "[variables('globalServiceResourceGroupName')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -136,7 +145,7 @@
             "apiVersion": "2017-05-10",
             "name": "[concat(variables('functionName'), 'ServiceAPIsDeployment')]",
             "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[concat(variables('coreNamePrefix'), 'rg')]",
+            "resourceGroup": "[variables('coreResourceGroupName')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -158,7 +167,7 @@
             "apiVersion": "2017-05-10",
             "name": "[concat(variables('functionName'), 'BackendDeployment')]",
             "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[concat(variables('coreNamePrefix'), 'rg')]",
+            "resourceGroup": "[variables('coreNamePrefix')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
