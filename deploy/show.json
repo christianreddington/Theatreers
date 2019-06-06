@@ -68,7 +68,7 @@
         "serviceAppinsightsName": "[concat(variables('serviceNamePrefix'), 'ai')]",
         "coreCogSvcSearchAccountName": "[concat(variables('coreGlobalNamePrefix'), 'search')]",
         "coreCogSvcRGName": "[concat(variables('coreGlobalNamePrefix'), 'search')]",
-        "coreGlobalNamePrefix": "[concat(variables('organisationPrefix'), '-core-', variables('abbreviations')[parameters('location')], '-')]",
+        "coreGlobalNamePrefix": "[concat(variables('organisationPrefix'), '-core', parameters('environmentName'), '-')]",
         "coreNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-', variables('abbreviations')[parameters('location')], '-')]",
         "coreResourceGroupName": "[concat(variables('coreNamePrefix'), 'rg')]",
         "functionName": "[concat(variables('serviceNamePrefix'), 'func')]",
@@ -106,7 +106,7 @@
                         "value": "[variables('serviceAppinsightsName')]"
                     },
                     "cogSvcResourceGroup": {
-                        "value": "[variables('coreResourceGroupName')]"
+                        "value": "[variables('coreCogSvcRGName')]"
                     },
                     "cogSvcAccountName": {
                         "value": "[variables('coreCogSvcSearchAccountName')]"
