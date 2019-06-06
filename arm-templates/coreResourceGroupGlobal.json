@@ -22,7 +22,8 @@
          }
     },
     "variables": {    
-        "cogSvcAccountName": "[concat(parameters('namingPrefix'), '-search')]"
+        "bingSearchAccountName": "[concat(parameters('namingPrefix'), '-search')]",
+        "textAnalyticsAccountName": "[concat(parameters('namingPrefix'), '-text')]"
     },
     "resources": [    
         {
@@ -37,7 +38,25 @@
                 },
                 "parameters": {
                     "cogSvcAccountName": {
-                        "value": "[variables('cogSvcAccountName')]"
+                        "value": "[variables('bingSearchAccountName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy a Cognitive Services account for Bing Searches."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "textAnalyticsDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/textAnalytics.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "cogSvcAccountName": {
+                        "value": "[variables('textAnalyticsAccountName')]"
                     }
                 }
             },
