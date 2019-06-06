@@ -22,14 +22,12 @@
           },           
           "cogSvcResourceGroup": {
               "type": "string",
-              "defaultValue": "defaultValue",
               "metadata": {
                 "description": "The name of the App Insights resource."
               }
             },       
           "cogSvcAccountName": {
               "type": "string",
-              "defaultValue": "defaultValue",
               "metadata": {
                 "description": "The name of the App Insights resource."
               }
@@ -115,7 +113,7 @@
                         },
                         {
                             "name": "bingSearchSubscriptionKey",
-                            "value": "[if(not(equals(parameters('cogSvcAccountName'), 'defaultValue')), listKeys(resourceId(parameters('cogSvcResourceGroup'), 'Microsoft.CognitiveServices/accounts', parameters('cogSvcAccountName')), '2016-02-01-preview'), 'defaultValue')]"
+                            "value": "[if(not(equals(parameters('cogSvcAccountName'), 'defaultValue')), listKeys(resourceId(parameters('cogSvcResourceGroup'), 'Microsoft.CognitiveServices/accounts', parameters('cogSvcAccountName')), '2016-02-01-preview').key1, 'defaultValue')]"
                             
                         }
                     ]
