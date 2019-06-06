@@ -120,7 +120,7 @@
                 },
                 "parameters": {
                     "namePrefix": {
-                        "value": "[variables('serviceNamePrefix')]"
+                        "value": "[variables('globalServiceNamePrefix')]"
                     },
                     "endpointPrefix": {
                         "value": "[parameters('location')]"
