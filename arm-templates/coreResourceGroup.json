@@ -115,8 +115,8 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
-                    "appinsightsName": {
-                        "cogSvcAccountName": "[variables('cogSvcAccountName')]"
+                    "cogSvcAccountName": {
+                        "value": "[variables('cogSvcAccountName')]"
                     }
                 }
             },
