@@ -68,6 +68,7 @@
         "serviceAppinsightsName": "[concat(variables('serviceNamePrefix'), 'ai')]",
         "coreNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-', variables('abbreviations')[parameters('location')], '-')]",
         "functionName": "[concat(variables('serviceNamePrefix'), 'func')]",
+        "globalServiceNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'), '-')]",
         "keyvaultName": "[concat(variables('serviceNamePrefix'), 'kv')]",
         "serviceNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'),'-', variables('abbreviations')[parameters('location')], '-')]",
         "serviceResourceGroupName": "[concat(variables('serviceNamePrefix'), 'rg')]",
@@ -98,6 +99,34 @@
                     },
                     "appInsightsName": {
                         "value": "[variables('serviceAppinsightsName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(parameters('location'), 'TrafficManagerEndpointDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "functionDeployment"
+            ],
+            "resourceGroup": "[concat(variables('globalServiceNamePrefix'), 'rg')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'trafficManagerEndpoint.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "namePrefix": {
+                        "value": "[variables('serviceNamePrefix')]"
+                    },
+                    "endpointPrefix": {
+                        "value": "[parameters('location')]"
+                    },
+                    "targetResourceId": {
+                        "value": "[reference('functionDeployment').outputs.targetResourceId.value]"
                     }
                 }
             },
@@ -166,7 +195,7 @@
                     }
                 }
             },
-            "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
+            "comments": "Downstream template to deploy an Application Insights resource."
         },       
         {
             "apiVersion": "2017-05-10",

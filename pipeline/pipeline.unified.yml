@@ -48,27 +48,58 @@ stages:
           displayName: 'Publish Pipeline Artifact'
           inputs:
             targetPath: '$(buildPublishPath)'
-- stage: 'dev'
-  displayName: 'Dev Deployment'
+- stage: 'devrelease'
+  displayName: 'Microservice Dev Release'
   dependsOn: 'build'
   variables: 
     artifactsAccountName: 'thmgtdevartifactstg'
     artifactsResourceGroupName: 'th-mgt-dev-rg'
-    cosmosDbAccountName: 'th-core-dev-cosmos'
-    cosmosDbResourceGroup: 'th-core-dev-rg'
     environmentName: 'dev'
-    serviceBusNamespaceResourceGroup: 'th-core-dev-rg'
+    serviceResourceGroupName: 'th-show-dev-rg'
     servicePrincipalObjectId: '6ee1bb40-e589-4884-90bc-c705d88bb3e0'
   jobs:
-    - job: 'devrelease'
-      displayName: 'Nightly Build'
+    - job: 'microservicereleaseglobal'
+      displayName: 'Microservice Release (Global)'
+      pool:
+        name: 'Hosted Windows 2019 with VS2019'
+      steps:
+        - task: DownloadPipelineArtifact@1
+          inputs:
+            buildType: 'current'
+            artifactName: 'drop'
+            targetPath: '$(System.DefaultWorkingDirectory)/'
+        - task: CmdLine@2
+          inputs:
+            script: 'ls -la'
+        - task: AzureFileCopy@3
+          inputs:
+            SourcePath: '$(System.DefaultWorkingDirectory)/deploy/apim'
+            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+            Destination: 'AzureBlob'
+            storage: '$(artifactsAccountName)'
+            ContainerName: 'templates'
+            outputStorageUri: 'templateContainerUri'
+            outputStorageContainerSasToken: 'templateContainerSasToken'
+        - task: AzureResourceGroupDeployment@2
+          inputs:
+            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+            action: 'Create Or Update Resource Group'
+            resourceGroupName: '$(serviceResourceGroupName)'
+            location: '$(region)'
+            templateLocation: 'Linked artifact'
+            csmFile: '$(System.DefaultWorkingDirectory)/deploy/show-global.json'
+            overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName)'
+            deploymentMode: 'Incremental'
+    - job: 'microservicereleaseregion'
+      displayName: 'Microservice Release (Regional)'
+      dependsOn: 'microservicereleaseglobal'
       pool:
         name: 'Hosted Windows 2019 with VS2019'
       strategy:
         matrix: { westeurope: 
           { region: 'West Europe', functionAppName: 'th-show-dev-weu-func', keyvaultName: 'th-show-dev-weu-kv', serviceResourceGroupName: 'th-show-dev-weu-rg' },
           northeurope: { region: 'North Europe', functionAppName: 'th-show-dev-neu-func', keyvaultName: 'th-show-dev-neu-kv', serviceResourceGroupName: 'th-show-dev-neu-rg' } }
-      steps:
+      steps:        
       # Setup the Sonar Cloud for analysis
         - task: DownloadPipelineArtifact@1
           inputs:

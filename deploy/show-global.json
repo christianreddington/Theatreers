@@ -1,0 +1,58 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {           
+        "environmentName": {
+            "type": "string",
+            "allowedValues": [
+                "dev",
+                "test",
+                "qa",
+                "prod"
+            ],
+            "defaultValue": "dev",
+            "metadata": {
+                "description": "Define which environment is being deployed, this will affect naming convention of all resources"
+            }
+        },   
+        "templateContainerUri": {
+            "type": "string",
+            "metadata": {
+                "description": "URI of the Blob Storage Container containing the ARM Template building blocks"
+            }
+        },
+        "templateContainerSasToken": {
+            "type": "string",
+            "metadata": {
+                "description": "The SAS token of the container containing the ARM Template building blocks"
+            }
+        }
+    },
+    "variables": {
+        "globalServiceNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'), '-')]",
+        "organisationPrefix": "th",
+        "serviceName": "show"
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "trafficManagerDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[concat(variables('globalServiceNamePrefix'), 'rg')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'trafficManager.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "namePrefix": {
+                        "value": "[variables('globalServiceNamePrefix')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
+        }
+    ],
+    "outputs": {}
+}
