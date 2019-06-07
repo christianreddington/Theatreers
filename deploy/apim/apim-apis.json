@@ -18,8 +18,8 @@
       "type": "Microsoft.ApiManagement/service/apis",
       "apiVersion": "2019-01-01",
       "properties": {
-        "displayName": "[parameters('serviceName')]",
-        "path": "[parameters('serviceName')]",
+        "displayName": "[parameters('functionName')]",
+        "path": "[parameters('functionName')]",
         "protocols": [
           "https"
         ],
@@ -39,6 +39,18 @@
         "displayName": "CreationOrchestrator",
         "method": "POST",
         "urlTemplate": "/show"
+      }
+    },
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/post-creationorchestrator/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'post-creationorchestrator')]"
+      ],
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('functionName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "xml"
       }
     },
     {
@@ -63,6 +75,18 @@
       }
     },    
     {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-imageobjects/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'get-getshow-imageobjects')]"
+      ],
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('functionName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "xml"
+      }
+    },
+    {
       "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-newsobjects')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
@@ -81,6 +105,18 @@
         "displayName": "GetShow_NewsObjects",
         "method": "GET",
         "urlTemplate": "/show/{id}/news"
+      }
+    }, 
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-newsobjects/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'get-getshow-newsobjects')]"
+      ],
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('functionName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "xml"
       }
     },
     {
@@ -105,6 +141,18 @@
       }
     },
     {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-showobjects/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'get-getshow-showobjects')]"
+      ],
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('functionName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "xml"
+      }
+    },
+    {
       "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-showsbyletter')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
@@ -126,6 +174,18 @@
         "displayName": "GetShowsByLetter",
         "method": "GET",
         "urlTemplate": "/shows/{letter}"
+      }
+    },
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-showsbyletter/policy')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'get-getshow-showsbyletter')]"
+      ],
+      "properties": {
+        "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('functionName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+        "format": "xml"
       }
     },
     {
