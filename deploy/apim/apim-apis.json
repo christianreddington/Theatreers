@@ -18,8 +18,8 @@
       "type": "Microsoft.ApiManagement/service/apis",
       "apiVersion": "2019-01-01",
       "properties": {
-        "displayName": "[parameters('functionName')]",
-        "path": "[parameters('functionName')]",
+        "displayName": "[parameters('serviceName')]",
+        "path": "[parameters('serviceName')]",
         "protocols": [
           "https"
         ],
