@@ -160,6 +160,9 @@
                     },
                     "functionName": {
                         "value": "[variables('functionName')]"
+                    },
+                    "serviceName": {
+                        "value": "[variables('serviceName')]"
                     }
                 }
             },
