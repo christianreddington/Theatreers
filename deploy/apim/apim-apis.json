@@ -7,11 +7,14 @@
     },
     "functionName": {
       "type": "string"
+    },
+    "serviceName": {
+      "type": "string"
     }
   },
   "resources": [
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'))]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'))]",
       "type": "Microsoft.ApiManagement/service/apis",
       "apiVersion": "2019-01-01",
       "properties": {
@@ -19,11 +22,13 @@
         "path": "[parameters('functionName')]",
         "protocols": [
           "https"
-        ]
+        ],
+        "subscriptionRequired": false,
+        "serviceUrl": "[concat('https://', parameters('functionName'), '.azurewebsites.net/api')]"
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/post-creationorchestrator')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/post-creationorchestrator')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -37,7 +42,7 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/post-creationorchestrator/policy')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/post-creationorchestrator/policy')]",
       "type": "Microsoft.ApiManagement/service/apis/operations/policies",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -49,7 +54,7 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/get-getshow-imageobjects')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-imageobjects')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -70,7 +75,7 @@
       }
     },    
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/get-getshow-imageobjects/policy')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-imageobjects/policy')]",
       "type": "Microsoft.ApiManagement/service/apis/operations/policies",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -82,7 +87,7 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/get-getshow-newsobjects')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-newsobjects')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -103,7 +108,7 @@
       }
     }, 
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/get-getshow-newsobjects/policy')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-newsobjects/policy')]",
       "type": "Microsoft.ApiManagement/service/apis/operations/policies",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -115,7 +120,7 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/get-getshow-showobjects')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-showobjects')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -136,7 +141,7 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/get-getshow-showobjects/policy')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-showobjects/policy')]",
       "type": "Microsoft.ApiManagement/service/apis/operations/policies",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -148,7 +153,7 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/get-getshow-showsbyletter')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-showsbyletter')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -172,7 +177,7 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/get-getshow-showsbyletter/policy')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-showsbyletter/policy')]",
       "type": "Microsoft.ApiManagement/service/apis/operations/policies",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -184,7 +189,7 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/post-updateshow')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/post-updateshow')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -198,7 +203,7 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'), '/post-updateshow/policy')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/post-updateshow/policy')]",
       "type": "Microsoft.ApiManagement/service/apis/operations/policies",
       "apiVersion": "2019-01-01",
       "dependsOn": [
