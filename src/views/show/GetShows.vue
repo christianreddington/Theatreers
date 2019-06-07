@@ -98,7 +98,7 @@ export default {
       immediate: false,
       handler () {
         this.isLoading = true
-        fetch(`https://th-show-weu-dev-func.azurewebsites.net/api/shows/${this.selectedPartition}`, {
+        fetch(`http://th-show-dev-tm.trafficmanager.net/api/shows/${this.selectedPartition}`, {
           method: 'get'
         })
           .then(function (response) {

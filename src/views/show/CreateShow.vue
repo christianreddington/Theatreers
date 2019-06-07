@@ -35,7 +35,7 @@ export default {
     methods: {
       onSubmit(evt) {
         self = this  
-        fetch("https://th-show-neu-dev-func.azurewebsites.net/api/show", {
+        fetch("http://th-show-dev-tm.trafficmanager.net/api/show", {
           headers: {
           'Content-Type': 'application/json'
           },

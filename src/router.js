@@ -26,9 +26,9 @@ export default new Router({
     { path: '/group', name: 'getgroups', component: GetGroups },
     { path: '/group/:id', name: 'getgroup', component: GetGroup },
     { path: '/show', name: 'getshows', component: GetShows },
+    { path: '/show/create', name: 'createshow', component: CreateShow },
     { path: '/show/:id', name: 'getshow', component: GetShow},
     { path: '/show/:id/edit', name: 'editshow', component: EditShow },
-    { path: '/show/create', name: 'createshow', component: CreateShow },
     { path: '/', name: 'root', component: Home }
   ]
 })

@@ -41,9 +41,9 @@ export default {
   mounted: function() {
     this.isLoading = true;
     var urls = [
-      `https://th-show-neu-dev-func.azurewebsites.net/api/show/${this.$route.params.id}/show`,
-      `https://th-show-neu-dev-func.azurewebsites.net/api/show/${this.$route.params.id}/image`,
-      `https://th-show-neu-dev-func.azurewebsites.net/api/show/${this.$route.params.id}/news`
+      `http://th-show-dev-tm.trafficmanager.net/api/show/${this.$route.params.id}/show`,
+      `http://th-show-dev-tm.trafficmanager.net/api/show/${this.$route.params.id}/image`,
+      `http://th-show-dev-tm.trafficmanager.net/api/show/${this.$route.params.id}/news`
     ]
 
     this.myData = getAllUrls(urls). then((data) => {
