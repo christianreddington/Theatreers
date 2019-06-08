@@ -41,9 +41,9 @@ export default {
   mounted: function() {
     this.isLoading = true;
     var urls = [
-      `http://th-show-dev-tm.trafficmanager.net/api/show/${this.$route.params.id}/show`,
-      `http://th-show-dev-tm.trafficmanager.net/api/show/${this.$route.params.id}/image`,
-      `http://th-show-dev-tm.trafficmanager.net/api/show/${this.$route.params.id}/news`
+      `https://api.theatreers.com/show/show/${this.$route.params.id}/show`,
+      `https://api.theatreers.com/show/show/${this.$route.params.id}/image`,
+      `https://api.theatreers.com/show/show/${this.$route.params.id}/news`
     ]
 
     this.myData = getAllUrls(urls). then((data) => {

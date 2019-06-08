@@ -35,7 +35,7 @@ export default {
     methods: {
       onSubmit(evt) {
         self = this  
-        fetch("http://th-show-dev-tm.trafficmanager.net/api/show", {
+        fetch("https://api.theatreers.com/show/show", {
           headers: {
           'Content-Type': 'application/json'
           },

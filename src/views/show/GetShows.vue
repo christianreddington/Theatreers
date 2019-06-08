@@ -98,7 +98,7 @@ export default {
       immediate: false,
       handler () {
         this.isLoading = true
-        fetch(`http://th-show-dev-tm.trafficmanager.net/api/shows/${this.selectedPartition}`, {
+        fetch(`https://api.theatreers.com/show/shows/${this.selectedPartition}`, {
           method: 'get'
         })
           .then(function (response) {
