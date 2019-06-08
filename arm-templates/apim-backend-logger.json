@@ -33,6 +33,51 @@
           "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2014-04-01').InstrumentationKey]",
           "secret": true
       }
+    },    
+    {
+      "type": "Microsoft.ApiManagement/service/diagnostics",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(parameters('ApimServiceName'), '/applicationinsights')]",
+      "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('ApimServiceName'), parameters('appInsightsName'))]"
+      ],
+      "properties": {
+          "alwaysLog": "allErrors",
+          "enableHttpCorrelationHeaders": true,
+          "loggerId": "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('ApimServiceName'), parameters('appInsightsName'))]",
+          "sampling": {
+              "samplingType": "fixed",
+              "percentage": 50
+          },
+          "frontend": {
+              "request": {
+                  "headers": [],
+                  "body": {
+                      "bytes": 0
+                  }
+              },
+              "response": {
+                  "headers": [],
+                  "body": {
+                      "bytes": 0
+                  }
+              }
+          },
+          "backend": {
+              "request": {
+                  "headers": [],
+                  "body": {
+                      "bytes": 0
+                  }
+              },
+              "response": {
+                  "headers": [],
+                  "body": {
+                      "bytes": 0
+                  }
+              }
+          }
+      }
     }
   ]
 }
