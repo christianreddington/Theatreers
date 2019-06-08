@@ -20,6 +20,19 @@
           "instrumentationKey": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2014-04-01').InstrumentationKey]"
         }
       }
+    },    
+    {
+      "type": "Microsoft.ApiManagement/service/properties",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(parameters('ApimServiceName'), '/', parameters('appInsightsName'))]",
+      "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('ApimServiceName'), parameters('appInsightsName'))]"
+      ],
+      "properties": {
+          "displayName": "[concat('Logger-', parameters('appInsightsName'))]",
+          "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2014-04-01').InstrumentationKey]",
+          "secret": true
+      }
     }
   ]
 }
