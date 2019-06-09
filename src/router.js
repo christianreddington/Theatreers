@@ -19,7 +19,6 @@ const GetShow = () => import('@/views/show/GetShow')
 const GetShows = () => import('@/views/show/GetShows')
 
 export default new Router({
-  mode: 'history', // https://router.vuejs.org/api/#mode
   routes: [
     { path: '/event', name: 'getevents', component: GetEvents },
     { path: '/event/:id', name: 'getevent', component: GetEvent },
