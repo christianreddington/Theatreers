@@ -29,7 +29,7 @@
         }
     },
     "variables": {
-        "globalServiceNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'), '-')]",
+        "serviceGlobalNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'), '-')]",
         "organisationPrefix": "th",
         "serviceName": "show"
     },
@@ -38,7 +38,7 @@
             "apiVersion": "2017-05-10",
             "name": "trafficManagerDeployment",
             "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[concat(variables('globalServiceNamePrefix'), 'rg')]",
+            "resourceGroup": "[concat(variables('serviceGlobalNamePrefix'), 'rg')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -47,7 +47,7 @@
                 },
                 "parameters": {
                     "namePrefix": {
-                        "value": "[variables('globalServiceNamePrefix')]"
+                        "value": "[variables('serviceGlobalNamePrefix')]"
                     }
                 }
             },

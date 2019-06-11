@@ -133,7 +133,7 @@ stages:
             resourceGroupName: '$(serviceResourceGroupName)'
             location: '$(region)'
             templateLocation: 'Linked artifact'
-            csmFile: '$(System.DefaultWorkingDirectory)/deploy/show.json'
+            csmFile: '$(System.DefaultWorkingDirectory)/deploy/show-regional.json'
             overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup)'
             deploymentMode: 'Incremental'
         - task: AzureKeyVault@1
