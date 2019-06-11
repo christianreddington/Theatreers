@@ -13,7 +13,13 @@
           "metadata": {
             "description": "The name prefix with dashes removed"
           }
-        },         
+        },            
+        "appInsightsResourceGroup": {
+            "type": "string",
+            "metadata": {
+              "description": "The name of the App Insights resource."
+            }
+          },         
         "appInsightsName": {
             "type": "string",
             "metadata": {
@@ -105,7 +111,7 @@
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference(resourceId('Microsoft.insights/Components/', parameters('appInsightsName')), '2015-05-01').InstrumentationKey]"
+                            "value": "[reference(resourceId(parameters('appInsightsResourceGroup'), parameters('appInsightsName')), '2015-05-01').InstrumentationKey]"
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
