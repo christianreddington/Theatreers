@@ -13,7 +13,9 @@
       "defaultValue": "[resourceGroup().location]"
     }
   },
-  "variables": {},
+  "variables": {
+    "databaseName": "theatreers"
+  },
   "resources": [
     {
       "type": "Microsoft.DocumentDB/databaseAccounts",
@@ -32,6 +34,17 @@
             "failoverPriority": 0
           }
         ]
+      }
+    },
+    {
+      "name": "[concat(parameters('accountName'). '/', variables('databaseName'))]",
+      "type": "Microsoft.DocumentDB/databaseAccounts/apis/databases",
+      "apiVersion": "2015-04-08",
+      "properties": {
+        "resource": {
+          "id": "[variables('databaseName')]"
+        },
+        "options": {}
       }
     }
   ]
