@@ -66,6 +66,7 @@
         },
         "apimServiceName": "[concat(variables('coreNamePrefix'),'apim')]",
         "serviceAppinsightsName": "[concat(variables('serviceNamePrefix'), 'ai')]",
+        "coreAppinsightsName": "[concat(variables('coreNamePrefix'), 'ai')]",
         "coreCogSvcSearchAccountName": "[concat(variables('coreGlobalNamePrefix'), 'search')]",
         "coreCogSvcRGName": "[concat(variables('coreGlobalNamePrefix'), 'rg')]",
         "coreGlobalNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-')]",
@@ -86,9 +87,6 @@
             "apiVersion": "2017-05-10",
             "name": "functionDeployment",
             "type": "Microsoft.Resources/deployments",
-            "dependsOn": [
-                "appInsightsDeployment"
-            ],
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -102,8 +100,11 @@
                     "namePrefixWithoutDashes": {
                         "value": "[variables('namePrefixWithoutDashes')]"
                     },
+                    "appInsightsResourceGroup": {
+                        "value": "[variables('coreResourceGroupName')]"
+                    },
                     "appInsightsName": {
-                        "value": "[variables('serviceAppinsightsName')]"
+                        "value": "[variables('coreAppinsightsName')]"
                     },
                     "cogSvcResourceGroup": {
                         "value": "[variables('coreCogSvcRGName')]"
@@ -192,25 +193,7 @@
                 }
             },
             "comments": "Downstream template to deploy an APIs for the given Microservice."
-        },
-        {
-            "apiVersion": "2017-05-10",
-            "name": "appInsightsDeployment",
-            "type": "Microsoft.Resources/deployments",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('templateContainerUri'), 'applicationInsights.json', parameters('templateContainerSasToken'))]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "appinsightsName": {
-                        "value": "[variables('serviceAppinsightsName')]"
-                    }
-                }
-            },
-            "comments": "Downstream template to deploy an Application Insights resource."
-        },       
+        },     
         {
             "apiVersion": "2017-05-10",
             "name": "keyVaultDeployment",
