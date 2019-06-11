@@ -63,22 +63,21 @@
         "abbreviations": {
             "northeurope": "neu",
             "westeurope": "weu"
-        },
-        "apimServiceName": "[concat(variables('coreNamePrefix'),'apim')]",
-        "serviceAppinsightsName": "[concat(variables('serviceNamePrefix'), 'ai')]",
-        "coreAppinsightsName": "[concat(variables('coreNamePrefix'), 'ai')]",
-        "coreCogSvcSearchAccountName": "[concat(variables('coreGlobalNamePrefix'), 'search')]",
-        "coreCogSvcRGName": "[concat(variables('coreGlobalNamePrefix'), 'rg')]",
+        },        
+        "coreGlobalCogSvcSearchName": "[concat(variables('coreGlobalNamePrefix'), 'search')]",
+        "coreGlobalResourceGroupName": "[concat(variables('coreGlobalNamePrefix'), 'rg')]",
         "coreGlobalNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-')]",
-        "coreNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-', variables('abbreviations')[parameters('location')], '-')]",
-        "coreResourceGroupName": "[concat(variables('coreNamePrefix'), 'rg')]",
-        "functionName": "[concat(variables('serviceNamePrefix'), 'func')]",
-        "globalServiceNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'), '-')]",
-        "globalServiceResourceGroupName": "[concat(variables('globalServiceNamePrefix'), 'rg')]",
-        "keyvaultName": "[concat(variables('serviceNamePrefix'), 'kv')]",
-        "serviceNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'),'-', variables('abbreviations')[parameters('location')], '-')]",
-        "serviceResourceGroupName": "[concat(variables('serviceNamePrefix'), 'rg')]",
-        "namePrefixWithoutDashes": "[replace(variables('serviceNamePrefix'), '-', '')]",
+        "coreRegionalApimServiceName": "[concat(variables('coreRegionalNamePrefix'),'apim')]",
+        "coreRegionalAppinsightsName": "[concat(variables('coreRegionalNamePrefix'), 'ai')]",
+        "coreRegionalNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-', variables('abbreviations')[parameters('location')], '-')]",
+        "coreRegionalResourceGroupName": "[concat(variables('coreRegionalNamePrefix'), 'rg')]",
+        "serviceGlobalNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'), '-')]",
+        "serviceGlobalResourceGroupName": "[concat(variables('serviceGlobalNamePrefix'), 'rg')]",
+        "serviceRegionalFunctionName": "[concat(variables('serviceRegionalNamePrefix'), 'func')]",
+        "serviceRegionalKeyvaultName": "[concat(variables('serviceRegionalNamePrefix'), 'kv')]",
+        "serviceRegionalNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'),'-', variables('abbreviations')[parameters('location')], '-')]",
+        "serviceRegionalNamePrefixWithoutDashes": "[replace(variables('serviceRegionalNamePrefix'), '-', '')]",
+        "serviceResourceGroupName": "[concat(variables('serviceRegionalNamePrefix'), 'rg')]",
         "organisationPrefix": "th",
         "serviceName": "show"
     },
@@ -95,22 +94,22 @@
                 },
                 "parameters": {
                     "namePrefix": {
-                        "value": "[variables('serviceNamePrefix')]"
+                        "value": "[variables('serviceRegionalNamePrefix')]"
                     },
                     "namePrefixWithoutDashes": {
-                        "value": "[variables('namePrefixWithoutDashes')]"
+                        "value": "[variables('serviceRegionalNamePrefixWithoutDashes')]"
                     },
                     "appInsightsResourceGroup": {
-                        "value": "[variables('coreResourceGroupName')]"
+                        "value": "[variables('coreRegionalResourceGroupName')]"
                     },
                     "appInsightsName": {
-                        "value": "[variables('coreAppinsightsName')]"
+                        "value": "[variables('coreRegionalAppinsightsName')]"
                     },
                     "cogSvcResourceGroup": {
-                        "value": "[variables('coreCogSvcRGName')]"
+                        "value": "[variables('coreGlobalResourceGroupName')]"
                     },
                     "cogSvcAccountName": {
-                        "value": "[variables('coreCogSvcSearchAccountName')]"
+                        "value": "[variables('coreGlobalCogSvcSearchName')]"
                     }
                 }
             },
@@ -123,7 +122,7 @@
             "dependsOn": [
                 "functionDeployment"
             ],
-            "resourceGroup": "[variables('globalServiceResourceGroupName')]",
+            "resourceGroup": "[variables('serviceGlobalResourceGroupName')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -132,7 +131,7 @@
                 },
                 "parameters": {
                     "namePrefix": {
-                        "value": "[variables('globalServiceNamePrefix')]"
+                        "value": "[variables('serviceGlobalNamePrefix')]"
                     },
                     "endpointPrefix": {
                         "value": "[parameters('location')]"
@@ -146,9 +145,9 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(variables('functionName'), 'ServiceAPIsDeployment')]",
+            "name": "[concat(variables('serviceRegionalFunctionName'), 'ServiceAPIsDeployment')]",
             "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[variables('coreResourceGroupName')]",
+            "resourceGroup": "[variables('coreRegionalResourceGroupName')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -157,10 +156,10 @@
                 },
                 "parameters": {
                     "apimServiceName": {
-                        "value": "[variables('apimServiceName')]"
+                        "value": "[variables('coreRegionalApimServiceName')]"
                     },
                     "functionName": {
-                        "value": "[variables('functionName')]"
+                        "value": "[variables('serviceRegionalFunctionName')]"
                     },
                     "serviceName": {
                         "value": "[variables('serviceName')]"
@@ -171,9 +170,9 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(variables('functionName'), 'BackendDeployment')]",
+            "name": "[concat(variables('serviceRegionalFunctionName'), 'BackendDeployment')]",
             "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[variables('coreResourceGroupName')]",
+            "resourceGroup": "[variables('coreRegionalResourceGroupName')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -182,10 +181,10 @@
                 },
                 "parameters": {
                     "apimServiceName": {
-                        "value": "[variables('apimServiceName')]"
+                        "value": "[variables('coreRegionalApimServiceName')]"
                     },
                     "functionName": {
-                        "value": "[variables('functionName')]"
+                        "value": "[variables('serviceRegionalFunctionName')]"
                     },
                     "functionResourceGroup": {
                         "value": "[variables('serviceResourceGroupName')]"
@@ -206,7 +205,7 @@
                 },
                 "parameters": {
                     "vaultName": {
-                        "value": "[variables('keyvaultName')]"
+                        "value": "[variables('serviceRegionalKeyvaultName')]"
                     },
                     "tenantId": {
                         "value": "[parameters('tenantId')]"
@@ -221,7 +220,7 @@
         {
             "apiVersion": "2018-02-14",
             "type": "Microsoft.KeyVault/vaults/secrets",
-            "name": "[concat(variables('keyVaultName'), '/', 'cosmosConnectionString')]",
+            "name": "[concat(variables('serviceRegionalKeyvaultName'), '/', 'cosmosConnectionString')]",
             "properties": {
                 "value": "[concat('AccountEndpoint=https://', parameters('cosmosDbAccountName'), '.documents.azure.com:443/;AccountKey=', listKeys(resourceId(parameters('cosmosDbResourceGroup'), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2015-11-06').primaryMasterKey)]"
             },
