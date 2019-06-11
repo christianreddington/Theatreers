@@ -23,7 +23,8 @@
     },
     "variables": {    
         "bingSearchAccountName": "[concat(parameters('namingPrefix'), '-search')]",
-        "textAnalyticsAccountName": "[concat(parameters('namingPrefix'), '-text')]"
+        "textAnalyticsAccountName": "[concat(parameters('namingPrefix'), '-text')]",
+        "cosmosDBAccountName": "[concat(parameters('namingPrefix'), '-cosmos')]"
     },
     "resources": [    
         {
@@ -61,6 +62,24 @@
                 }
             },
             "comments": "Downstream template to deploy a Cognitive Services account for Bing Searches."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "cosmosDBAccountDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/cosmosDBAccount.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[variables('cosmosDBAccountName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy a CosmosDB Account to be used by many microservices."
         }
     ],
     "outputs": {}
