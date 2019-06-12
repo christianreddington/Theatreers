@@ -1,0 +1,160 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "frontdoorName": {
+      "type": "string"
+    },
+    "frontendHostname": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "pool": "frontend",
+    "healthProbe": "[concat(variables('pool'), 'probe')]",
+    "frontendEndpoint": "[concat(variables('pool'), 'endpoint')]",
+    "defaultFrontendEndpoint": "[concat(variables('pool'), 'defaultendpoint')]",
+    "loadbalancer": "[concat(variables('pool'), 'lb')]",
+    "routingrules": "[concat(parameters('frontendHostname'), 'https')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/frontdoors",
+      "apiVersion": "2018-08-01",
+      "name": "[parameters('frontdoorName')]",
+      "location": "Global",
+      "properties": {
+        "backendPools": [
+          {
+            "id": "[concat(resourceId('Microsoft.Network/frontdoors', parameters('frontdoorName')), '/BackendPools/frontend')]",
+            "name": "frontend",
+            "properties": {
+              "backends": [
+                {
+                  "address": "thfrontenddev.z6.web.core.windows.net",
+                  "httpPort": 80,
+                  "httpsPort": 443,
+                  "priority": 1,
+                  "weight": 50,
+                  "backendHostHeader": "thfrontenddev.z6.web.core.windows.net"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {        
+      "name": "[concat(parameters('frontdoorName'), '/', variables('pool'))]",
+      "type": "Microsoft.Network/frontDoors/backendPools",
+      "apiVersion": "2019-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/frontdoors', parameters('frontdoorName'))]",
+        "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', parameters('frontdoorName'), variables('loadbalancer'))]",
+        "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', parameters('frontdoorName'), variables('healthProbe'))]"
+    ],
+      "properties": {
+        "backends": [
+          {
+            "address": "thfrontenddev.z6.web.core.windows.net",
+            "httpPort": 80,
+            "httpsPort": 443,
+            "priority": 1,
+            "weight": 50,
+            "backendHostHeader": "thfrontenddev.z6.web.core.windows.net",
+            "enabledState": "Enabled"
+          }
+        ],
+        "loadBalancingSettings": {
+          "id": "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', parameters('frontdoorName'), variables('loadbalancer'))]"
+        },
+        "healthProbeSettings": {
+          "id": "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', parameters('frontdoorName'), variables('healthProbe'))]"
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('frontdoorName'), '/', variables('healthProbe') )]",
+      "type": "Microsoft.Network/frontDoors/healthProbeSettings",      
+      "apiVersion": "2019-04-01",      
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/frontdoors', parameters('frontdoorName'))]"
+      ],
+      "properties": {
+        "intervalInSeconds": 30,
+        "path": "/",
+        "protocol": "Https",
+        "resourceState": "Enabled"
+      }
+    },
+    {
+      "name": "[concat(parameters('frontdoorName'), '/', variables('defaultFrontendEndpoint') )]",
+      "type": "Microsoft.Network/frontDoors/frontendEndpoints",
+      "apiVersion": "2019-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/frontdoors', parameters('frontdoorName'))]"
+      ],
+      "properties": {
+        "hostName": "[concat(parameters('frontdoorName'), '.azurefd.net')]",
+        "sessionAffinityEnabledState": "Disabled",
+        "sessionAffinityTtlSeconds": 0
+      }
+    }, 
+    {
+      "name": "[concat(parameters('frontdoorName'), '/', variables('frontendEndpoint') )]",
+      "type": "Microsoft.Network/frontDoors/frontendEndpoints",
+      "apiVersion": "2019-04-01",      
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/frontdoors', parameters('frontdoorName'))]"
+      ],
+      "properties": {
+        "hostName": "[parameters('frontendHostname')]",
+        "sessionAffinityEnabledState": "Disabled",
+        "sessionAffinityTtlSeconds": 0
+      }
+    },
+    {
+      "name": "[concat(parameters('frontdoorName'), '/', variables('loadbalancer') )]",
+      "type": "Microsoft.Network/frontDoors/loadBalancingSettings",
+      "apiVersion": "2019-04-01",      
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/frontdoors', parameters('frontdoorName'))]"
+      ],
+      "properties": {
+        "additionalLatencyMilliseconds": 0,
+        "sampleSize": 4,
+        "successfulSamplesRequired": 2
+      }
+    },
+    {
+      "name": "[concat(parameters('frontdoorName'), '/', variables('routingrules') )]",
+      "type": "Microsoft.Network/frontDoors/routingRules",
+      "apiVersion": "2019-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', parameters('frontdoorName'), variables('defaultFrontendEndpoint'))]",
+        "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', parameters('frontdoorName'), variables('frontendEndpoint'))]",
+        "[resourceId('Microsoft.Network/frontDoors/backendPools', parameters('frontdoorName'), variables('pool'))]"
+      ],
+      "properties": {
+        "frontendEndpoints": [
+          {
+            "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', parameters('frontdoorName'), variables('defaultFrontendEndpoint'))]"
+          }, 
+          {
+            "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', parameters('frontdoorName'), variables('frontendEndpoint'))]"
+          }
+        ], 
+        "backendPool": {
+          "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', parameters('frontdoorName'), variables('pool'))]"
+        },      
+        "acceptedProtocols": [
+          "Https"
+        ],
+        "patternsToMatch": [
+          "/*"
+        ],
+        "forwardingProtocol": "HttpsOnly"
+      }
+    }
+  ]
+}
