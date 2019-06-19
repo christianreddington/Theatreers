@@ -6,7 +6,6 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Security.Claims;
-using System.Threading;
 
 namespace Theatreers.Show
 {
@@ -16,10 +15,11 @@ namespace Theatreers.Show
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, methods: "post", Route = "show")] HttpRequestMessage req,
             [OrchestrationClient] DurableOrchestrationClientBase starter,
+            ClaimsPrincipal identity,
             ILogger log)
         {
-           // if (Thread.CurrentPrincipal != null && Thread.CurrentPrincipal.Identity.IsAuthenticated)
-          //  {
+            if (identity != null && identity.Identity.IsAuthenticated)
+            {
                 //Initialise the message for transport
                 //Generate correllation ID and initial request timestamp
                 string CorrelationId = Guid.NewGuid().ToString();
@@ -42,13 +42,13 @@ namespace Theatreers.Show
                 log.LogInformation($"[Request Correlation ID: {messageHeaders.RequestCorrelationId}] :: Begin Orchestration :: SubmitImageAsync instance ID: {submitImageInstanceId}");
 
                 return starter.CreateCheckStatusResponse(req, submitShowInstanceId);
-           /* } else
+           } else
             {
                 HttpResponseMessage response = new HttpResponseMessage();
                 response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
-                response.ReasonPhrase = "The user is not logged in";
+                response.ReasonPhrase = "This is an unauthorized request";
                 return response;
-            }*/
+            }
         }
     }
 }
