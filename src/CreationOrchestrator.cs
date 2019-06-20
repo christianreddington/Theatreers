@@ -6,6 +6,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using System.Threading;
 
 namespace Theatreers.Show
 {
@@ -15,8 +16,8 @@ namespace Theatreers.Show
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, methods: "post", Route = "show")] HttpRequestMessage req,
             [OrchestrationClient] DurableOrchestrationClientBase starter,
-            ClaimsPrincipal identity,
-            ILogger log)
+            ILogger log,
+            ClaimsPrincipal identity)
         {
             if (identity != null && identity.Identity.IsAuthenticated)
             {
@@ -45,6 +46,10 @@ namespace Theatreers.Show
            } else
             {
                 HttpResponseMessage response = new HttpResponseMessage();
+                log.LogInformation($"Is Authenticated (ClaimsPrincipal): {identity.Identity.IsAuthenticated}");
+                log.LogInformation($"jsonObject (Claims Principal): {JsonConvert.SerializeObject(identity)}");
+                log.LogInformation($"Is Authenticated (Thread): {Thread.CurrentPrincipal.Identity.IsAuthenticated}");
+                log.LogInformation($"jsonObject (Thread): {JsonConvert.SerializeObject(Thread.CurrentPrincipal.Identity)}");
                 response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
                 response.ReasonPhrase = "This is an unauthorized request";
                 return response;
