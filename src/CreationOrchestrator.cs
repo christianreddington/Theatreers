@@ -19,6 +19,9 @@ namespace Theatreers.Show
             ILogger log,
             ClaimsPrincipal identity)
         {
+            log.LogInformation($"Is Authenticated (ClaimsPrincipal): {identity.Identity.IsAuthenticated}");
+            log.LogInformation($"Is Authenticated (Thread): {Thread.CurrentPrincipal.Identity.IsAuthenticated}");
+
             if (identity != null && identity.Identity.IsAuthenticated)
             {
                 //Initialise the message for transport
@@ -46,10 +49,8 @@ namespace Theatreers.Show
            } else
             {
                 HttpResponseMessage response = new HttpResponseMessage();
-                log.LogInformation($"Is Authenticated (ClaimsPrincipal): {identity.Identity.IsAuthenticated}");
-                log.LogInformation($"jsonObject (Claims Principal): {JsonConvert.SerializeObject(identity)}");
-                log.LogInformation($"Is Authenticated (Thread): {Thread.CurrentPrincipal.Identity.IsAuthenticated}");
-                log.LogInformation($"jsonObject (Thread): {JsonConvert.SerializeObject(Thread.CurrentPrincipal.Identity)}");
+                //log.LogInformation($"jsonObject (Claims Principal): {JsonConvert.SerializeObject(identity.Identity)}");
+                //log.LogInformation($"jsonObject (Thread): {JsonConvert.SerializeObject(Thread.CurrentPrincipal.Identity)}");
                 response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
                 response.ReasonPhrase = "This is an unauthorized request";
                 return response;
