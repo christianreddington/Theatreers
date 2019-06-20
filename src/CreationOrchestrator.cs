@@ -19,8 +19,13 @@ namespace Theatreers.Show
             ILogger log,
             ClaimsPrincipal identity)
         {
+            ClaimsIdentity claimsIdentity = (ClaimsIdentity) identity.Identity;
             log.LogInformation($"Is Authenticated (ClaimsPrincipal): {identity.Identity.IsAuthenticated}");
-            log.LogInformation($"Is Authenticated (Thread): {Thread.CurrentPrincipal.Identity.IsAuthenticated}");
+            foreach (Claim claim in claimsIdentity.Claims)
+            {
+                log.LogInformation($"Claim Type: {claim.Type} :: Claim Value {claim.Value}");
+            }
+            //log.LogInformation($"Is Authenticated (Thread): {Thread.CurrentPrincipal.Identity.IsAuthenticated}");
 
             if (identity != null && identity.Identity.IsAuthenticated)
             {
