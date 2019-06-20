@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Theatreers.Show
 {
@@ -20,9 +21,12 @@ namespace Theatreers.Show
                 databaseName: "theatreers",
                 collectionName: "shows",
                 ConnectionStringSetting = "cosmosConnectionString"
-            )] IAsyncCollector<ShowObject> outputs)
+            )] IAsyncCollector<ShowObject> outputs,
+            ClaimsPrincipal identity)
         {
-            string CorrelationId = Guid.NewGuid().ToString();
+            if (identity != null && identity.Identity.IsAuthenticated)
+            {
+                string CorrelationId = Guid.NewGuid().ToString();
             Uri collectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "shows");
 
             //var collectionLink = outputs.get.CreateDocumentCollectionUri(databaseId, collectionId);
@@ -46,6 +50,11 @@ namespace Theatreers.Show
             {
                 log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: Show Creation Fail :: {ex.Message}");
                 return new BadRequestResult();
+            }
+            }
+            else
+            {
+                return new UnauthorizedResult();
             }
         }
     }

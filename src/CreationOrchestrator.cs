@@ -6,7 +6,6 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Security.Claims;
-using System.Threading;
 
 namespace Theatreers.Show
 {
@@ -19,14 +18,6 @@ namespace Theatreers.Show
             ILogger log,
             ClaimsPrincipal identity)
         {
-            ClaimsIdentity claimsIdentity = (ClaimsIdentity) identity.Identity;
-            log.LogInformation($"Is Authenticated (ClaimsPrincipal): {identity.Identity.IsAuthenticated}");
-            foreach (Claim claim in claimsIdentity.Claims)
-            {
-                log.LogInformation($"Claim Type: {claim.Type} :: Claim Value {claim.Value}");
-            }
-            //log.LogInformation($"Is Authenticated (Thread): {Thread.CurrentPrincipal.Identity.IsAuthenticated}");
-
             if (identity != null && identity.Identity.IsAuthenticated)
             {
                 //Initialise the message for transport
@@ -39,6 +30,7 @@ namespace Theatreers.Show
                 messageHeaders.RequestCreatedAt = DateTime.Now.ToString();
                 showObjectInput.MessageProperties = messageHeaders;
                 showObjectInput.showId = showId;
+                showObjectInput.isDeleted = "false";
                 string eventData = JsonConvert.SerializeObject(showObjectInput);
 
                 //Call the downstream "Activity" functions
@@ -51,11 +43,8 @@ namespace Theatreers.Show
                 log.LogInformation($"[Request Correlation ID: {messageHeaders.RequestCorrelationId}] :: Begin Orchestration :: SubmitImageAsync instance ID: {submitImageInstanceId}");
 
                 return starter.CreateCheckStatusResponse(req, submitShowInstanceId);
-           } else
-            {
+           } else {
                 HttpResponseMessage response = new HttpResponseMessage();
-                //log.LogInformation($"jsonObject (Claims Principal): {JsonConvert.SerializeObject(identity.Identity)}");
-                //log.LogInformation($"jsonObject (Thread): {JsonConvert.SerializeObject(Thread.CurrentPrincipal.Identity)}");
                 response.StatusCode = System.Net.HttpStatusCode.Unauthorized;
                 response.ReasonPhrase = "This is an unauthorized request";
                 return response;

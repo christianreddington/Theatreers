@@ -19,6 +19,8 @@ namespace Theatreers.Show
         public string description { get; set; }
         public string composer { get; set; }
         public string author { get; set; }
+        public string ttl { get; set; }
+        public string isDeleted { get; set; }
     }
 
     public class DecoratedShowObject : ShowObject {        
@@ -54,6 +56,7 @@ namespace Theatreers.Show
         public string showId { get; set; }
         public string showName { get; set; }
         public string partition { get; set; }
+        public string ttl { get; set; }
     }
 
     public class EnvelopedMessage {
