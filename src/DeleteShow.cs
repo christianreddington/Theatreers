@@ -1,60 +1,74 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.Azure.Documents.Client;
-using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Theatreers.Show
 {
-    public static class DeleteShow
-    {        
-        [FunctionName("DeleteShow")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, methods: "delete", Route = "deleteshow")] HttpRequestMessage req,
-            ILogger log,
-            [CosmosDB(
-                databaseName: "theatreers",
-                collectionName: "shows",
-                ConnectionStringSetting = "cosmosConnectionString"
-            )] IAsyncCollector<ShowObject> outputs,
-            ClaimsPrincipal identity)
-        {
-            if (identity != null && identity.Identity.IsAuthenticated)
-            {
-                string CorrelationId = Guid.NewGuid().ToString();
-                Uri collectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "shows");
+  public static class DeleteShow
+  {
+    [FunctionName("DeleteShow")]
+    public static async Task<IActionResult> Run(
+      [HttpTrigger(
+        AuthorizationLevel.Anonymous, 
+        "delete",
+        Route = "show/{id}"
+      )]HttpRequest req,
+      ILogger log,
+      [CosmosDB(
+          databaseName: "theatreers",
+          collectionName: "shows",
+          ConnectionStringSetting = "cosmosConnectionString"
+      )] IDocumentClient documentClient,
+      ClaimsPrincipal identity
+    )
+    {
+      //if (identity != null && identity.Identity.IsAuthenticated)
+      //{
 
-                //Take the input as a string from the orchestrator function context
-                //Deserialize into a transport and "returned" object
-                //These have subtly different types, the latter having fewer properties for storage in CosmosDB
+      String requestId = req.HttpContext.Request.Path.ToString().Replace("/api/show/", "").Replace("/show", "");
 
-                ShowObject returnedObject = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync());
-                returnedObject.doctype = "show";
-                returnedObject.ttl = "1";
+      Uri collectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "shows");
+      CosmosBaseObject<ShowObject> returnedObject = documentClient.CreateDocumentQuery<CosmosBaseObject<ShowObject>>(collectionUri)
+                                  .Where(c => c.showId == requestId && c.doctype == "show")
+                                  .AsEnumerable()
+                                  .FirstOrDefault();
 
-                //If successful, push the output to CosmosDB, log the creation and return an OkObjectResult
-                //If unsuccessful, catch any exception, log that and throw a BadRequestResult
-                try
-                {
-                    await outputs.AddAsync(returnedObject);
-                    log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: Show Deletion Success");
-                    return new OkResult();
-                }
-                catch (Exception ex)
-                {
-                    log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: Show Deletion Fail :: {ex.Message}");
-                    return new BadRequestResult();
-                }
-            }
-            else
-            {
-                return new UnauthorizedResult();
-            }
-        }
+      string CorrelationId = Guid.NewGuid().ToString();
+
+
+      //Take the input as a string from the orchestrator function context
+      //Deserialize into a transport and "returned" object
+      //These have subtly different types, the latter having fewer properties for storage in CosmosDB
+      returnedObject.doctype = "show";
+      returnedObject.ttl = 10;
+      returnedObject.isDeleted = "true";
+
+      //If successful, push the output to CosmosDB, log the creation and return an OkObjectResult
+      //If unsuccessful, catch any exception, log that and throw a BadRequestResult
+      try
+      {
+        await documentClient.UpsertDocumentAsync(collectionUri, returnedObject);
+        log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: Show Deletion Success");
+        return new OkResult();
+      }
+      catch (Exception ex)
+      {
+        log.LogInformation($"[Request Correlation ID: {CorrelationId}] :: Show Deletion Fail :: {ex.Message}");
+        return new BadRequestResult();
+      }
+      /* }
+      else
+       {
+           return new UnauthorizedResult();
+       }*/
     }
+  }
 }

@@ -1,87 +1,72 @@
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
-using Microsoft.Azure.CognitiveServices.Search;
+using System.Runtime.Serialization;
 
 namespace Theatreers.Show
 {
 
-    public class ShowBaseObject
-    {
-        public string showId { get; set; }
-    }
+public interface IShowObject 
+{
+  }
 
-    public class ShowObject : ShowBaseObject {
-        public string id { get; set; }
-        public string doctype {get; set;}
-        public string showName {get; set; }
-        public string description { get; set; }
-        public string composer { get; set; }
-        public string author { get; set; }
-        public string ttl { get; set; }
-        public string isDeleted { get; set; }
-    }
+  public class CosmosBaseObject<T>
+  {
+    public string id { get; set; }
+    public T innerobject { get; set; }
+    public string showId { get; set; }
+    public int ttl { get; set; } = -1;
+    public string isDeleted { get; set; }
+    public string doctype { get; set; }
+  }
 
-    public class DecoratedShowObject : ShowObject {        
-        public MessageHeaders MessageProperties {get; set;}
-    }
+  public class ImageObject : IShowObject
+  {
+    public string imageId { get; set; }
+    public string contentUrl { get; set; }
+    public string hostPageUrl { get; set; }
+    public string name { get; set; }
+    public string doctype { get; set; }
+  }
 
-    public class MessageHeaders
-    {
-        public string RequestCorrelationId {get; set;}
-        public string RequestCreatedAt {get; set;}
-        public string RequestStatus {get; set;}
-    }
+  public class MessageHeaders
+  {
+    public string RequestCorrelationId { get; set; }
+    public string RequestCreatedAt { get; set; }
+    public string RequestStatus { get; set; }
+  }
 
-    public class ImageObject : ShowBaseObject
-    {
-        public string imageId {get; set;}
-        public string contentUrl {get; set;}
-        public string hostPageUrl {get; set;}
-        public string name {get; set; }
-        public string doctype { get; set; }
-    }
-    public class NewsObject : ShowBaseObject
-    {
-        public string DatePublished { get; set; }
-        public string BingId { get; set; }
-        public string name {get; set;}
-        public string url {get; set; }
-        public string doctype { get; set; }
-    }
 
-    public class ShowListObject
-    {
-        public string showId { get; set; }
-        public string showName { get; set; }
-        public string partition { get; set; }
-        public string ttl { get; set; }
-    }
+  public class MessageObject<T>
+  {
+    public MessageHeaders Headers { get; set; }
+    public CosmosBaseObject<T> Body { get; set; }
+  }
 
-    public class EnvelopedMessage {
-        public MessageHeaders MessageProperties {get; set;}
-        public string RequestObject {get; set;}
-    }
+  public class NewsObject : IShowObject
+  {
+    public string DatePublished { get; set; }
+    public string BingId { get; set; }
+    public string name { get; set; }
+    public string url { get; set; }
+    public string doctype { get; set; }
+  }
 
-    public static class MessageHelper {
-        // Decorator - Takes the input and augments the object with an additional set of properties to the JSON body as am additional header level property (MessageProperties)
-        // Returns a serialized string with the original object at the root
-        public static string DecorateJsonBody(string inputjson, Dictionary<string, JToken> HeaderProperties)
-        {
-            JObject jObject = JObject.Parse(inputjson);
-            jObject.Add("MessageProperties", JObject.FromObject(HeaderProperties));
-            return jObject.ToString();
-        }
+  public class ShowObject : IShowObject
+  {
 
-        // Classic 'Envelope' - Takes the input and augments the object with an additional set of properties to the JSON body as an additional header level property (EnvelopeProperties) 
-        // whilst appending the original object as a new property called 'requestobject' and returns a serialized string
-        public static string EnvelopeJSONBody(string inputjson, Dictionary<string, JToken> HeaderProperties)
-        {
-            JObject jObject = new JObject();
-            jObject.Add("RequestObject", JObject.Parse(inputjson));
-            jObject.Add("EnvelopeProperties",JObject.FromObject(HeaderProperties)); 
-            return jObject.ToString();
-        }
-    }
+    public string id { get; set; }
+    public string showName { get; set; }
+    public string description { get; set; }
+    public string composer { get; set; }
+    public string author { get; set; }
+  }
+
+  public class ShowListObject
+  {
+    public string showName { get; set; }
+    public string partition { get; set; }
+    public int ttl { get; set; }
+  }
 }
