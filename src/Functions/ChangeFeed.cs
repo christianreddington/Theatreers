@@ -6,13 +6,14 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Theatreers.Show.Models;
 
-namespace Theatreers.Show
+namespace Theatreers.Show.Functions
 {
   public static class ChangeFeed
   {
     [FunctionName("ChangeFeed")]
-    public static async void Run(
+    public static async void ChangeFeedAsync(
       [CosmosDBTrigger(
         databaseName: "theatreers",
         collectionName: "shows",
@@ -29,11 +30,11 @@ namespace Theatreers.Show
       )] IDocumentClient outputs
     )
     {
-      string showName = "";
       CosmosBaseObject<ShowListObject> output = new CosmosBaseObject<ShowListObject>()
       {
-        isDeleted = "false",
-        doctype = "showlist"
+        IsDeleted = false,
+        Doctype = "showlist",
+        CreatedAt = DateTime.Now
       };
       try
       {
@@ -42,29 +43,25 @@ namespace Theatreers.Show
           foreach (var show in inputs)
           {
 
-            if (show.GetPropertyValue<string>("doctype") == "show" && (string)show.GetPropertyValue<string>("isDeleted") != "true")
+            if (show.GetPropertyValue<string>("doctype") == "show" && show.GetPropertyValue<bool>("isDeleted") != true)
             {
-              string firstCharacter = show.GetPropertyValue<ShowObject>("innerobject").showName[0].ToString().ToUpper();
+              string firstCharacter = show.GetPropertyValue<ShowObject>("innerObject").ShowName[0].ToString().ToUpper();
               int number;
               bool isNumber = int.TryParse(firstCharacter, out number);
 
-              output.showId = show.GetPropertyValue<string>("showId");
-              output.innerobject = new ShowListObject()
+              output.ShowId = show.GetPropertyValue<string>("showId");
+              output.InnerObject = new ShowListObject()
               {
-                showName = show.GetPropertyValue<ShowObject>("innerobject").showName
+                ShowName = show.GetPropertyValue<ShowObject>("innerObject").ShowName
               };
-             // output.SetPropertyValue("id", show.GetPropertyValue<string>("showId"));
-              //output.SetPropertyValue("showName", show.GetPropertyValue<ShowObject>("innerobject").showName);
 
               if (isNumber)
               {
-                output.innerobject.partition = "0-9";
-                //output.SetPropertyValue("partition", "0-9");
+                output.InnerObject.Partition = "0-9";
               }
               else
               {
-                output.innerobject.partition = firstCharacter;
-                //output.SetPropertyValue("partition", firstCharacter);
+                output.InnerObject.Partition = firstCharacter;
               }
               await outputs.UpsertDocumentAsync(
                 UriFactory.CreateDocumentCollectionUri("theatreers", "showlist"),
@@ -72,11 +69,12 @@ namespace Theatreers.Show
               log.LogInformation($"[Reacting to Change Feed :: Creation of ShowListObject for {show.GetPropertyValue<string>("showName")} succeeded");
               output = new CosmosBaseObject<ShowListObject>()
               {
-                isDeleted = "false",
-                doctype = "showlist"
+                IsDeleted = false,
+                Doctype = "showlist",
+                CreatedAt = DateTime.Now
               };
             }
-            else if (show.GetPropertyValue<string>("doctype") == "show" && show.GetPropertyValue<string>("isDeleted") == "true")
+            else if (show.GetPropertyValue<string>("doctype") == "show" && show.GetPropertyValue<bool>("isDeleted") == true)
             {
 
               //Setup a connection to the Show and Show List collection to set TTL of related object
@@ -85,7 +83,7 @@ namespace Theatreers.Show
               
               //Initialise variables appropriately
               string showId = show.GetPropertyValue<string>("showId");
-              string firstCharacter = show.GetPropertyValue<ShowObject>("innerobject").showName[0].ToString().ToUpper();
+              string firstCharacter = show.GetPropertyValue<ShowObject>("innerObject").ShowName[0].ToString().ToUpper();
               int number;
               bool isNumber = int.TryParse(firstCharacter, out number);
               string partitionKey;
@@ -104,18 +102,20 @@ namespace Theatreers.Show
               try
               {
                 // Query the showList by the partitionKey, trying to find the same showID
-                CosmosBaseObject<ShowListObject> result = outputs.CreateDocumentQuery<CosmosBaseObject<ShowListObject>>(showListCollectionUri, new FeedOptions { PartitionKey = new PartitionKey(partitionKey) })
-                                            .Where(c => c.showId == showId)
+                CosmosBaseObject<ShowListObject> showListObject = outputs.CreateDocumentQuery<CosmosBaseObject<ShowListObject>>(showListCollectionUri, new FeedOptions { PartitionKey = new PartitionKey(partitionKey) })
+                                            .Where(c => c.ShowId == showId)
                                             .AsEnumerable()
                                             .FirstOrDefault();
 
                 // Set the ttl of 1 to that object
-                result.ttl = 1;
+                showListObject.Ttl = 1;
+                showListObject.IsDeleted = true;
+                showListObject.Doctype = "showlist";
 
                 // Save it
                 //If successful, push the output to CosmosDB, log the creation and return an OkObjectResult
                 //If unsuccessful, catch any exception, log that and throw a BadRequestResult
-                await outputs.UpsertDocumentAsync(showListCollectionUri, result);
+                await outputs.UpsertDocumentAsync(showListCollectionUri, showListObject, new RequestOptions {PartitionKey = new PartitionKey(partitionKey)});
                 log.LogInformation($"Deleting the Show List listing successful for {showId}");
               }
               catch (Exception ex)
@@ -124,25 +124,25 @@ namespace Theatreers.Show
               }
 
               List<CosmosBaseObject<dynamic>> showObjects = outputs.CreateDocumentQuery<CosmosBaseObject<dynamic>> (showCollectionUri, new FeedOptions { PartitionKey = new PartitionKey(showId) })
-                                          .Where(c => c.showId == showId)
+                                          .Where(c => c.ShowId == showId)
                                           .ToList();
 
               foreach (CosmosBaseObject<dynamic> showObject in showObjects){
                 try
                 {
                   // Set the ttl of 1 to that object
-                  showObject.ttl = 1;
-                  showObject.isDeleted = "false";
+                  showObject.Ttl = 1;
+                  showObject.IsDeleted = true;
 
                   // Save it
                   //If successful, push the output to CosmosDB, log the creation and return an OkObjectResult
                   //If unsuccessful, catch any exception, log that and throw a BadRequestResult
                   await outputs.UpsertDocumentAsync(showCollectionUri, showObject);
-                  log.LogInformation($"Deleting the item {showObject.id} for {showObject.showId} was successful");
+                  log.LogInformation($"Deleting the item {showObject.Id} for {showObject.ShowId} was successful");
                 }
                 catch (Exception ex)
                 {
-                  log.LogInformation($"Deleting the the item {showObject.id} for {showObject.showId} has failed :: {ex.Message}");
+                  log.LogInformation($"Deleting the the item {showObject.Id} for {showObject.ShowId} has failed :: {ex.Message}");
                 }
               }
 

@@ -8,8 +8,9 @@ using System;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Theatreers.Show.Models;
 
-namespace Theatreers.Show
+namespace Theatreers.Show.Functions
 {
   public static class UpdateShow
   {
@@ -17,13 +18,15 @@ namespace Theatreers.Show
     public static async Task<IActionResult> Run(
       [HttpTrigger(
         AuthorizationLevel.Anonymous, 
-        methods: "post", 
-        Route = "updateshow")] HttpRequestMessage req,
+        methods: "PUT",
+        Route = "show/{id}")] HttpRequestMessage req,
       ILogger log,
       [CosmosDB(
         databaseName: "theatreers",
         collectionName: "shows",
-        ConnectionStringSetting = "cosmosConnectionString"
+        ConnectionStringSetting = "cosmosConnectionString",
+        Id = "{id}",
+        PartitionKey = "{id}"
       )] IAsyncCollector<CosmosBaseObject<ShowObject>> outputs,
       ClaimsPrincipal identity
     )
@@ -38,8 +41,8 @@ namespace Theatreers.Show
         //These have subtly different types, the latter having fewer properties for storage in CosmosDB
 
         MessageObject<ShowObject> message = new MessageObject<ShowObject>();
-        message.Body.innerobject = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync());
-        message.Body.doctype = "show";
+        message.Body.InnerObject = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync());
+        message.Body.Doctype = "show";
 
         //If successful, push the output to CosmosDB, log the creation and return an OkObjectResult
         //If unsuccessful, catch any exception, log that and throw a BadRequestResult
