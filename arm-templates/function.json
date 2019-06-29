@@ -14,6 +14,18 @@
             "description": "The name prefix with dashes removed"
           }
         },            
+        "aadClientId": {
+            "type": "string",
+            "metadata": {
+              "description": "Client ID of the AAD B2C Application linked to the API Auth"
+            }
+          },            
+          "aadB2cIssuer": {
+              "type": "string",
+              "metadata": {
+                "description": "Link to the well known Open ID Configuration for the sign in policy."
+              }
+            },            
         "appInsightsResourceGroup": {
             "type": "string",
             "metadata": {
@@ -57,7 +69,7 @@
     "resources": [
         {
             "type": "Microsoft.Web/serverfarms",
-            "apiVersion": "2015-04-01",
+            "apiVersion": "2018-02-01",
             "name": "[variables('function').planName]",
             "location": "[parameters('location')]",
             "properties": {
@@ -67,7 +79,7 @@
             }
         },
         {
-            "apiVersion": "2016-03-01",
+            "apiVersion": "2018-11-01",
             "type": "Microsoft.Web/sites",
             "name": "[variables('function').appName]",
             "location": "[parameters('location')]",
@@ -124,6 +136,23 @@
                         }
                     ]
                 }
+            }
+        },
+        {
+            "apiVersion": "2018-11-01",
+            "type": "Microsoft.Web/sites/config",
+            "name": "[concat(variables('function').appName, '/authsettings')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', variables('function').appName)]"
+            ],
+            "properties": {
+              "enabled": true,
+              "unauthenticatedClientAction": null,
+              "tokenStoreEnabled": null,
+              "defaultProvider": null,
+              "clientId": "[parameters('aadClientId')]",
+              "issuer": "[parameters('aadB2cIssuer')]"
             }
         },
         {
