@@ -1,7 +1,19 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {            
+    "parameters": {             
+        "aadClientId": {
+            "type": "string",
+            "metadata": {
+              "description": "Client ID of the AAD B2C Application linked to the API Auth"
+            }
+          },            
+          "aadB2cIssuer": {
+              "type": "string",
+              "metadata": {
+                "description": "Link to the well known Open ID Configuration for the sign in policy."
+              }
+            },          
         "cosmosDbAccountName": {
             "type": "string",
             "metadata": {
@@ -93,6 +105,12 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
+                    "aadClientId": {
+                        "value": "[parameters('aadClientId')]"
+                    },
+                    "aadB2cIssuer": {
+                        "value": "[parameters('aadB2cIssuer')]"
+                    },
                     "namePrefix": {
                         "value": "[variables('serviceRegionalNamePrefix')]"
                     },

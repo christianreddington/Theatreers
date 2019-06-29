@@ -25,7 +25,7 @@ stages:
         - task: DotNetCoreCLI@2
           displayName: 'Build project'
           inputs:
-            projects: 'src/*.csproj'
+            projects: 'src/Theatreers.Show/Theatreers.Show.csproj'
             arguments: '--output $(dotnetBuildOutputPath) --configuration Release'
         # Execute the Sonar Cloud Analysis, and push to Sonar Cloud
         - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
@@ -98,6 +98,9 @@ stages:
       dependsOn: 'microservicereleaseglobal'
       pool:
         name: 'Hosted Windows 2019 with VS2019'
+      variables:
+        aadClientId: '73e2635f-dadd-443b-9e47-89ac07f91485'
+        aadB2cIssuer: 'https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn'
       strategy:
         matrix: { westeurope: 
           { region: 'West Europe', functionAppName: 'th-show-dev-weu-func', keyvaultName: 'th-show-dev-weu-kv', serviceResourceGroupName: 'th-show-dev-weu-rg' },
@@ -134,7 +137,7 @@ stages:
             location: '$(region)'
             templateLocation: 'Linked artifact'
             csmFile: '$(System.DefaultWorkingDirectory)/deploy/show-regional.json'
-            overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup)'
+            overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup) -aadClientId $(aadClientId) -aadB2cIssuer $(aadB2cIssuer)'
             deploymentMode: 'Incremental'
         - task: AzureKeyVault@1
           inputs:
