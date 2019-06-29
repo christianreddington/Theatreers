@@ -14,8 +14,6 @@ namespace Theatreers.Show.Models
     public string Name { get; set; }
     [JsonProperty("url")]
     public string Url { get; set; }
-    [JsonProperty("doctype")]
-    public string Doctype { get; set; }
   }
 
 }
