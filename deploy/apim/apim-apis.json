@@ -335,6 +335,13 @@
         "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
       ],
       "properties": {
+        "templateParameters": [
+          {
+            "name": "id",
+            "type": "Guid",
+            "required": true
+          }
+        ],
         "description": "Updates a specific show when passing in the ShowID",
         "displayName": "UpdateShow",
         "method": "PUT",
