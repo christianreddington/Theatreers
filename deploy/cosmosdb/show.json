@@ -38,16 +38,6 @@
             "indexingMode": "consistent",
             "includedPaths": [
               {
-                "path": "/id/?",
-                "indexes": [
-                  {
-                    "kind": "Range",
-                    "dataType": "string",
-                    "precision": -1
-                  }
-                ]
-              },
-              {
                 "path": "/showId/?",
                 "indexes": [
                   {
