@@ -40,21 +40,33 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/post-creationorchestrator')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/CreateShowOrchestrator')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
         "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
       ],
       "properties": {
-        "description": "Some description about the API here",
-        "displayName": "CreationOrchestrator",
+        "description": "API used to create a Show. This triggers the creation of images and news objects for a show.",
+        "displayName": "CreateShowOrchestrator",
         "method": "POST",
         "urlTemplate": "/show"
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-imageobjects')]",
+        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+        "apiVersion": "2019-01-01",
+        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/CreateShowOrchestrator/authpolicy')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'CreateShowOrchestrator')]"
+        ],
+        "properties": {
+            "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base>\r\n     element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "format": "xml"
+        }
+    },
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/CreateShowImageObjectByHttp')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -68,14 +80,189 @@
             "required": true
           }
         ],
-        "description": "Description of the API here",
-        "displayName": "GetShow_ImageObjects",
+        "description": "API used to create an individual Show Image Object manually, rather than the Cognitive Services API.",
+        "displayName": "CreateShowImageObjectByHttp",
+        "method": "POST",
+        "urlTemplate": "/show/{id}/image"
+      }
+    },
+    {
+        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+        "apiVersion": "2019-01-01",
+        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/CreateShowImageObjectByHttp/authpolicy')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'CreateShowImageObjectByHttp')]"
+        ],
+        "properties": {
+            "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base>\r\n     element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "format": "xml"
+        }
+    },
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/CreateShowNewsObjectByHttp')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
+      ],
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "id",
+            "type": "Guid",
+            "required": true
+          }
+        ],
+        "description": "API used to create an individual Show News Object manually, rather than the Cognitive Services API.",
+        "displayName": "CreateShowNewsObjectByHttp",
+        "method": "POST",
+        "urlTemplate": "/show/{id}/news"
+      }
+    },
+    {
+        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+        "apiVersion": "2019-01-01",
+        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/CreateShowNewsObjectByHttp/authpolicy')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'CreateShowNewsObjectByHttp')]"
+        ],
+        "properties": {
+            "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base>\r\n     element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "format": "xml"
+        }
+    },
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/DeleteShowImageObject')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
+      ],
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "id",
+            "type": "Guid",
+            "required": true
+          },
+          {
+            "name": "imageId",
+            "type": "Guid",
+            "required": true
+          }
+        ],
+        "description": "API used to delete a specified Show Image Object.",
+        "displayName": "DeleteShowImageObject",
+        "method": "DELETE",
+        "urlTemplate": "/show/{id}/image/{imageId}"
+      }
+    },
+    {
+        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+        "apiVersion": "2019-01-01",
+        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/DeleteShowImageObject/authpolicy')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'DeleteShowImageObject')]"
+        ],
+        "properties": {
+            "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base>\r\n     element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "format": "xml"
+        }
+    },
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/DeleteShowNewsObject')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
+      ],
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "id",
+            "type": "Guid",
+            "required": true
+          },
+          {
+            "name": "newsId",
+            "type": "Guid",
+            "required": true
+          }
+        ],
+        "description": "API used to delete a specified Show News Object.",
+        "displayName": "DeleteShowNewsObject",
+        "method": "DELETE",
+        "urlTemplate": "/show/{id}/news/{newsId}"
+      }
+    },
+    {
+        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+        "apiVersion": "2019-01-01",
+        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/DeleteShowNewsObject/authpolicy')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'DeleteShowNewsObject')]"
+        ],
+        "properties": {
+            "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base>\r\n     element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "format": "xml"
+        }
+    },
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/DeleteShowObject')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
+      ],
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "id",
+            "type": "Guid",
+            "required": true
+          }
+        ],
+        "description": "API used to delete a specified Show Object. This will trigger the CosmosDB Change feed and cascade the deletion of any related objects to the Show.",
+        "displayName": "DeleteShowObject",
+        "method": "DELETE",
+        "urlTemplate": "/show/{id}"
+      }
+    },
+    {
+        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+        "apiVersion": "2019-01-01",
+        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/DeleteShowObject/authpolicy')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'DeleteShowObject')]"
+        ],
+        "properties": {
+            "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base>\r\n     element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "format": "xml"
+        }
+    },
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/GetImageObjectsByShow')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
+      ],
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "id",
+            "type": "Guid",
+            "required": true
+          }
+        ],
+        "description": "API used to get all images relating to a show when passing in a specific ShowID",
+        "displayName": "GetImageObjectsByShow",
         "method": "GET",
         "urlTemplate": "/show/{id}/image"
       }
     },   
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-newsobjects')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/GetNewsObjectByShow')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -89,35 +276,14 @@
             "required": true
           }
         ],
-        "description": "Description of the API",
-        "displayName": "GetShow_NewsObjects",
+        "description": "API used to get all news objects relating to a show when passing in a specific ShowID",
+        "displayName": "GetNewsObjectByShow",
         "method": "GET",
         "urlTemplate": "/show/{id}/news"
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-showobjects')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "id",
-            "type": "Guid",
-            "required": true
-          }
-        ],
-        "description": "Description of the API",
-        "displayName": "GetShow_ShowObjects",
-        "method": "GET",
-        "urlTemplate": "/show/{id}/show"
-      }
-    },
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/get-getshow-showsbyletter')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/GetShowListObject')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -134,25 +300,134 @@
             ]
           }
         ],
-        "description": "Description of the API",
-        "displayName": "GetShowsByLetter",
+        "description": "API to retrieve a list of all shows, when passing in the start letter.",
+        "displayName": "GetShowListObject",
         "method": "GET",
         "urlTemplate": "/shows/{letter}"
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/post-updateshow')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/GetShowObject')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
         "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
       ],
       "properties": {
-        "description": "Description of the API",
-        "displayName": "UpdateShow",
-        "method": "POST",
-        "urlTemplate": "/updateshow"
+        "templateParameters": [
+          {
+            "name": "id",
+            "type": "Guid",
+            "required": true
+          }
+        ],
+        "description": "API used to get a show object when passing in a specific ShowID",
+        "displayName": "GetShowObject",
+        "method": "GET",
+        "urlTemplate": "/show/{id}/show"
       }
+    },
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/UpdateShow')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
+      ],
+      "properties": {
+        "description": "Updates a specific show when passing in the ShowID",
+        "displayName": "UpdateShow",
+        "method": "PUT",
+        "urlTemplate": "/show/{id}"
+      }
+    },
+    {
+        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+        "apiVersion": "2019-01-01",
+        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/UpdateShow/authpolicy')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'UpdateShow')]"
+        ],
+        "properties": {
+            "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base>\r\n     element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "format": "xml"
+        }
+    }
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/UpdateShowImageObject')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
+      ],
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "id",
+            "type": "Guid",
+            "required": true
+          },
+          {
+            "name": "imageId",
+            "type": "Guid",
+            "required": true
+          }
+        ],
+        "description": "API used to update a specified Show Image Object.",
+        "displayName": "UpdateShowImageObject",
+        "method": "PUT",
+        "urlTemplate": "/show/{id}/image/{imageId}"
+      }
+    },
+    {
+        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+        "apiVersion": "2019-01-01",
+        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/UpdateShowImageObject/authpolicy')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'UpdateShowImageObject')]"
+        ],
+        "properties": {
+            "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base>\r\n     element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "format": "xml"
+        }
+    }
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/UpdateShowNewsObject')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
+      ],
+      "properties": {
+        "templateParameters": [
+          {
+            "name": "id",
+            "type": "Guid",
+            "required": true
+          },
+          {
+            "name": "newsId",
+            "type": "Guid",
+            "required": true
+          }
+        ],
+        "description": "API used to update a specified Show News Object.",
+        "displayName": "UpdateShowNewsObject",
+        "method": "PUT",
+        "urlTemplate": "/show/{id}/news/{newsId}"
+      }
+    },
+    {
+        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+        "apiVersion": "2019-01-01",
+        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/UpdateShowNewsObject/authpolicy')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'UpdateShowNewsObject')]"
+        ],
+        "properties": {
+            "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base>\r\n     element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "format": "xml"
+        }
     }
   ]
 }
