@@ -8,10 +8,10 @@
         :to="{ name: 'editshow', params: { id: $route.params.id } }"
       >Edit</b-button>
     </div>
-    <h1 v-if="show">{{ show.showName }}</h1>
-    <p v-if="show">{{ show.showName }}</p>
-    <p v-if="show">Composer: {{ show.composer }}</p>
-    <p v-if="show">Author: {{ show.author }}</p>
+    <h1 v-if="show">{{ show.innerObject.showName }}</h1>
+    <p v-if="show">{{ show.innerObject.showName }}</p>
+    <p v-if="show">Composer: {{ show.innerObject.composer }}</p>
+    <p v-if="show">Author: {{ show.innerObject.author }}</p>
 
     <h1>News</h1>  
     <ShowNews :newsObjects="news" v-if="news" />

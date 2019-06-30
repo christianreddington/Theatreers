@@ -35,29 +35,28 @@ export default {
     methods: {
       onSubmit(evt) {
         self = this  
-        fetch("https://api.theatreers.com/show/show", {
-          headers: {
-          'Content-Type': 'application/json'
-          },
-          method: 'POST',
-          body: JSON.stringify(this.show)
-        })
-        .catch(function () {                
-          self.alert = {
-            visible: true,
-            content: `${self.show.showName} has not been successfully created`,
-            type: 'danger',
-            display: true
-          }
-        })
-        .then(function() {         
-          self.alert = {
-            visible: true,
-            content: `${self.show.showName} has been successfully created`,
-            type: 'success',
-            display: true
-          }
-        })
+        this.$AuthService.getAccessToken(['https://theatreers.onmicrosoft.com/show-api/user_impersonation'])
+        .then(bearerToken => {              
+          self.$AuthService.postApi('https://th-show-dev-neu-func.azurewebsites.net/api/show', 
+          JSON.stringify(this.show), 
+          bearerToken)           
+          .catch(function () {                
+            self.alert = {
+              visible: true,
+              content: `${self.show.showName} has not been successfully created`,
+              type: 'danger',
+              display: true
+            }
+          })
+          .then(function() {         
+            self.alert = {
+              visible: true,
+              content: `${self.show.showName} has been successfully created`,
+              type: 'success',
+              display: true
+            }
+          })
+        })  
       }
     },
     mounted: function () {       

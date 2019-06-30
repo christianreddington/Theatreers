@@ -2,13 +2,12 @@
   <div>
     <b-row v-for="(images, groupIndex) in groupedImages(imageObjects, 3)" v-bind:key="groupIndex">
       <b-col v-for="(image, imageIndex) in images" v-bind:key="imageIndex">
-          <b-img thumbnail fluid :src="image.contentUrl" :thing="image.name" />
+          <b-img thumbnail fluid :src="image.innerObject.contentUrl" :thing="image.innerObject.name" />
       </b-col>
     </b-row>
   </div>
 </template>
 
-<script src="https://cdn.jsdelivr.net/lodash/4.17.4/lodash.min.js"></script>
 <script>
 export default {
   props: {

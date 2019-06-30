@@ -17,8 +17,6 @@ export default class AuthService {
       this.applicationConfig.clientID,
       this.applicationConfig.authority,
       () => {
-        // callback for login redirect
-        //cacheLocation: 'localStorage'
       },
       {
         redirectUri,
@@ -30,7 +28,7 @@ export default class AuthService {
 
   // Core Functionality
   loginPopup () {
-    return this.app.loginPopup(this.applicationConfig.graphScopes).then(
+    return this.app.loginPopup().then(
       idToken => {
         const user = this.app.getUser()
         if (user) {
@@ -46,7 +44,7 @@ export default class AuthService {
   }
 
   loginRedirect () {
-    this.app.loginRedirect(this.applicationConfig.graphScopes)
+    this.app.loginRedirect()
   }
 
   logout () {
@@ -54,16 +52,15 @@ export default class AuthService {
     this.app.logout()
   }
 
-  // Graph Related
-  getGraphToken () {
-    return this.app.acquireTokenSilent(this.applicationConfig.graphScopes).then(
+  getAccessToken (scopes) {
+    return this.app.acquireTokenSilent(scopes).then(
       accessToken => {
         return accessToken
       })
       .catch(function (error) {
         console.log(error)
         return this.app
-          .acquireTokenPopup(this.applicationConfig.graphScopes)
+          .acquireTokenPopup(scopes)
           .then(
             accessToken => {
               return accessToken
@@ -75,16 +72,20 @@ export default class AuthService {
       })
   }
 
-  getGraphUserInfo (token) {
-    const headers = new Headers({ Authorization: `Bearer ${token}` })
-    const options = {
-      headers
+  getApi (uri, token) {
+    const headers = { 
+      'Authorization': `Bearer ${token}`
     }
-    return fetch(`${this.graphUrl}`, options)
-      .then(response => response.json())
-      .catch(response => {
-        throw new Error(response.text())
-      })
+    return fetch(`${uri}`, {headers: headers, method: 'GET'})
+  }
+
+  postApi (uri, body, token) {
+   // const headers = new Headers({ Authorization: `Bearer ${token}` })
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+    return fetch(`${uri}`, {headers: headers, method: 'POST', body: body})
   }
 
   // Utility

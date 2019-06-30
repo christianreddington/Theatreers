@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 
-Vue.use(Router)
 
 // Event
 const GetEvent = () => import('@/views/event/GetEvent')
@@ -31,3 +30,5 @@ export default new Router({
     { path: '/', name: 'root', component: Home }
   ]
 })
+
+Vue.use(Router)

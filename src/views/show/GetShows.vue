@@ -29,8 +29,8 @@
           <text x="50%" y="50%" fill="#dee2e6" dy=".3em">64x64</text>
         </svg>
 
-        <h2 align="left"><router-link :to="`/show/${item.showId}`">{{ item.showName }}</router-link></h2>
-        <p align="left">Description of {{ item.showName }}</p>
+        <h2 align="left"><router-link :to="`/show/${item.showId}`">{{ item.innerObject.showName }}</router-link></h2>
+        <p align="left">Description of {{ item.innerObject.showName }}</p>
 
         <!-- b-[Optional: add media children here for nesting] -->
       </b-media>
@@ -97,10 +97,20 @@ export default {
     selectedPartition: {
       immediate: false,
       handler () {
-        this.isLoading = true
-        fetch(`https://api.theatreers.com/show/shows/${this.selectedPartition}`, {
-          method: 'get'
-        })
+        this.isLoading = true        
+        self = this  
+        this.$AuthService.getAccessToken(['https://theatreers.onmicrosoft.com/show-api/user_impersonation'])
+        .then(bearerToken => {              
+          self.$AuthService.getApi(`https://api.theatreers.com/show/shows/${self.selectedPartition}`, 
+          bearerToken)  
+          .catch(function (error) {                
+            self.alert = {
+              visible: true,
+              content: `${error}`,
+              type: 'danger',
+              display: true
+            }
+          })
           .then(function (response) {
             return response.json()
           })
@@ -108,6 +118,7 @@ export default {
             this.isLoading = false
             this.items = jsonData
           })
+        })
       }
     }
   }
