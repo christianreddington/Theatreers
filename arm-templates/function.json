@@ -74,8 +74,11 @@
             "location": "[parameters('location')]",
             "properties": {
                 "name": "[variables('function').planName]",
-                "computeMode": "Dynamic",
-                "sku": "Dynamic"
+                "computeMode": "Dynamic"
+            },
+            "sku": {
+              "name": "Y1",
+              "tier": "Dynamic"
             }
         },
         {
