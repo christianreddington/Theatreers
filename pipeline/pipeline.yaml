@@ -1,0 +1,15 @@
+steps:
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'test'
+    projects: 'Theatreers.Core.Tests/Theatreers.Core.Tests.csproj'
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet pack'
+  inputs:
+    command: pack
+    packagesToPack: Theatreers.Shared/Theatreers.Shared.csproj
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet push'
+  inputs:
+    command: push
+    publishVstsFeed: 'Theatreers.Artifacts'
