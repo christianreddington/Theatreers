@@ -1,9 +1,12 @@
+using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Theatreers.Core.Abstractions;
 using Theatreers.Core.Models;
 using Theatreers.Core.Providers;
@@ -17,7 +20,11 @@ namespace Theatreers.Core.Tests
     public StorageProviderTest()
     {
       ILogger log = new StubLogger();
-      _storageProvider = new LocalMemoryProvider<CosmosBaseObject<string>>();
+
+      IDocumentClient client = new DocumentClient(new Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+      Uri showCollectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "shows");
+      _storageProvider = new CosmosStorageProvider<CosmosBaseObject<string>>(client, showCollectionUri);
+      // _storageProvider = new LocalMemoryProvider<CosmosBaseObject<string>>();
       _storageProvider.CreateAsync(new CosmosBaseObject<string>
       {
         Id = "1",
@@ -34,8 +41,12 @@ namespace Theatreers.Core.Tests
       }, log);
     }
 
-    public void Dispose(){
-      _storageProvider = null;
+    public void Dispose()
+    {
+      ILogger log = new StubLogger();
+      //_storageProvider = null;
+      _storageProvider.DeleteAsync("1", log);
+      _storageProvider.DeleteAsync("2", log);
     }
 
     [Fact]
@@ -55,8 +66,8 @@ namespace Theatreers.Core.Tests
 
 
       // Assert  
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(3, query.Select(e => e.Key).ToList<String>().Count);
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(3, query.Select(e => e.Id).ToList<String>().Count);
     }
 
     [Fact]
@@ -98,10 +109,9 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
-
 
     [Fact]
     public async void CannotCreateAsyncForValuesWithMissingId()
@@ -121,8 +131,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
 
@@ -144,8 +154,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
 
@@ -167,8 +177,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
     [Fact]
@@ -244,9 +254,9 @@ namespace Theatreers.Core.Tests
       var deletion = await _storageProvider.DeleteAsync(reference, log);
 
       // Assert
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
       Assert.True(deletion); 
-      Assert.Single(query.Select(e => e.Key).ToList<String>());
+      Assert.Single(query);
     }
 
     [Theory]
@@ -263,9 +273,9 @@ namespace Theatreers.Core.Tests
       var deletion = await _storageProvider.DeleteAsync(reference, log);
 
       // Assert
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
       Assert.False(deletion);
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count);
+      Assert.Equal(2, query.Count());
     }
 
 
@@ -288,11 +298,11 @@ namespace Theatreers.Core.Tests
       var update = await _storageProvider.UpdateAsync(reference, _object, log);
 
       // Assert
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
       Assert.True(update);
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count);
-      Assert.Equal("myNewString", query.Select(e => e.Value).ToList<CosmosBaseObject<string>>().Where(e => e.Id == reference).First().InnerObject);
-      Assert.Single(query.Select(e => e.Value).ToList<CosmosBaseObject<string>>().Where(e => e.InnerObject == "myNewString"));
+      Assert.Equal(2, query.Count());
+      Assert.Equal("myNewString", query.Where(e => e.Id == reference).First().InnerObject);
+      Assert.Single(query.Where(e => e.InnerObject == "myNewString"));
     }
 
     [Theory]
@@ -315,8 +325,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
     [Theory]
@@ -339,8 +349,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
     [Theory]
@@ -363,8 +373,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
     [Theory]
@@ -386,10 +396,10 @@ namespace Theatreers.Core.Tests
       var update = await _storageProvider.UpdateAsync(reference, _object, log);
 
       // Assert
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
       Assert.False(update);
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count);
-      Assert.Empty(query.Select(e => e.Value).ToList<CosmosBaseObject<string>>().Where(e => e.InnerObject == "myNewString"));
+      Assert.Equal(2, query.Count());
+      Assert.Empty(query.Where(e => e.InnerObject == "myNewString"));
     }
 
     [Theory]
@@ -413,10 +423,10 @@ namespace Theatreers.Core.Tests
       await _storageProvider.UpsertAsync(reference, _object, log);
 
       // Assert
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(3, query.Select(e => e.Key).ToList<String>().Count);
-      Assert.Single(query.Select(e => e.Value).ToList<CosmosBaseObject<string>>().Where(e => e.InnerObject == "myNewString"));
-      Assert.Equal(reference, query.Select(e => e.Value).ToList<CosmosBaseObject<string>>().Where(e => e.InnerObject == "myNewString").SingleOrDefault().Id);
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(3, query.Count());
+      Assert.Single(query.Where(e => e.InnerObject == "myNewString"));
+      Assert.Equal(reference, query.Where(e => e.InnerObject == "myNewString").SingleOrDefault().Id);
     }
 
     [Theory]
@@ -441,8 +451,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
     [Theory]
@@ -467,8 +477,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
     [Theory]
@@ -493,8 +503,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
     [Theory]
@@ -519,8 +529,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
     [Theory]
@@ -542,10 +552,10 @@ namespace Theatreers.Core.Tests
       await _storageProvider.UpsertAsync(reference, _object, log);
 
       // Assert
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count);
-      Assert.Single(query.Select(e => e.Value).ToList<CosmosBaseObject<string>>().Where(e => e.InnerObject == "myNewString"));
-      Assert.Equal(reference, query.Select(e => e.Value).ToList<CosmosBaseObject<string>>().Where(e => e.InnerObject == "myNewString").SingleOrDefault().Id);
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
+      Assert.Single(query.Where(e => e.InnerObject == "myNewString"));
+      Assert.Equal(reference, query.Where(e => e.InnerObject == "myNewString").SingleOrDefault().Id);
     }
 
 
@@ -569,8 +579,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
     [Theory]
@@ -593,8 +603,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
 
     [Theory]
@@ -617,8 +627,8 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<KeyValuePair<string, CosmosBaseObject<string>>> query = await _storageProvider.Query();
-      Assert.Equal(2, query.Select(e => e.Key).ToList<String>().Count());
+      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      Assert.Equal(2, query.Count());
     }
   }
 }

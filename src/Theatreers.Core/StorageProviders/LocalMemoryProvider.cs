@@ -35,26 +35,26 @@ namespace Theatreers.Core.Providers
       return _datastore.Remove(reference);
     }
 
-    public async Task<IQueryable<KeyValuePair<string, T>>> Query()
+    public async Task<IQueryable<T>> Query()
     {
-      return _datastore.AsQueryable();
+      return _datastore.Select(e => e.Value).AsQueryable();
     }
 
-    public async Task<KeyValuePair<string, T>> ReadAsync(string reference)
+    public async Task<T> ReadAsync(string reference)
     {
-      return this.Query().Result.Where(e => e.Key == reference).SingleOrDefault();
+      return this.Query().Result.Where(e => e.Id == reference).SingleOrDefault();
     }
 
     public async Task<bool> UpdateAsync(string reference, T _object, ILogger log)
     {
-      KeyValuePair<string, T> result = this.Query().Result.Where(e => e.Key == reference).SingleOrDefault();
+      T result = this.Query().Result.Where(e => e.Id == reference).SingleOrDefault();
 
-      _object.Id = result.Key;
-      if (result.Key != null)
+      if (result != null)
       {
+        _object.Id = reference;
         if (_object.IsValid())
         {
-          _datastore[result.Key] = _object;
+          _datastore[result.Id] = _object;
           return true;
         } else
         {
@@ -67,9 +67,9 @@ namespace Theatreers.Core.Providers
 
     public async Task UpsertAsync(string reference, T _object, ILogger log)
     {
-      KeyValuePair<string, T> result = this.Query().Result.Where(e => e.Key == reference).SingleOrDefault();
+      T result = this.Query().Result.Where(e => e.Id == reference).SingleOrDefault();
 
-      if (result.Key != null)
+      if (result != null)
       {
         await UpdateAsync(reference, _object, log);
       }

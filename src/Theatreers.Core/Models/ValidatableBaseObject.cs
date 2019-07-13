@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Theatreers.Core.Abstractions;
 
@@ -9,10 +9,12 @@ namespace Theatreers.Core.Models
 {
   public class ValidatableBaseObject : IValidatable, IStorable, IReplicable
   {
+    [JsonProperty("id")]
     public string Id { get; set; }
 
     public int Version { get; set; }
 
+    [JsonIgnore]
     public IList<ValidationRule> ValidationRules { get; set; } = new List<ValidationRule>();
 
     public virtual IDictionary<string, string> GetValidationErrors()

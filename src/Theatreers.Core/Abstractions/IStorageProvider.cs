@@ -8,10 +8,10 @@ using Theatreers.Core.Providers;
 
 namespace Theatreers.Core.Abstractions
 {
-  public interface IStorageProvider<T>
+  public interface IStorageProvider<T> where T : IStorable, IValidatable, IReplicable
   {
-    Task<IQueryable<KeyValuePair<string, T>>> Query();
-    Task<KeyValuePair<string, T>> ReadAsync(string reference);
+    Task<IQueryable<T>> Query();
+    Task<T> ReadAsync(string reference);
     Task CreateAsync(T _object, ILogger log);
     Task<bool> UpdateAsync(string reference, T _object, ILogger log);
     Task UpsertAsync(string reference, T _object, ILogger log);
