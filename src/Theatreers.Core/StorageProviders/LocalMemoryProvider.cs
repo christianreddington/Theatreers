@@ -14,7 +14,7 @@ namespace Theatreers.Core.Providers
   public class LocalMemoryProvider<T> : IStorageProvider<T> where T : ValidatableBaseObject
   {
     private IDictionary<string, T> _datastore = new ConcurrentDictionary<string, T>();
-    public async Task<bool> CheckExistsAsync(string reference, ILogger log)
+    public async Task<bool> CheckExistsAsync(string reference, string partition, ILogger log)
     {
       return _datastore.Where(e => e.Key == reference).Any();
     }
@@ -30,7 +30,7 @@ namespace Theatreers.Core.Providers
         }
     }
 
-    public async Task<bool> DeleteAsync(string reference, ILogger log)
+    public async Task<bool> DeleteAsync(string reference, string partition, ILogger log)
     {
       return _datastore.Remove(reference);
     }
@@ -40,7 +40,7 @@ namespace Theatreers.Core.Providers
       return _datastore.Select(e => e.Value).AsQueryable();
     }
 
-    public async Task<T> ReadAsync(string reference)
+    public async Task<T> ReadAsync(string reference, string partition)
     {
       return this.Query().Result.Where(e => e.Id == reference).SingleOrDefault();
     }

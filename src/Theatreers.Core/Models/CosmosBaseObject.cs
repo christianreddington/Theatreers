@@ -6,7 +6,7 @@ using Theatreers.Core.Abstractions;
 
 namespace Theatreers.Core.Models
 {
-  public class CosmosBaseObject<T> : ValidatableBaseObject
+  public class CosmosBaseObject<T> : ValidatableBaseObject, IPartitionable
   {
     public CosmosBaseObject() : base()
     {
@@ -19,8 +19,6 @@ namespace Theatreers.Core.Models
     public T InnerObject { get; set; }
     [JsonProperty("partition")]
     public string Partition { get; set; }
-    [JsonProperty("ttl")]
-    public int Ttl { get; set; } = -1;
     [JsonProperty("isDeleted")]
     public bool IsDeleted { get; set; } = false;
     [JsonProperty("doctype")]

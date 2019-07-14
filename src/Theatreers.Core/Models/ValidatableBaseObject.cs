@@ -11,6 +11,8 @@ namespace Theatreers.Core.Models
   {
     [JsonProperty("id")]
     public string Id { get; set; }
+    [JsonProperty("ttl")]
+    public int Ttl { get; set; } = -1;
 
     public int Version { get; set; }
 

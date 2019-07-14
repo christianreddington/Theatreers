@@ -11,20 +11,30 @@ using Microsoft.Azure.Documents.Client;
 
 namespace Theatreers.Core.Providers
 {
-  public class CosmosStorageProvider<T> : IStorageProvider<T> where T : ValidatableBaseObject
+  public class CosmosStorageProvider<T> : IStorageProvider<T> where T : ValidatableBaseObject, IPartitionable
   {
     private IDocumentClient documentClient { get; set; }
     private Uri collectionUri { get; set; }
-    public CosmosStorageProvider(IDocumentClient _documentClient, Uri _collectionUri)
+    private string databaseId { get; set; }
+    private string collectionId { get; set; }
+    public CosmosStorageProvider(IDocumentClient _documentClient, Uri _collectionUri, string _databaseId = "", string _collectionId = "")
     {
       documentClient = _documentClient;
       collectionUri = _collectionUri;
+      databaseId = _databaseId;
+      collectionId = _collectionId;
+      
     }
 
 
-    public async Task<bool> CheckExistsAsync(string reference, ILogger log)
+    public async Task<bool> CheckExistsAsync(string reference, string partition, ILogger log)
     {
-      return await Task.FromResult(true);
+      IQueryable<T> query = await Query();
+      if (query.Where(doc => doc.Id == reference && doc.Partition == partition).Count() > 0){
+        return true;
+      }
+
+      return false;
     }
 
     public async Task<IQueryable<T>> Query()
@@ -32,9 +42,9 @@ namespace Theatreers.Core.Providers
       return documentClient.CreateDocumentQuery<T>(collectionUri);
     }
 
-    public async Task<T> ReadAsync(string reference)
+    public async Task<T> ReadAsync(string reference, string partition)
     {
-      return await Task.Run(() => Query().Result.SingleOrDefault());
+      return await Task.Run(() => Query().Result.Where(e => e.Partition == partition).Take(1).AsEnumerable().FirstOrDefault());
     }
 
     public async Task CreateAsync(T _object, ILogger log)
@@ -60,52 +70,65 @@ namespace Theatreers.Core.Providers
 
     public async Task<bool> UpdateAsync(string reference, T _object, ILogger log)
     {
-      try
+      _object.Id = reference;
+      if (_object.IsValid())
       {
-        ResourceResponse<Document> upsert = await documentClient.UpsertDocumentAsync(collectionUri, _object);
-        if (upsert.Resource != null)
+        try
         {
-          return true;
-        }
+          ResourceResponse<Document> upsert = await documentClient.UpsertDocumentAsync(collectionUri, _object);
+          if (upsert.Resource != null)
+          {
+            return true;
+          }
 
-        return false;
+          return false;
+        }
+        catch (Exception ex)
+        {
+          log.LogError($"Create Object Failed: {ex.Message}");
+          return false;
+        }
       }
-      catch (Exception ex)
+      else
       {
-        log.LogError($"Create Object Failed: {ex.Message}");
-        return false;
+        throw new Exception($"There was at least one validation error. Please provide the appropriate information.");
       }
     }
 
     public async Task UpsertAsync(string reference, T _object, ILogger log)
     {
-      try
+      _object.Id = reference;
+      if (_object.IsValid())
       {
-        await documentClient.UpsertDocumentAsync(collectionUri, _object);
+        try
+        {
+          await documentClient.UpsertDocumentAsync(collectionUri, _object);
+        }
+        catch (Exception ex)
+        {
+          log.LogError($"Create Object Failed: {ex.Message}");
+        }
       }
-      catch (Exception ex)
+      else
       {
-        log.LogError($"Create Object Failed: {ex.Message}");
+        throw new Exception($"There was at least one validation error. Please provide the appropriate information.");
       }
     }
 
-    public async Task<bool> DeleteAsync(string reference, ILogger log)
+    public async Task<bool> DeleteAsync(string reference, string partition, ILogger log)
     {
-      try
+      IQueryable<T> query = await Query();
+      T _object = query.Where(e => e.Id == reference && e.Partition == partition).AsEnumerable().FirstOrDefault();
+      _object.Ttl = 1;
+      if (_object.IsValid())
       {
-        Task delete = documentClient.DeleteDocumentAsync(reference);
-        if (delete.IsCompletedSuccessfully)
-        {
+          await documentClient.UpsertDocumentAsync(collectionUri, _object);
           return true;
-        }
-
-        return false;
       }
-      catch (Exception ex)
+      else
       {
-        log.LogError($"Delete Object Failed: {ex.Message}");
-        return false;
-      }
+        throw new Exception($"There was at least one validation error. Please provide the appropriate information.");
+      } 
     }
   }
 }
