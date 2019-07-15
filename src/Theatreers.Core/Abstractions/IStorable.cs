@@ -6,7 +6,5 @@ namespace Theatreers.Core.Abstractions
   {
     [JsonProperty("id")]
     string Id { get; set; }
-    [JsonProperty("ttl")]
-    int Ttl { get; set; }
   }
 }

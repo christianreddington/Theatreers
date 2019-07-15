@@ -6,7 +6,7 @@ using Theatreers.Core.Abstractions;
 
 namespace Theatreers.Core.Models
 {
-  public class CosmosBaseObject<T> : ValidatableBaseObject, IPartitionable
+  public class CosmosBaseObject<T> : ValidatableBaseObject, IPartitionable, IExpirable
   {
     public CosmosBaseObject() : base()
     {

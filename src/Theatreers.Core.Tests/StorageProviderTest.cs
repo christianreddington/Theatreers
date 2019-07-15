@@ -20,50 +20,47 @@ namespace Theatreers.Core.Tests
     private IStorageProvider<CosmosBaseObject<string>> _storageProvider;
     public StorageProviderTest()
     {
-      ILogger log = new StubLogger();
 
-      string databaseName = "theatreers";
+      /*string databaseName = "theatreers";
       string collectionName = "shows";
 
       IDocumentClient client = new DocumentClient(new Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
-      Uri showCollectionUri = UriFactory.CreateDocumentCollectionUri(databaseName, collectionName);
-      _storageProvider = new CosmosStorageProvider<CosmosBaseObject<string>>(client, showCollectionUri, databaseName, collectionName);
-      // _storageProvider = new LocalMemoryProvider<CosmosBaseObject<string>>();
-    _storageProvider.CreateAsync(new CosmosBaseObject<string>
+      Uri showCollectionUri = UriFactory.CreateDocumentCollectionUri(databaseName, collectionName);*/
+      // _storageProvider = new CosmosStorageProvider<CosmosBaseObject<string>>(client, showCollectionUri, databaseName, collectionName);
+      _storageProvider = new LocalMemoryProvider<CosmosBaseObject<string>>();
+      _storageProvider.CreateAsync(new CosmosBaseObject<string>
       {
         Id = "1",
         Partition = "partition",
         InnerObject = "hello",
         Doctype = "show"
-      }, log);
+      });
       _storageProvider.CreateAsync(new CosmosBaseObject<string>
       {
         Id = "2",
         Partition = "partition",
         InnerObject = "hello",
         Doctype = "show"
-      }, log);
+      });
     }
 
     public void Dispose()
     {
-      ILogger log = new StubLogger();
-      // _storageProvider = null;
-      IDocumentClient client = new DocumentClient(new Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+      // IDocumentClient client = new DocumentClient(new Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
 
-      IEnumerable<string> documents = new List<string>()
+      IEnumerable<CosmosBaseObject<string>> documents = new List<CosmosBaseObject<string>>()
       {
-        "1",
-        "2",
-        "-123819",
-        "10",
-        "abc",
-        "3"
+        new CosmosBaseObject<string> { Id = "1", Partition = "partition" },
+        new CosmosBaseObject<string> { Id = "2", Partition = "partition" },
+        new CosmosBaseObject<string> { Id = "-123819", Partition = "partition" },
+        new CosmosBaseObject<string> { Id = "10", Partition = "partition" },
+        new CosmosBaseObject<string> { Id = "abc", Partition = "partition" },
+        new CosmosBaseObject<string> { Id = "3", Partition = "partition" }
       };
 
-      foreach (string documentId in documents)
+      foreach (CosmosBaseObject<string> document in documents)
       {
-        _storageProvider.DeleteAsync(documentId, "partition", log);
+        _storageProvider.DeleteAsync(document);
       }
     }
 
@@ -80,7 +77,7 @@ namespace Theatreers.Core.Tests
         Partition = "partition",
         InnerObject = "hello",
         Doctype = "show"
-      }, log);
+      });
 
 
       // Assert  
@@ -101,11 +98,11 @@ namespace Theatreers.Core.Tests
         Partition = "partition",
         InnerObject = "hello",
         Doctype = "show"
-      }, log));
+      }));
 
 
       // Assert  
-      Assert.IsAssignableFrom<ArgumentException>(_insert);
+      Assert.IsAssignableFrom<Exception>(_insert);
     }
 
 
@@ -121,7 +118,7 @@ namespace Theatreers.Core.Tests
         Id = "3",
         Doctype = "show",
         InnerObject = "hello"
-      }, log));
+      }));
 
 
       // Assert  
@@ -143,7 +140,7 @@ namespace Theatreers.Core.Tests
         Partition = "partition",
         Doctype = "show",
         InnerObject = "hello"
-      }, log));
+      }));
 
 
       // Assert  
@@ -166,7 +163,7 @@ namespace Theatreers.Core.Tests
         Id = "3",
         Partition = "partition",
         InnerObject = "hello"
-      }, log));
+      }));
 
 
       // Assert  
@@ -189,7 +186,7 @@ namespace Theatreers.Core.Tests
         Id = "3",
         Doctype = "show",
         Partition = "partition"
-      }, log));
+      }));
 
 
       // Assert  
@@ -207,9 +204,7 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
 
       // Act
-      Exception exception = await Record.ExceptionAsync(() => 
-                              _storageProvider.CreateAsync(null, log)
-                            );
+      Exception exception = await Record.ExceptionAsync(() => _storageProvider.CreateAsync(null));
 
       //Assert
       Assert.IsType<System.NullReferenceException>(exception);
@@ -234,10 +229,10 @@ namespace Theatreers.Core.Tests
     {
       // Arrange
       // Use existing records from constructor
-      ILogger log = new StubLogger();
+      CosmosBaseObject<string> _object = new CosmosBaseObject<string> { Id = reference, Partition = "partition" };
 
       // Act  
-      bool objectExists = await _storageProvider.CheckExistsAsync(reference, "partition", log);
+      bool objectExists = await _storageProvider.CheckExistsAsync(_object);
 
       //Assert
       Assert.True(objectExists);
@@ -250,10 +245,10 @@ namespace Theatreers.Core.Tests
     {
       // Arrange
       // Use existing records from constructor
-      ILogger log = new StubLogger();
+      CosmosBaseObject<string> _object = new CosmosBaseObject<string> { Id = reference, Partition = "partition" };
 
       // Act  
-      bool objectExists = await _storageProvider.CheckExistsAsync(reference, "partition", log);
+      bool objectExists = await _storageProvider.CheckExistsAsync(_object);
 
       //Assert
       Assert.False(objectExists);
@@ -266,10 +261,10 @@ namespace Theatreers.Core.Tests
     {
       // Arrange
       // Use existing records from constructor
-      ILogger log = new StubLogger();
+      CosmosBaseObject<string> _object = new CosmosBaseObject<string> { Id = reference, Partition = "partition" };
 
       // Act  
-      var deletion = await _storageProvider.DeleteAsync(reference, "partition", log);
+      var deletion = await _storageProvider.DeleteAsync(_object);
       Thread.Sleep(2000);
 
       // Assert
@@ -286,10 +281,10 @@ namespace Theatreers.Core.Tests
     {
       // Arrange
       // Use existing records from constructor
-      ILogger log = new StubLogger();
+      CosmosBaseObject<string> _object = new CosmosBaseObject<string> { Id = reference, Partition = "partition" };
 
       // Act 
-      var deletion = await _storageProvider.DeleteAsync(reference, "partition", log);
+      var deletion = await _storageProvider.DeleteAsync(_object);
       Thread.Sleep(2000);
 
       // Assert
@@ -309,13 +304,14 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
       CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
       {
+        Id = reference,
         Partition = "partition",
         InnerObject = "myNewString",
         Doctype = "show"
       };
 
       // Act  
-      var update = await _storageProvider.UpdateAsync(reference, _object, log);
+      var update = await _storageProvider.UpdateAsync(_object);
 
       // Assert
       IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
@@ -328,19 +324,20 @@ namespace Theatreers.Core.Tests
     [Theory]
     [InlineData("1")]
     [InlineData("2")]
-    public async Task UpdateAsyncFailssWithExistingKeyAndMissingInnerObject(string reference)
+    public async Task UpdateAsyncFailsWithExistingKeyAndMissingInnerObject(string reference)
     {
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
       CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
       {
+        Id = reference,
         Partition = "partition",
         Doctype = "show"
       };
 
       // Act  
-      var exception = await Record.ExceptionAsync(() => _storageProvider.UpdateAsync(reference, _object, log));
+      var exception = await Record.ExceptionAsync(() => _storageProvider.UpdateAsync(_object));
 
       // Assert  
       Assert.IsType<Exception>(exception);
@@ -352,19 +349,20 @@ namespace Theatreers.Core.Tests
     [Theory]
     [InlineData("1")]
     [InlineData("2")]
-    public async Task UpdateAsyncFailssWithExistingKeyAndMissingDoctype(string reference)
+    public async Task UpdateAsyncFailsWithExistingKeyAndMissingDoctype(string reference)
     {
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
       CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
       {
+        Id = reference,
         Partition = "partition",
         InnerObject = "myNewString"
       };
 
       // Act  
-      var exception = await Record.ExceptionAsync(() => _storageProvider.UpdateAsync(reference, _object, log));
+      var exception = await Record.ExceptionAsync(() => _storageProvider.UpdateAsync(_object));
 
       // Assert  
       Assert.IsType<Exception>(exception);
@@ -376,19 +374,20 @@ namespace Theatreers.Core.Tests
     [Theory]
     [InlineData("1")]
     [InlineData("2")]
-    public async Task UpdateAsyncFailssWithExistingKeyAndMissingPartition(string reference)
+    public async Task UpdateAsyncFailsWithExistingKeyAndMissingPartition(string reference)
     {
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
       CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
       {
+        Id = reference,
         InnerObject = "myNewString",
         Doctype = "show"
       };
 
       // Act  
-      var exception = await Record.ExceptionAsync(() => _storageProvider.UpdateAsync(reference, _object, log));
+      var exception = await Record.ExceptionAsync(() => _storageProvider.UpdateAsync(_object));
 
       // Assert  
       Assert.IsType<Exception>(exception);
@@ -408,18 +407,19 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
       CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
       {
+        Id = reference,
         Partition = "partition",
         InnerObject = "myNewString",
         Doctype = "show"
         
       };
-
       // Act  
-      var update = await _storageProvider.UpdateAsync(reference, _object, log);
+      var exception = await Record.ExceptionAsync(() => _storageProvider.UpdateAsync(_object));
 
-      // Assert
+      // Assert  
+      Assert.IsType<Exception>(exception);
+      Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
       IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
-      Assert.False(update);
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
       Assert.Empty(query.Where(e => e.InnerObject == "myNewString" && e.Partition == "partition"));
     }
@@ -442,7 +442,7 @@ namespace Theatreers.Core.Tests
       };
 
       // Act  
-      await _storageProvider.UpsertAsync(reference, _object, log);
+      await _storageProvider.UpsertAsync(_object);
 
       // Assert
       IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
@@ -451,11 +451,8 @@ namespace Theatreers.Core.Tests
       Assert.Equal(reference, query.Where(e => e.InnerObject == "myNewString" && e.Partition == "partition").Take(1).ToList().First().Id);
     }
 
-    [Theory]
-    [InlineData("10")]
-    [InlineData("abc")]
-    [InlineData("-123819")]
-    public async Task UpsertAsyncCannotCompleteWithMissingId(string reference)
+    [Fact]
+    public async Task UpsertAsyncCannotCompleteWithMissingId()
     {
       // Arrange
       // Use existing records from constructor
@@ -468,7 +465,7 @@ namespace Theatreers.Core.Tests
       };
 
       // Act  
-      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(reference, _object, log));
+      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(_object));
 
       // Assert  
       Assert.IsType<Exception>(exception);
@@ -494,7 +491,7 @@ namespace Theatreers.Core.Tests
       };
 
       // Act  
-      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(reference, _object, log));
+      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(_object));
 
       // Assert  
       Assert.IsType<Exception>(exception);
@@ -520,7 +517,7 @@ namespace Theatreers.Core.Tests
       };
 
       // Act  
-      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(reference, _object, log));
+      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(_object));
 
       // Assert  
       Assert.IsType<Exception>(exception);
@@ -546,7 +543,7 @@ namespace Theatreers.Core.Tests
       };
 
       // Act  
-      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(reference, _object, log));
+      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(_object));
 
       // Assert  
       Assert.IsType<Exception>(exception);
@@ -565,13 +562,14 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
       CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
       {
+        Id = reference,
         Partition = "partition",
         InnerObject = "myNewString",
         Doctype = "show"
       };
 
       // Act  
-      await _storageProvider.UpsertAsync(reference, _object, log);
+      await _storageProvider.UpsertAsync(_object);
 
       // Assert
       IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
@@ -596,7 +594,7 @@ namespace Theatreers.Core.Tests
       };
 
       // Act  
-      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(reference, _object, log));
+      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(_object));
 
       // Assert  
       Assert.IsType<Exception>(exception);
@@ -615,12 +613,13 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
       CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
       {
+        Id = reference,
         Partition = "partition",
         Doctype = "show"
       };
 
       // Act  
-      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(reference, _object, log));
+      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(_object));
 
       // Assert  
       Assert.IsType<Exception>(exception);
@@ -639,12 +638,13 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
       CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
       {
+        Id = reference,
         Partition = "partition",
         InnerObject = "myNewString"
       };
 
       // Act  
-      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(reference, _object, log));
+      var exception = await Record.ExceptionAsync(() => _storageProvider.UpsertAsync(_object));
 
       // Assert  
       Assert.IsType<Exception>(exception);
