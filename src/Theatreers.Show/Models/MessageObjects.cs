@@ -1,3 +1,4 @@
+using Theatreers.Core.Models;
 using Theatreers.Show.Abstractions;
 
 namespace Theatreers.Show.Models

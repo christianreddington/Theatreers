@@ -5,7 +5,7 @@ using Theatreers.Show.Abstractions;
 namespace Theatreers.Show.Models
 {
 
-  public class CosmosBaseObject<T>
+  public class ArchiveCosmosBaseObject<T>
   {
     [JsonProperty("id")]
     public string Id { get; set; }
