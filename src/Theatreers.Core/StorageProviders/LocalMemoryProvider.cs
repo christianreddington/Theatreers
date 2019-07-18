@@ -11,7 +11,7 @@ using Theatreers.Core.Models;
 
 namespace Theatreers.Core.Providers
 {
-  public class LocalMemoryProvider<T> : IStorageProvider<T> where T : ValidatableBaseObject
+  public class LocalMemoryProvider<T> : IStorageProvider<T> where T : IStorableValidatable
   {
     private IDictionary<string, T> _datastore = new ConcurrentDictionary<string, T>();
     public async Task<bool> CheckExistsAsync(T _object)

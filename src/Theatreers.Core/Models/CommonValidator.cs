@@ -7,17 +7,20 @@ using Theatreers.Core.Abstractions;
 
 namespace Theatreers.Core.Models
 {
-  public class ValidatableBaseObject : IValidatable, IStorable, IReplicable
+  public class ValidatableBaseObject : IStorableValidatable
   {
     [JsonProperty("id")]
     public string Id { get; set; }
-    [JsonProperty("ttl")]
-    public int Ttl { get; set; } = -1;
-
-    public int Version { get; set; }
+    [JsonProperty("createdAt")]
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     [JsonIgnore]
     public IList<ValidationRule> ValidationRules { get; set; } = new List<ValidationRule>();
+
+    public ValidatableBaseObject()
+    {
+      ValidationRules.Add(new ValidationRule() { AppliedToField = "Id", Mandatory = true });
+    }
 
     public virtual IDictionary<string, string> GetValidationErrors()
     {

@@ -17,25 +17,35 @@ namespace Theatreers.Core.Tests
 {
   public class StorageProviderTest  : IDisposable
   {
-    private IStorageProvider<CosmosBaseObject<string>> _storageProvider;
+    private IStorageProvider<PartitionedTestObject> _storageProvider;
     public StorageProviderTest()
     {
 
-      /*string databaseName = "theatreers";
+      string databaseName = "theatreers";
       string collectionName = "shows";
 
       IDocumentClient client = new DocumentClient(new Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
-      Uri showCollectionUri = UriFactory.CreateDocumentCollectionUri(databaseName, collectionName);*/
-      // _storageProvider = new CosmosStorageProvider<CosmosBaseObject<string>>(client, showCollectionUri, databaseName, collectionName);
-      _storageProvider = new LocalMemoryProvider<CosmosBaseObject<string>>();
-      _storageProvider.CreateAsync(new CosmosBaseObject<string>
+      Uri showCollectionUri = UriFactory.CreateDocumentCollectionUri(databaseName, collectionName);
+      Uri databaseUri = UriFactory.CreateDatabaseUri(databaseName);
+
+      DocumentCollection showCollection = new DocumentCollection()
+      {
+        Id = collectionName
+      };
+
+      showCollection.PartitionKey.Paths.Add("/partition");
+      showCollection.DefaultTimeToLive = -1;
+      client.CreateDocumentCollectionIfNotExistsAsync(databaseUri, showCollection);
+ 
+      _storageProvider = new CosmosStorageProvider<PartitionedTestObject>(client, showCollectionUri, databaseName, collectionName);
+      _storageProvider.CreateAsync(new PartitionedTestObject
       {
         Id = "1",
         Partition = "partition",
         InnerObject = "hello",
         Doctype = "show"
       });
-      _storageProvider.CreateAsync(new CosmosBaseObject<string>
+      _storageProvider.CreateAsync(new PartitionedTestObject
       {
         Id = "2",
         Partition = "partition",
@@ -46,19 +56,19 @@ namespace Theatreers.Core.Tests
 
     public void Dispose()
     {
-      // IDocumentClient client = new DocumentClient(new Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+       IDocumentClient client = new DocumentClient(new Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
 
-      IEnumerable<CosmosBaseObject<string>> documents = new List<CosmosBaseObject<string>>()
+      IEnumerable<PartitionedTestObject> documents = new List<PartitionedTestObject>()
       {
-        new CosmosBaseObject<string> { Id = "1", Partition = "partition" },
-        new CosmosBaseObject<string> { Id = "2", Partition = "partition" },
-        new CosmosBaseObject<string> { Id = "-123819", Partition = "partition" },
-        new CosmosBaseObject<string> { Id = "10", Partition = "partition" },
-        new CosmosBaseObject<string> { Id = "abc", Partition = "partition" },
-        new CosmosBaseObject<string> { Id = "3", Partition = "partition" }
+        new PartitionedTestObject { Id = "1", Partition = "partition" },
+        new PartitionedTestObject { Id = "2", Partition = "partition" },
+        new PartitionedTestObject { Id = "-123819", Partition = "partition" },
+        new PartitionedTestObject { Id = "10", Partition = "partition" },
+        new PartitionedTestObject { Id = "abc", Partition = "partition" },
+        new PartitionedTestObject { Id = "3", Partition = "partition" }
       };
 
-      foreach (CosmosBaseObject<string> document in documents)
+      foreach (PartitionedTestObject document in documents)
       {
         _storageProvider.DeleteAsync(document);
       }
@@ -71,7 +81,7 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
 
       // Act
-       await _storageProvider.CreateAsync(new CosmosBaseObject<string>
+       await _storageProvider.CreateAsync(new PartitionedTestObject
       {
         Id = "3",
         Partition = "partition",
@@ -81,7 +91,7 @@ namespace Theatreers.Core.Tests
 
 
       // Assert  
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(3, query.Where(doc => doc.Partition == "partition").Select(e => e.Id).ToList<String>().Count);
     }
 
@@ -92,7 +102,7 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
 
       // Act
-      Exception _insert = await Record.ExceptionAsync(() => _storageProvider.CreateAsync(new CosmosBaseObject<string>
+      Exception _insert = await Record.ExceptionAsync(() => _storageProvider.CreateAsync(new PartitionedTestObject
       {
         Id = "2",
         Partition = "partition",
@@ -113,7 +123,7 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
 
       // Act
-      var exception = await Record.ExceptionAsync(() => _storageProvider.CreateAsync(new CosmosBaseObject<string>
+      var exception = await Record.ExceptionAsync(() => _storageProvider.CreateAsync(new PartitionedTestObject
       {
         Id = "3",
         Doctype = "show",
@@ -124,7 +134,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(0, query.Where(doc => doc.Partition == "").Count());
     }
 
@@ -135,7 +145,7 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
 
       // Act
-      var exception = await Record.ExceptionAsync(() => _storageProvider.CreateAsync(new CosmosBaseObject<string>
+      var exception = await Record.ExceptionAsync(() => _storageProvider.CreateAsync(new PartitionedTestObject
       {
         Partition = "partition",
         Doctype = "show",
@@ -146,7 +156,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -158,7 +168,7 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
 
       // Act
-      var exception = await Record.ExceptionAsync(() => _storageProvider.CreateAsync(new CosmosBaseObject<string>
+      var exception = await Record.ExceptionAsync(() => _storageProvider.CreateAsync(new PartitionedTestObject
       {
         Id = "3",
         Partition = "partition",
@@ -169,7 +179,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -181,7 +191,7 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
 
       // Act
-      var exception = await Record.ExceptionAsync(() => _storageProvider.CreateAsync(new CosmosBaseObject<string>
+      var exception = await Record.ExceptionAsync(() => _storageProvider.CreateAsync(new PartitionedTestObject()
       {
         Id = "3",
         Doctype = "show",
@@ -192,7 +202,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -229,7 +239,7 @@ namespace Theatreers.Core.Tests
     {
       // Arrange
       // Use existing records from constructor
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string> { Id = reference, Partition = "partition" };
+      PartitionedTestObject _object = new PartitionedTestObject { Id = reference, Partition = "partition" };
 
       // Act  
       bool objectExists = await _storageProvider.CheckExistsAsync(_object);
@@ -245,7 +255,7 @@ namespace Theatreers.Core.Tests
     {
       // Arrange
       // Use existing records from constructor
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string> { Id = reference, Partition = "partition" };
+      PartitionedTestObject _object = new PartitionedTestObject { Id = reference, Partition = "partition" };
 
       // Act  
       bool objectExists = await _storageProvider.CheckExistsAsync(_object);
@@ -261,14 +271,14 @@ namespace Theatreers.Core.Tests
     {
       // Arrange
       // Use existing records from constructor
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string> { Id = reference, Partition = "partition" };
+      PartitionedTestObject _object = new PartitionedTestObject { Id = reference, Partition = "partition" };
 
       // Act  
       var deletion = await _storageProvider.DeleteAsync(_object);
       Thread.Sleep(2000);
 
       // Assert
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.True(deletion);
       Assert.Single(query.Where(e => e.Partition == "partition"));
     }
@@ -281,14 +291,14 @@ namespace Theatreers.Core.Tests
     {
       // Arrange
       // Use existing records from constructor
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string> { Id = reference, Partition = "partition" };
+      PartitionedTestObject _object = new PartitionedTestObject { Id = reference, Partition = "partition" };
 
       // Act 
       var deletion = await _storageProvider.DeleteAsync(_object);
       Thread.Sleep(2000);
 
       // Assert
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.False(deletion);
       Assert.Equal(2, query.Where(e => e.Partition == "partition").Count());
     }
@@ -302,7 +312,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         Partition = "partition",
@@ -314,7 +324,7 @@ namespace Theatreers.Core.Tests
       var update = await _storageProvider.UpdateAsync(_object);
 
       // Assert
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = (IQueryable<PartitionedTestObject>) await _storageProvider.Query();
       Assert.True(update);
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
       Assert.Equal("myNewString", query.Where(e => e.Id == reference && e.Partition == "partition").Take(1).ToList().First().InnerObject);
@@ -329,7 +339,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         Partition = "partition",
@@ -342,7 +352,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = (IQueryable<PartitionedTestObject>)await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -354,7 +364,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         Partition = "partition",
@@ -367,7 +377,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -379,7 +389,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         InnerObject = "myNewString",
@@ -392,7 +402,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -405,7 +415,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         Partition = "partition",
@@ -419,7 +429,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query() as IQueryable<PartitionedTestObject>;
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
       Assert.Empty(query.Where(e => e.InnerObject == "myNewString" && e.Partition == "partition"));
     }
@@ -433,7 +443,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         Partition = "partition",
@@ -445,7 +455,7 @@ namespace Theatreers.Core.Tests
       await _storageProvider.UpsertAsync(_object);
 
       // Assert
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query() as IQueryable<PartitionedTestObject>;
       Assert.Equal(3, query.Where(e => e.Partition == "partition").Count());
       Assert.Single(query.Where(e => e.InnerObject == "myNewString" && e.Partition == "partition"));
       Assert.Equal(reference, query.Where(e => e.InnerObject == "myNewString" && e.Partition == "partition").Take(1).ToList().First().Id);
@@ -457,7 +467,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Partition = "partition",
         InnerObject = "myNewString",
@@ -470,7 +480,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -483,7 +493,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         InnerObject = "myNewString",
@@ -496,7 +506,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -509,7 +519,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         Partition = "partition",
@@ -522,7 +532,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -535,7 +545,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         Partition = "partition",
@@ -548,7 +558,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -560,7 +570,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         Partition = "partition",
@@ -572,7 +582,7 @@ namespace Theatreers.Core.Tests
       await _storageProvider.UpsertAsync(_object);
 
       // Assert
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = (IQueryable<PartitionedTestObject>) await _storageProvider.Query();
       Assert.Equal(2, query.Where(e => e.Partition == "partition").Count());
       Assert.Single(query.Where(e => e.InnerObject == "myNewString" && e.Partition == "partition"));
       Assert.Equal(reference, query.Where(e => e.InnerObject == "myNewString" && e.Partition == "partition").Take(1).ToList().First().Id);
@@ -587,7 +597,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         InnerObject = "myNewString",
         Doctype = "show"
@@ -599,7 +609,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -611,7 +621,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         Partition = "partition",
@@ -624,7 +634,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
 
@@ -636,7 +646,7 @@ namespace Theatreers.Core.Tests
       // Arrange
       // Use existing records from constructor
       ILogger log = new StubLogger();
-      CosmosBaseObject<string> _object = new CosmosBaseObject<string>()
+      PartitionedTestObject _object = new PartitionedTestObject()
       {
         Id = reference,
         Partition = "partition",
@@ -649,7 +659,7 @@ namespace Theatreers.Core.Tests
       // Assert  
       Assert.IsType<Exception>(exception);
       Assert.Equal("There was at least one validation error. Please provide the appropriate information.", exception.Message);
-      IQueryable<CosmosBaseObject<string>> query = await _storageProvider.Query();
+      IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
       Assert.Equal(2, query.Where(doc => doc.Partition == "partition").Count());
     }
   }

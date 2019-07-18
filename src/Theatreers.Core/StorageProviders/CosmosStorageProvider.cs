@@ -11,7 +11,7 @@ using Microsoft.Azure.Documents.Client;
 
 namespace Theatreers.Core.Providers
 {
-  public class CosmosStorageProvider<T> : IStorageProvider<T> where T : ValidatableBaseObject, IPartitionable, IExpirable
+  public class CosmosStorageProvider<T> : IStorageProvider<T> where T : IPartitionable, IStorable, IValidatable, IExpirable
   {
     private IDocumentClient documentClient { get; set; }
     private Uri collectionUri { get; set; }
@@ -39,7 +39,7 @@ namespace Theatreers.Core.Providers
 
     public async Task<IQueryable<T>> Query()
     {
-      return documentClient.CreateDocumentQuery<T>(collectionUri);
+      return documentClient.CreateDocumentQuery<T>(collectionUri).AsQueryable();
     }
 
     public async Task<T> ReadAsync(T _object)
@@ -49,7 +49,6 @@ namespace Theatreers.Core.Providers
 
     public async Task CreateAsync(T _object)
     {
-
       if (_object.IsValid())
       {
         await documentClient.CreateDocumentAsync(collectionUri, _object);
@@ -95,20 +94,12 @@ namespace Theatreers.Core.Providers
 
     public async Task<bool> DeleteAsync(T _object)
     {
-      IQueryable<T> query = await Query();
-      T _deletedObject = query.Where(e => e.Id == _object.Id && e.Partition == _object.Partition).AsEnumerable().FirstOrDefault();
-      if (_deletedObject != null) 
-      { 
-        if (_deletedObject.IsValid())
-        {
-          _deletedObject.Ttl = 1;
-          await UpsertAsync(_deletedObject);
-          return true;
-        }
-        else
-        {
-          throw new Exception($"There was at least one validation error. Please provide the appropriate information.");
-        }
+      if (await CheckExistsAsync(_object)) 
+      {
+        T _deletedObject = await ReadAsync(_object);
+        _deletedObject.Ttl = 1;
+      await UpsertAsync(_deletedObject);
+      return true;
       }
       return false;
     }
