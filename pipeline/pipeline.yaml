@@ -14,16 +14,6 @@ stages:
         inputs:
           testResultsFormat: 'VSTest'
           testResultsFiles: '**/*.trx'
-      - task: DotNetCoreCLI@2
-        displayName: 'dotnet pack'
-        inputs:
-          command: pack
-          packagesToPack: 'src/Theatreers.Core/Theatreers.Core.csproj'
-      - task: DotNetCoreCLI@2
-        displayName: 'dotnet push'
-        inputs:
-          command: push
-          publishVstsFeed: 'Theatreers.Artifacts'
 - stage: Full_Build
   displayName: 'Full Build'
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
