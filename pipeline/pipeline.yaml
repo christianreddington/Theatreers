@@ -1,7 +1,7 @@
 stages:
 - stage: CI_Build
   displayName: 'CI Build'  
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/features'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   jobs:
     - job: 'build'
       displayName: 'Nightly Build'
