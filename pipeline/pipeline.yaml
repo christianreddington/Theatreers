@@ -10,7 +10,7 @@ steps:
 #  env: { 'AZURE_COSMOS_DB_CONNECTION_STRING': "$(CosmosDbEmulator.Endpoint)" }
 - task: PublishTestResults@2
   inputs:
-    testResultsFormat: 'XUnit'
+    testResultsFormat: 'VSTest'
     testResultsFiles: '**/*.trx'
 #- task: DotNetCoreCLI@2
 #  displayName: 'dotnet pack'
