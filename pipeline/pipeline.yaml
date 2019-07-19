@@ -1,24 +1,24 @@
 steps:
-#- task: CosmosDbEmulator@2
-#  inputs:
-#    containerName: 'azure-cosmosdb-emulator'
-#    enableAPI: 'SQL'
- #   portMapping: '8081:8081, 8901:8901, 8902:8902, 8979:8979, 10250:10250, 10251:10251, 10252:10252, 10253:10253, 10254:10254, 10255:10255, 10256:10256, 10350:10350'
-# #   hostDirectory: '$(Build.BinariesDirectory)\azure-cosmosdb-emulator'
-#- script: dotnet test src/Theatreers.Core.Tests/Theatreers.Core.Tests.csproj --logger trx
-#  displayName: 'Execute Tests'
-#  env: { 'AZURE_COSMOS_DB_CONNECTION_STRING': "$(CosmosDbEmulator.Endpoint)" }
+- task: CosmosDbEmulator@2
+  inputs:
+    containerName: 'azure-cosmosdb-emulator'
+    enableAPI: 'SQL'
+    portMapping: '8081:8081, 8901:8901, 8902:8902, 8979:8979, 10250:10250, 10251:10251, 10252:10252, 10253:10253, 10254:10254, 10255:10255, 10256:10256, 10350:10350'
+    hostDirectory: '$(Build.BinariesDirectory)\azure-cosmosdb-emulator'
+- script: dotnet test src/Theatreers.Core.Tests/Theatreers.Core.Tests.csproj --logger trx
+  displayName: 'Execute Tests'
+  env: { 'AZURE_COSMOS_DB_CONNECTION_STRING': "$(CosmosDbEmulator.Endpoint)" }
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'VSTest'
     testResultsFiles: '**/*.trx'
-#- task: DotNetCoreCLI@2
-#  displayName: 'dotnet pack'
-#  inputs:
-#    command: pack
- #   packagesToPack: 'src/Theatreers.Core/Theatreers.Core.csproj'
-#- task: DotNetCoreCLI@2
-#  displayName: 'dotnet push'
- # inputs:
- #   command: push
- #   publishVstsFeed: 'Theatreers.Artifacts'
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet pack'
+  inputs:
+    command: pack
+    packagesToPack: 'src/Theatreers.Core/Theatreers.Core.csproj'
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet push'
+  inputs:
+    command: push
+    publishVstsFeed: 'Theatreers.Artifacts'
