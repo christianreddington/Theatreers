@@ -24,7 +24,7 @@ namespace Theatreers.Core.Tests
       string databaseName = "theatreers";
       string collectionName = "shows";
 
-      IDocumentClient client = new DocumentClient(new Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+      IDocumentClient client = new DocumentClient(new Uri(getCosmosURI()), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
       Uri showCollectionUri = UriFactory.CreateDocumentCollectionUri(databaseName, collectionName);
       Uri databaseUri = UriFactory.CreateDatabaseUri(databaseName);
 
@@ -54,9 +54,17 @@ namespace Theatreers.Core.Tests
       });
     }
 
+    public string getCosmosURI(){
+      if (System.Environment.GetEnvironmentVariable("AZURE_COSMOS_DB_CONNECTION_STRING") == null){
+        return "https://localhost:8081";
+      }
+
+      return System.Environment.GetEnvironmentVariable("AZURE_COSMOS_DB_CONNECTION_STRING");
+    }
+
     public void Dispose()
     {
-       IDocumentClient client = new DocumentClient(new Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+       IDocumentClient client = new DocumentClient(new Uri(getCosmosURI()), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
 
       IEnumerable<PartitionedTestObject> documents = new List<PartitionedTestObject>()
       {
@@ -599,6 +607,7 @@ namespace Theatreers.Core.Tests
       ILogger log = new StubLogger();
       PartitionedTestObject _object = new PartitionedTestObject()
       {
+        Id = reference,
         InnerObject = "myNewString",
         Doctype = "show"
       };
