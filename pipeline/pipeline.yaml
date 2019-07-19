@@ -32,7 +32,7 @@ stages:
     - job: 'build'
       displayName: 'Full Build'
       pool:
-        name: 'VS2017'
+        name: 'Hosted VS2017'
       steps:
       - task: CosmosDbEmulator@2
         inputs:
