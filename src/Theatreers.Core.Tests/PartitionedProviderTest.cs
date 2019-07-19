@@ -15,10 +15,10 @@ using Xunit;
 
 namespace Theatreers.Core.Tests
 {
-  public class StorageProviderTest  : IDisposable
+  public class StorageProviderTest  : IAsyncLifetime
   {
     private IStorageProvider<PartitionedTestObject> _storageProvider;
-    public StorageProviderTest()
+    public async Task InitializeAsync()
     {
 
       string databaseName = "theatreers";
@@ -28,6 +28,13 @@ namespace Theatreers.Core.Tests
       Uri showCollectionUri = UriFactory.CreateDocumentCollectionUri(databaseName, collectionName);
       Uri databaseUri = UriFactory.CreateDatabaseUri(databaseName);
 
+      Database theatreersDatabase = new Database()
+      {
+        Id = databaseName
+      };
+
+      await client.CreateDatabaseIfNotExistsAsync(theatreersDatabase);
+
       DocumentCollection showCollection = new DocumentCollection()
       {
         Id = collectionName
@@ -35,17 +42,17 @@ namespace Theatreers.Core.Tests
 
       showCollection.PartitionKey.Paths.Add("/partition");
       showCollection.DefaultTimeToLive = -1;
-      client.CreateDocumentCollectionIfNotExistsAsync(databaseUri, showCollection);
+      await client.CreateDocumentCollectionIfNotExistsAsync(databaseUri, showCollection);
  
       _storageProvider = new CosmosStorageProvider<PartitionedTestObject>(client, showCollectionUri, databaseName, collectionName);
-      _storageProvider.CreateAsync(new PartitionedTestObject
+      await _storageProvider.CreateAsync(new PartitionedTestObject
       {
         Id = "1",
         Partition = "partition",
         InnerObject = "hello",
         Doctype = "show"
       });
-      _storageProvider.CreateAsync(new PartitionedTestObject
+      await _storageProvider.CreateAsync(new PartitionedTestObject
       {
         Id = "2",
         Partition = "partition",
@@ -62,7 +69,7 @@ namespace Theatreers.Core.Tests
       return System.Environment.GetEnvironmentVariable("AZURE_COSMOS_DB_CONNECTION_STRING");
     }
 
-    public void Dispose()
+    public async Task DisposeAsync()
     {
        IDocumentClient client = new DocumentClient(new Uri(getCosmosURI()), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
 
@@ -78,7 +85,7 @@ namespace Theatreers.Core.Tests
 
       foreach (PartitionedTestObject document in documents)
       {
-        _storageProvider.DeleteAsync(document);
+        await _storageProvider.DeleteAsync(document);
       }
     }
 
