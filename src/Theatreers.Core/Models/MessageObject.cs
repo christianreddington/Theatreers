@@ -10,9 +10,10 @@ namespace Theatreers.Core.Models
   }
 
 
-  public class MessageObject
+//  Test Comment- To test which builds will trigger
+  public class MessageObject<T> where T : IStorableValidatable
   {
     MessageHeaders Headers { get; set; }
-    IStorableValidatable Body { get; set; }
+    T Body { get; set; }
   }
 }

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>0.0.4</Version>
+    <Version>0.0.5</Version>
     <Authors>Theatreers</Authors>
     <Description>Core capabilities required across the numerous microservices of the Theatreers project</Description>
   </PropertyGroup>
