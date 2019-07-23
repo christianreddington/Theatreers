@@ -20,22 +20,25 @@ namespace Theatreers.Show.Actions
     {
       _collectionUri = UriFactory.CreateDocumentCollectionUri(databaseId, collectionId);
     }
-
-    public async Task CreateShowAsync(IDocumentClient client, CosmosBaseObject<ShowObject> _object)
+    public async Task CreateImageAsync(IDocumentClient client, MessageObject<ImageObject> _message)
     {
-      IStorageProvider<CosmosBaseObject<ShowObject>> store = new CosmosStorageProvider<CosmosBaseObject<ShowObject>>(client, _collectionUri);
-      await store.CreateAsync(_object);
-    }
-
-    public async Task CreateImageAsync(IDocumentClient client, CosmosBaseObject<ImageObject> _object)
-    {
+      CosmosBaseObject<ImageObject> _object = _message.Body;
       IStorageProvider<CosmosBaseObject<ImageObject>> store = new CosmosStorageProvider<CosmosBaseObject<ImageObject>>(client, _collectionUri);
       await store.CreateAsync(_object);
     }
 
-    public async Task CreateShowAsync(IDocumentClient client, CosmosBaseObject<NewsObject> _object)
+    public async Task CreateNewsAsync(IDocumentClient client, MessageObject<NewsObject> _message)
     {
+      CosmosBaseObject<NewsObject> _object = _message.Body;
       IStorageProvider<CosmosBaseObject<NewsObject>> store = new CosmosStorageProvider<CosmosBaseObject<NewsObject>>(client, _collectionUri);
+      await store.CreateAsync(_object);
+    }
+
+
+    public async Task CreateShowAsync(IDocumentClient client, MessageObject<ShowObject> _message)
+    {
+      CosmosBaseObject<ShowObject> _object = _message.Body;
+      IStorageProvider<CosmosBaseObject<ShowObject>> store = new CosmosStorageProvider<CosmosBaseObject<ShowObject>>(client, _collectionUri);
       await store.CreateAsync(_object);
     }
 
@@ -56,18 +59,18 @@ namespace Theatreers.Show.Actions
       await store.DeleteAsync(_object);
     }
 
-    public async Task<IEnumerable<CosmosBaseObject<ImageObject>>> GetImagesByShowAsync(IDocumentClient client, string showId)
+    public async Task<ICollection<CosmosBaseObject<ImageObject>>> GetImagesByShowAsync(IDocumentClient client, string showId)
     {
       IStorageProvider<CosmosBaseObject<ImageObject>> store = new CosmosStorageProvider<CosmosBaseObject<ImageObject>>(client, _collectionUri);
       IQueryable<CosmosBaseObject<ImageObject>> query = await store.Query();
-      return query.Where(e => e.Partition == showId && e.Doctype == DocTypes.Image).AsEnumerable();
+      return query.Where(e => e.Partition == showId && e.Doctype == DocTypes.Image).ToList();
     }
 
-    public async Task<IEnumerable<CosmosBaseObject<NewsObject>>> GetNewsByShowAsync(IDocumentClient client, string showId)
+    public async Task<ICollection<CosmosBaseObject<NewsObject>>> GetNewsByShowAsync(IDocumentClient client, string showId)
     {
       IStorageProvider<CosmosBaseObject<NewsObject>> store = new CosmosStorageProvider<CosmosBaseObject<NewsObject>>(client, _collectionUri);
       IQueryable<CosmosBaseObject<NewsObject>> query = await store.Query();
-      return query.Where(e => e.Partition == showId && e.Doctype == DocTypes.News).AsEnumerable();
+      return query.Where(e => e.Partition == showId && e.Doctype == DocTypes.News).ToList();
     }
     public async Task<CosmosBaseObject<ShowObject>> GetShowAsync(IDocumentClient client, string showId)
     {
@@ -81,11 +84,11 @@ namespace Theatreers.Show.Actions
       return await store.ReadAsync(_object);
     }
 
-    public async Task<IEnumerable<CosmosBaseObject<ShowListObject>>> GetShowsAsync(IDocumentClient client, string partitionKey)
+    public async Task<ICollection<CosmosBaseObject<ShowListObject>>> GetShowsAsync(IDocumentClient client, string partitionKey)
     {
       IStorageProvider<CosmosBaseObject<ShowListObject>> store = new CosmosStorageProvider<CosmosBaseObject<ShowListObject>>(client, _collectionUri);
       IQueryable<CosmosBaseObject<ShowListObject>> query = await store.Query();
-      return query.Where(e => e.Partition == partitionKey).AsEnumerable();
+      return query.Where(e => e.Partition == partitionKey).ToList();
     }
 
     public async Task<bool> UpdateShowAsync(IDocumentClient client, CosmosBaseObject<ShowObject> _object)

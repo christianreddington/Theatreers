@@ -4,7 +4,7 @@ using Theatreers.Show.Abstractions;
 namespace Theatreers.Show.Models
 {
 
-  public class NewsObject : IShowObject
+  public class NewsObject : PartitionableValidatableBaseObject, IPartitionable, IValidatable
   {
     [JsonProperty("datePublished")]
     public string DatePublished { get; set; }

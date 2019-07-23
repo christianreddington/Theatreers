@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 namespace Theatreers.Show.Models
 {
 
-  public class ShowListObject
+  public class ShowListObject : PartitionableValidatableBaseObject, IPartitionable, IValidatable
   {
     [JsonProperty("showName")]
     public string ShowName { get; set; }

@@ -19,22 +19,5 @@ namespace Theatreers.Show.Test
       // ... clean up test data from the database ...
     }
 
-
-    [Fact]
-    public async void GetObjectsReturnsNoValues()
-    {
-      // Arrange
-      // Mock<HttpRequest> req = new Mock<HttpRequest>();
-      Mock<ILogger> log = new Mock<ILogger>();
-      // req.SetupProperty(c => c.HttpContext.Request.Path, new PathString("/my/path/is/here"));
-
-      // Act
-      var result = await Theatreers.Show.Utils.ShowServiceHelper.GetObjectsAsync("show", "/api/show/notarealguid/show", documentClient, log.Object, "shows", "show");
-
-      // Assert
-      Assert.IsAssignableFrom<Microsoft.AspNetCore.Mvc.StatusCodeResult>(result);
-      var objectResponse = result as Microsoft.AspNetCore.Mvc.StatusCodeResult;
-      Assert.Equal(404 , objectResponse.StatusCode);
-    }
   }
 }

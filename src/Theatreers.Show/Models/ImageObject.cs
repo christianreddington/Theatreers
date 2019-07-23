@@ -3,7 +3,7 @@ using Theatreers.Show.Abstractions;
 
 namespace Theatreers.Show.Models
 {
-  public class ImageObject : IShowObject
+  public class ImageObject : PartitionableValidatableBaseObject, IPartitionable, IValidatable
   {
     [JsonProperty("ImageId")]
     public string ImageId { get; set; }

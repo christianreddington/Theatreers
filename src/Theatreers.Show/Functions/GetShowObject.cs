@@ -36,8 +36,12 @@ namespace Theatreers.Show.Functions
       Actions.Actions action = new Show.Actions.Actions("theatreers", "shows");
       CosmosBaseObject<ShowObject> _object = await action.GetShowAsync(documentClient, id);
 
-      return new OkObjectResult(_object);
-//ShowServiceHelper.GetObjectsAsync("show", req.Path.ToString(), documentClient, log, "shows", "show");
+      if (_object != null)
+      {
+        return new OkObjectResult(_object);
+      }
+
+      return new NotFoundObjectResult($"Sorry, but the show with ID {id} does not exist!");
     }
   }
 }

@@ -8,5 +8,6 @@ namespace Theatreers.Show.Models
   {
     public static string Image { get { return "Image"; } }
     public static string News { get { return "News"; } }
+    public static string Show { get { return "Show"; } }
   }
 }
