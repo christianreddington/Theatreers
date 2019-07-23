@@ -1,9 +1,10 @@
 using Newtonsoft.Json;
+using Theatreers.Core.Models;
 using Theatreers.Show.Abstractions;
 
 namespace Theatreers.Show.Models
 {
-  public class ImageObject : PartitionableValidatableBaseObject, IPartitionable, IValidatable
+  public class ImageObject : PartitionableStorableValidatableBaseObject
   {
     [JsonProperty("ImageId")]
     public string ImageId { get; set; }

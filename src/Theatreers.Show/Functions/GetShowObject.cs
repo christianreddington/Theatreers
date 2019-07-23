@@ -34,7 +34,7 @@ namespace Theatreers.Show.Functions
     )
     {
       Actions.Actions action = new Show.Actions.Actions("theatreers", "shows");
-      CosmosBaseObject<ShowObject> _object = await action.GetShowAsync(documentClient, id);
+      ShowObject _object = await action.GetShowAsync(documentClient, id);
 
       if (_object != null)
       {

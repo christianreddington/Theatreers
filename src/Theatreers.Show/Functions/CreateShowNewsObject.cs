@@ -42,7 +42,7 @@ namespace Theatreers.Show.Functions
       //Leverage the Cognitive Services Bing Search API and log out the action
       INewsSearchClient client = new NewsSearchClient(new ApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
       log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Searching for associated images");
-      Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.News newsResults = client.News.SearchAsync(query: $"{message.Body.InnerObject.ShowName} (Musical)").Result;
+      Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.News newsResults = client.News.SearchAsync(query: $"{message.Body.ShowName} (Musical)").Result;
 
       //Initialise a temporaryObject and loop through the results
       //For each result, create a new NewsObject which has a condensed set 
@@ -51,7 +51,7 @@ namespace Theatreers.Show.Functions
       //TODO: There is definitely a better way of doing this, but got a rough working approach out
       MessageObject<NewsObject> _object = new MessageObject<NewsObject>()
       {
-        Body = new CosmosBaseObject<NewsObject>()
+        Body = new NewsObject()
         {
           CreatedAt = DateTime.Now,
           Doctype = DocTypes.News,
@@ -59,14 +59,14 @@ namespace Theatreers.Show.Functions
         },
         Headers = new MessageHeaders(){
           RequestCorrelationId = message.Headers.RequestCorrelationId,
-          RequestCreatedAt = DateTime.Now.ToString()
+          RequestCreatedAt = DateTime.Now
         }
       };
       foreach (Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.NewsArticle newsItem in newsResults.Value)
       {
         try
         {
-          _object.Body.InnerObject = new NewsObject()
+          _object.Body = new NewsObject()
           {
             BingId = newsItem.BingId,
             DatePublished = newsItem.DatePublished,
@@ -75,11 +75,11 @@ namespace Theatreers.Show.Functions
           };
           Actions.Actions action = new Show.Actions.Actions(databaseName, collectionName);
           await action.CreateNewsAsync(documentClient, _object);
-          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Article Creation Success :: Image ID: {_object.Body.InnerObject.BingId} ");
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Article Creation Success :: Image ID: {_object.Body.BingId} ");
         }
         catch (Exception ex)
         {
-          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Article Creation Fail ::  :: Image ID: {_object.Body.InnerObject.BingId} - {ex.Message}");
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Article Creation Fail ::  :: Image ID: {_object.Body.BingId} - {ex.Message}");
           return new BadRequestResult();
         }
         finally
@@ -112,19 +112,23 @@ namespace Theatreers.Show.Functions
     {
       if (identity != null && identity.Identity.IsAuthenticated)
       {
+        NewsObject inputObject = JsonConvert.DeserializeObject<NewsObject>(await req.Content.ReadAsStringAsync());
 
-        MessageObject<NewsObject> message = new MessageObject<NewsObject>()
+        MessageObject <NewsObject> message = new MessageObject<NewsObject>()
         {
           Headers = new MessageHeaders()
           {
             RequestCorrelationId = Guid.NewGuid().ToString(),
-            RequestCreatedAt = DateTime.Now.ToString()
+            RequestCreatedAt = DateTime.Now
           },
-          Body = new CosmosBaseObject<NewsObject>()
+          Body = new NewsObject()
           {
             CreatedAt = DateTime.Now,
             Doctype = DocTypes.News,
-            InnerObject = JsonConvert.DeserializeObject<NewsObject>(await req.Content.ReadAsStringAsync()),
+            BingId = inputObject.BingId,
+            DatePublished = inputObject.DatePublished,
+            Name = inputObject.Name,
+            Url = inputObject.Url,
             Partition = id
           }
         };
@@ -137,11 +141,11 @@ namespace Theatreers.Show.Functions
         }
         catch (Exception ex)
         {
-          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of News Article {message.Body.InnerObject.Name} failed :: {ex.Message}");
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of News Article {message.Body.Name} failed :: {ex.Message}");
           return new BadRequestObjectResult($"There was an error: {ex.Message}");
         }
 
-        log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of News Article {message.Body.InnerObject.Name} succeeded");
+        log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of News Article {message.Body.Name} succeeded");
         return new OkResult();
       }
       else

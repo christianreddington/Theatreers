@@ -33,7 +33,7 @@ namespace Theatreers.Show.Functions
     )
     {
       Actions.Actions action = new Show.Actions.Actions("theatreers", "showlist");
-      ICollection<CosmosBaseObject<ShowListObject>> _object = await action.GetShowsAsync(documentClient, letter);
+      ICollection<ShowListObject> _object = await action.GetShowsAsync(documentClient, letter);
 
       if (_object.Count > 0 && _object != null)
       {

@@ -51,11 +51,11 @@ namespace Theatreers.Show.Functions
       }
       catch (Exception ex)
       {
-        log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of Show {message.Body.InnerObject.ShowName} failed :: {ex.Message}");
+        log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of Show {message.Body.ShowName} failed :: {ex.Message}");
         return new BadRequestObjectResult($"There was an error: {ex.Message}");
       }
 
-      log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Created of Show {message.Body.InnerObject.ShowName} succeeded");
+      log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Created of Show {message.Body.ShowName} succeeded");
       return new OkResult();
     }
 
@@ -84,17 +84,22 @@ namespace Theatreers.Show.Functions
           Headers = new MessageHeaders()
           {
             RequestCorrelationId = Guid.NewGuid().ToString(),
-            RequestCreatedAt = DateTime.Now.ToString()
+            RequestCreatedAt = DateTime.Now
           },
-          Body = new CosmosBaseObject<ShowObject>()
-          {
-            CreatedAt = DateTime.Now,
-            Doctype = "show",
-            Id = showId,
-            InnerObject = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync()),
-            Partition = showId
-          }
+          Body = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync())
         };
+
+        /*message.BOdy.
+
+        new ShowObject()
+        {
+          CreatedAt = DateTime.Now,
+          Doctype = "show",
+          Id = showId,
+          S
+                    InnerObject = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync()),
+          Partition = showId
+        }*/
 
         Actions.Actions action = new Show.Actions.Actions(databaseName, collectionName);
 
@@ -104,11 +109,11 @@ namespace Theatreers.Show.Functions
         }
         catch (Exception ex)
         {
-          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of Show {message.Body.InnerObject.ShowName} failed :: {ex.Message}");
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of Show {message.Body.ShowName} failed :: {ex.Message}");
           return new BadRequestObjectResult($"There was an error: {ex.Message}");
         }
 
-        log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Created of Show {message.Body.InnerObject.ShowName} succeeded");
+        log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Created of Show {message.Body.ShowName} succeeded");
         return new OkResult();
       } else {
         return new UnauthorizedResult();

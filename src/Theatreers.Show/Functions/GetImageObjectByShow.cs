@@ -28,7 +28,7 @@ namespace Theatreers.Show.Functions
         ILogger log)
     {
       Actions.Actions action = new Show.Actions.Actions("theatreers", "shows");
-      ICollection<CosmosBaseObject<ImageObject>> _object = await action.GetImagesByShowAsync(documentClient, id);
+      ICollection<ImageObject> _object = await action.GetImagesByShowAsync(documentClient, id);
 
       if (_object != null && _object.Count > 0)
       {

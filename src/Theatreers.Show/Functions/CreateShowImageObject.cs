@@ -41,7 +41,7 @@ namespace Theatreers.Show.Functions
       //Leverage the Cognitive Services Bing Search API and log out the action
       IImageSearchClient client = new ImageSearchClient(new ApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
       log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Searching for associated images");
-      Images imageResults = client.Images.SearchAsync(query: $"{message.Body.InnerObject.ShowName} (Musical)").Result;
+      Images imageResults = client.Images.SearchAsync(query: $"{message.Body.ShowName} (Musical)").Result;
 
       //Initialise a temporaryObject and loop through the results
       //For each result, create a new NewsObject which has a condensed set 
@@ -50,7 +50,7 @@ namespace Theatreers.Show.Functions
       //TODO: There is definitely a better way of doing this, but got a rough working approach out
       MessageObject<ImageObject> _object = new MessageObject<ImageObject>()
       {
-        Body = new CosmosBaseObject<ImageObject>()
+        Body = new ImageObject()
         {
           CreatedAt = DateTime.Now,
           Doctype = DocTypes.News,
@@ -59,14 +59,14 @@ namespace Theatreers.Show.Functions
         Headers = new MessageHeaders()
         {
           RequestCorrelationId = message.Headers.RequestCorrelationId,
-          RequestCreatedAt = DateTime.Now.ToString()
+          RequestCreatedAt = DateTime.Now
         }
       };
       foreach (Microsoft.Azure.CognitiveServices.Search.ImageSearch.Models.ImageObject image in imageResults.Value)
       {
         try
         {
-          _object.Body.InnerObject = new Models.ImageObject()
+          _object.Body = new Models.ImageObject()
           {
             ContentUrl = image.ContentUrl,
             HostPageUrl = image.HostPageUrl,
@@ -75,11 +75,11 @@ namespace Theatreers.Show.Functions
           };
           Actions.Actions action = new Show.Actions.Actions(databaseName, collectionName);
           await action.CreateImageAsync(documentClient, _object);
-          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Image Creation Success :: Image ID: {_object.Body.InnerObject.ImageId} ");
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Image Creation Success :: Image ID: {_object.Body.ImageId} ");
         }
         catch (Exception ex)
         {
-          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Image Creation Fail ::  :: Image ID: {_object.Body.InnerObject.ImageId} - {ex.Message}");
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Image Creation Fail ::  :: Image ID: {_object.Body.ImageId} - {ex.Message}");
           return new BadRequestResult();
         }
         finally
@@ -98,7 +98,7 @@ namespace Theatreers.Show.Functions
       [HttpTrigger(
         AuthorizationLevel.Anonymous,
         methods: "post",
-        Route = "show/{id}/news"
+        Route = "show/{id}/image"
       )]HttpRequestMessage req,
       [CosmosDB(
         databaseName: databaseName,
@@ -113,18 +113,21 @@ namespace Theatreers.Show.Functions
       if (identity != null && identity.Identity.IsAuthenticated)
       {
 
+        ImageObject inputObject = JsonConvert.DeserializeObject<ImageObject>(await req.Content.ReadAsStringAsync());
         MessageObject<ImageObject> message = new MessageObject<ImageObject>()
         {
           Headers = new MessageHeaders()
           {
             RequestCorrelationId = Guid.NewGuid().ToString(),
-            RequestCreatedAt = DateTime.Now.ToString()
+            RequestCreatedAt = DateTime.Now
           },
-          Body = new CosmosBaseObject<ImageObject>()
+          Body = new ImageObject()
           {
             CreatedAt = DateTime.Now,
             Doctype = DocTypes.News,
-            InnerObject = JsonConvert.DeserializeObject<ImageObject>(await req.Content.ReadAsStringAsync()),
+            ContentUrl = inputObject.ContentUrl,
+            HostPageUrl = inputObject.HostPageUrl,
+            ImageId = $"manual-{Guid.NewGuid().ToString()}",
             Partition = id
           }
         };
@@ -137,11 +140,11 @@ namespace Theatreers.Show.Functions
         }
         catch (Exception ex)
         {
-          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of Image {message.Body.InnerObject.Name} failed :: {ex.Message}");
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of Image {message.Body.Name} failed :: {ex.Message}");
           return new BadRequestObjectResult($"There was an error: {ex.Message}");
         }
 
-        log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of Image {message.Body.InnerObject.Name} succeeded");
+        log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of Image {message.Body.Name} succeeded");
         return new OkResult();
       }
       else

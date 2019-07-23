@@ -28,7 +28,7 @@ namespace Theatreers.Show.Functions
         ILogger log)
     {
       Actions.Actions action = new Show.Actions.Actions("theatreers", "shows");
-      ICollection<CosmosBaseObject<NewsObject>> _object = await action.GetNewsByShowAsync(documentClient, id);
+      ICollection<NewsObject> _object = await action.GetNewsByShowAsync(documentClient, id);
 
       if (_object != null && _object.Count > 0)
       {
