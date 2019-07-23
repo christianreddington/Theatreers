@@ -5,8 +5,10 @@ using Microsoft.Azure.Documents;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Theatreers.Show.Utils;
+using Theatreers.Core.Models;
+using Theatreers.Show.Models;
 
 namespace Theatreers.Show.Functions
 {
@@ -15,16 +17,25 @@ namespace Theatreers.Show.Functions
     [FunctionName("GetImageObjectByShow")]
     public static async Task<IActionResult> GetImageObjectByShowAsync(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get",
-                Route = "show/{id}/image")]HttpRequest req,
+          Route = "show/{id}/image")]HttpRequest req,
         [CosmosDB(
-                databaseName: "theatreers",
-                collectionName: "shows",
-                ConnectionStringSetting = "cosmosConnectionString",
-                Id = "{id}",
-                PartitionKey = "{id}")] IDocumentClient documentClient,
+          databaseName: "theatreers",
+          collectionName: "shows",
+          ConnectionStringSetting = "cosmosConnectionString",
+          Id = "{id}",
+          PartitionKey = "{id}")] IDocumentClient documentClient,
+        string id,
         ILogger log)
     {
-      return await ShowServiceHelper.GetObjectsAsync("image", req, documentClient, log, "shows", "show");
+      Actions.Actions action = new Show.Actions.Actions("theatreers", "shows");
+      ICollection<ImageObject> _object = await action.GetImagesByShowAsync(documentClient, id);
+
+      if (_object != null && _object.Count > 0)
+      {
+        return new OkObjectResult(_object);
+      }
+
+      return new NotFoundObjectResult($"Sorry, but the show with ID {id} does not exist!");
     }
   }
 }

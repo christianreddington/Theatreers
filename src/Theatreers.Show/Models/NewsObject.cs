@@ -1,10 +1,11 @@
 using Newtonsoft.Json;
+using Theatreers.Core.Models;
 using Theatreers.Show.Abstractions;
 
 namespace Theatreers.Show.Models
 {
 
-  public class NewsObject : IShowObject
+  public class NewsObject : PartitionableStorableValidatableBaseObject
   {
     [JsonProperty("datePublished")]
     public string DatePublished { get; set; }

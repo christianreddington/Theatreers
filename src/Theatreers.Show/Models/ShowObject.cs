@@ -1,9 +1,10 @@
 using Newtonsoft.Json;
+using Theatreers.Core.Models;
 using Theatreers.Show.Abstractions;
 
 namespace Theatreers.Show.Models
 {
-  public class ShowObject : IShowObject
+  public class ShowObject : PartitionableStorableValidatableBaseObject
   {
     [JsonProperty("showName")]
     public string ShowName { get; set; }

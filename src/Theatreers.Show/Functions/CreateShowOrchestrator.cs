@@ -7,6 +7,7 @@ using System;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Theatreers.Core.Models;
 using Theatreers.Show.Models;
 
 namespace Theatreers.Show.Functions
@@ -36,15 +37,14 @@ namespace Theatreers.Show.Functions
           Headers = new MessageHeaders()
           {
             RequestCorrelationId = correlationId,
-            RequestCreatedAt = DateTime.Now.ToString()
+            RequestCreatedAt = DateTime.Now
           },
-          Body = new CosmosBaseObject<ShowObject>()
-          {
-            InnerObject = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync()),
-            ShowId = showId,
-            IsDeleted = false
-          }
+          Body = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync())
         };
+
+        showObjectInput.Body.Id = showId;
+        showObjectInput.Body.IsDeleted = false;
+
         string eventData = JsonConvert.SerializeObject(showObjectInput);
 
         //Call the downstream "Activity" functions

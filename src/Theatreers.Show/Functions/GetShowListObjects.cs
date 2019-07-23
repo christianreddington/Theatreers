@@ -1,12 +1,15 @@
 
+using Dynamitey.DynamicObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Theatreers.Show.Utils;
+using Theatreers.Core.Models;
+using Theatreers.Show.Models;
 
 namespace Theatreers.Show.Functions
 {
@@ -15,7 +18,7 @@ namespace Theatreers.Show.Functions
     [FunctionName("GetShowListObjects")]
     public static async Task<IActionResult> GetShowListObjectsAsync(
       [HttpTrigger(
-        AuthorizationLevel.Anonymous, 
+        AuthorizationLevel.Anonymous,
         "get",
         Route = "shows/{letter}"
       )]HttpRequest req,
@@ -25,10 +28,19 @@ namespace Theatreers.Show.Functions
         ConnectionStringSetting = "cosmosConnectionString",
         PartitionKey = "{letter}"
       )] IDocumentClient documentClient,
+      string letter,
       ILogger log
     )
     {
-      return await ShowServiceHelper.GetObjectsAsync("showList", req, documentClient, log, "showlist", "shows");
+      Actions.Actions action = new Show.Actions.Actions("theatreers", "showlist");
+      ICollection<ShowListObject> _object = await action.GetShowsAsync(documentClient, letter);
+
+      if (_object.Count > 0 && _object != null)
+      {
+        return new OkObjectResult(_object);
+      }
+
+      return new NotFoundResult();
     }
   }
 }
