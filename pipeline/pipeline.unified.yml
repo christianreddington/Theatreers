@@ -1,21 +1,35 @@
+# Set the variables to be used across the entire pipeline
 variables:
   serviceName: 'show'
   tenantId: '8d56b40f-772a-4828-bf64-91905baabc85'
   projectName: 'Theatreers.Show'
   buildPublishPath: '$(Build.ArtifactStagingDirectory)/publish-path/'
   dotnetBuildOutputPath: '$(Build.ArtifactStagingDirectory)/build-output/'
+# Define the stages
+# The first stage defined is the Feature CI Build
+# The second stage defined is the PR Build when merging from Feature branches to master
+# The final stage is the Master CI Build / Release path
 stages:
 - stage: 'Feature_CI_Build'
+  # Notice how in some stages, there is dependsOn: [], this is because the default behaviour of
+  # yaml pipelines is to set dependencies from one stage to the next, if dependsOn is not defined.
   dependsOn: []
+  # Set a condition, that looks for a CI Trigger, an agent successfully found
+  # and that the branch is in the feature folder.
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'), contains(variables['Build.SourceBranch'], 'refs/heads/feature/'))
   displayName: 'Feature CI Build'
+  # The first job is run on an Ubuntu hosted image.
+  # As this is a feature branch, it just restores and 
+  # builds the project. On the backlog is designing some
+  # unit tests.
   jobs:
     - job: 'build'
-      displayName: 'Build'
+      displayName: 'Feature CI Build Job'
       pool:
         name: Hosted Ubuntu 1604
       steps:
         - task: DotNetCoreCLI@2
+          displayName: 'Restore project'
           inputs:
             command: 'restore'
             projects: 'src/Theatreers.Show/Theatreers.Show.csproj'
@@ -27,12 +41,19 @@ stages:
             projects: 'src/Theatreers.Show/Theatreers.Show.csproj'
             arguments: '--output $(dotnetBuildOutputPath) --configuration Release'
 - stage: 'PR_Build'
-  dependsOn: []
+  # Notice how in some stages, there is dependsOn: [], this is because the default behaviour of
+  # yaml pipelines is to set dependencies from one stage to the next, if dependsOn is not defined.
+  dependsOn: []  
+  # Set a condition, that looks for a Pull request as a build Trigger, 
+  # and that an was agent successfully found
   condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   displayName: 'PR Build from Feature into Master'
   jobs:
+    # This job sets up Sonar Cloud for analysis, restores the CSProj
+    # including any dependencies from Azure Artifacts. It then builds
+    # the project and reports the output to Sonar Cloud.
     - job: 'build'
-      displayName: 'Build'
+      displayName: 'PR Build from Feature into Master Job'
       pool:
         name: Hosted Ubuntu 1604
       steps:
@@ -43,13 +64,16 @@ stages:
             SonarCloud: 'Theatreers Sonarcloud'
             organization: 'theatreers'
             projectKey: $(projectName)
-            projectName: $(projectName)        
+            projectName: $(projectName) 
+        # Restore from Theatreers.Artifacts
         - task: DotNetCoreCLI@2
+          displayName: 'Restore project'
           inputs:
             command: 'restore'
             projects: 'src/Theatreers.Show/Theatreers.Show.csproj'
             feedsToUse: 'select'
             vstsFeed: 'fa1af919-202e-4e5c-91a7-dafe6f7d519e'
+        # Build the project
         - task: DotNetCoreCLI@2
           displayName: 'Build project'
           inputs:
@@ -59,7 +83,11 @@ stages:
         - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
           displayName: 'Run Code Analysis'
 - stage: 'Master_CI_Build'
+  # Set a condition, that looks for a CI Trigger, an agent successfully found
+  # and that the branch is the master branch.
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
+  # Notice how in some stages, there is dependsOn: [], this is because the default behaviour of
+  # yaml pipelines is to set dependencies from one stage to the next, if dependsOn is not defined.
   dependsOn: []
   displayName: 'Master CI Build'
   jobs:
@@ -76,12 +104,15 @@ stages:
             organization: 'theatreers'
             projectKey: $(projectName)
             projectName: $(projectName)
+        # Restore from Theatreers.Artifacts
         - task: DotNetCoreCLI@2
+          displayName: 'Restore project'
           inputs:
             command: 'restore'
             projects: 'src/Theatreers.Show/Theatreers.Show.csproj'
             feedsToUse: 'select'
             vstsFeed: 'fa1af919-202e-4e5c-91a7-dafe6f7d519e'
+        # Build the project
         - task: DotNetCoreCLI@2
           displayName: 'Build project'
           inputs:
@@ -92,14 +123,14 @@ stages:
           displayName: 'Run Code Analysis'
         # Zip the files to be published
         - task: ArchiveFiles@2
-          displayName: 'Archive files'
+          displayName: 'Zip files for later publishing to Azure Function'
           inputs:
             rootFolderOrFile: '$(dotnetBuildOutputPath)'
             includeRootFolder: false
             archiveFile: '$(buildPublishPath)/src/$(Build.BuildId).zip'
         # Copy the template to the deploy folder
         - task: CopyFiles@2
-          displayName: 'Copy Files to: $(buildPublishPath)/templates'
+          displayName: 'Copy ARM Template files for publishing: $(buildPublishPath)/templates'
           inputs:
             SourceFolder: deploy
             TargetFolder: '$(buildPublishPath)/deploy'
@@ -108,9 +139,13 @@ stages:
           displayName: 'Publish Pipeline Artifact'
           inputs:
             targetPath: '$(buildPublishPath)'
-- stage: 'devrelease'
+# Now we begin defining the release stage
+- stage: 'microservice_dev_release'
   displayName: 'Microservice Dev Release'
+  # As this is our release train to production, it should depend on our Master CI Build.
   dependsOn: 'Master_CI_Build'
+  # Set variables which should exist at a scope throughout this entire stage (i.e. across)
+  # multiple jobs
   variables: 
     artifactsAccountName: 'thmgtdevartifactstg'
     artifactsResourceGroupName: 'th-mgt-dev-rg'
@@ -121,20 +156,24 @@ stages:
     servicePrincipalObjectId: '6ee1bb40-e589-4884-90bc-c705d88bb3e0'
     serviceResourceGroupName: 'th-show-dev-rg'
   jobs:
-    - job: 'microservicereleaseglobal'
+    # The release has two phases or jobs, one for a global stamp (those
+    # resources all of the regional deployments, and the regional 
+    # deployments or stamps). The first is the global resources.
+    - job: 'microservice_dev_release_global_job'
       displayName: 'Microservice Release (Global)'
       pool:
         name: 'Hosted Windows 2019 with VS2019'
       steps:
+        # Download the artifacts published previously within this pipeline
         - task: DownloadPipelineArtifact@1
+          displayName: 'Download Pipeline Artifacts'
           inputs:
             buildType: 'current'
             artifactName: 'drop'
-            targetPath: '$(System.DefaultWorkingDirectory)/'
-        - task: CmdLine@2
-          inputs:
-            script: 'ls -la'
+            targetPath: '$(System.DefaultWorkingDirectory)/src/*.zip'
+        # Copy files to the management storage account
         - task: AzureFileCopy@3
+          displayName: 'Copy ARM Templates relating to Show Service to Management Storage Account: $(managementResourceGroupName)'
           inputs:
             SourcePath: '$(System.DefaultWorkingDirectory)/deploy/apim'
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
@@ -143,7 +182,10 @@ stages:
             ContainerName: 'templates'
             outputStorageUri: 'templateContainerUri'
             outputStorageContainerSasToken: 'templateContainerSasToken'
+        # Deploy the resources that sit at a global level, underpinning
+        # the regional stamps for the microservice.
         - task: AzureResourceGroupDeployment@2
+          displayName: 'Deploy Global Show Resource Group for $(environmentName) in $(resourceGroupName)'
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             action: 'Create Or Update Resource Group'
@@ -153,14 +195,21 @@ stages:
             csmFile: '$(System.DefaultWorkingDirectory)/deploy/show-global.json'
             overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName)'
             deploymentMode: 'Incremental'
-    - job: 'microservicereleaseregion'
-      displayName: 'Microservice Release (Europe)'
-      dependsOn: 'microservicereleaseglobal'
+    # This next job is the regional deployment.
+    - job: 'microservice_dev_release_regional_job'
+      displayName: 'Microservice Release (Regional)'
+      dependsOn: 'microservice_dev_release_global_job'
       pool:
         name: 'Hosted Windows 2019 with VS2019'
+      # Set variables which exist within the scope of this phase, i.e.
+      # the regional deployment for our dev environment.
       variables:
         aadClientId: '73e2635f-dadd-443b-9e47-89ac07f91485'
         aadB2cIssuer: 'https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn'
+      # Use a matrix strategy to repeat this set of tasks across multiple regions
+      # It means that it will execute maxParallel number of instances at a time of this
+      # phase, and use those key value pairs within each line item of the matrix to
+      # outline the build steps.
       strategy:
         matrix: 
           { 
@@ -171,12 +220,14 @@ stages:
       steps:        
         # Setup the Sonar Cloud for analysis
         - task: DownloadPipelineArtifact@1
+          displayName: 'Download Pipeline Artifacts'
           inputs:
             buildType: 'current'
             artifactName: 'drop'
             targetPath: '$(System.DefaultWorkingDirectory)/'
         # Copy the files from APIM folder in Git to Storage Account
         - task: AzureFileCopy@3
+          displayName: 'Copy ARM Templates relating to Show Service to Management Storage Account: $(managementResourceGroupName)'
           inputs:
             SourcePath: '$(System.DefaultWorkingDirectory)/deploy/apim'
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
@@ -187,6 +238,7 @@ stages:
             outputStorageContainerSasToken: 'templateContainerSasToken'
         # Create the appropriate storage account
         - task: AzureResourceGroupDeployment@2
+          displayName: 'Deploy $(region) Show Resource Group for $(environmentName) in $(resourceGroupName)'
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             action: 'Create Or Update Resource Group'
@@ -196,11 +248,16 @@ stages:
             csmFile: '$(System.DefaultWorkingDirectory)/deploy/show-regional.json'
             overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup) -aadClientId $(aadClientId) -aadB2cIssuer $(aadB2cIssuer)'
             deploymentMode: 'Incremental'
+        # Download the secres from Azure KeyVault
         - task: AzureKeyVault@1
+          displayName: 'Download secrets from $(keyvaultName)'
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             KeyVaultName: '$(keyvaultName)'
+        # Deploy the application to the Azure Function, and update appropriate
+        # configuration values on the Azure Function.
         - task: AzureFunctionApp@1
+          displayName: 'Deploy Code and App Configuration to $(functionAppName)'
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             appType: 'functionApp'
