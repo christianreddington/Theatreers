@@ -170,7 +170,7 @@ stages:
           inputs:
             buildType: 'current'
             artifactName: 'drop'
-            targetPath: '$(System.DefaultWorkingDirectory)/src/*.zip'
+            targetPath: '$(System.DefaultWorkingDirectory)'
         # Copy files to the management storage account
         - task: AzureFileCopy@3
           displayName: 'Copy ARM Templates relating to Show Service to Management Storage Account: $(managementResourceGroupName)'
