@@ -11,7 +11,7 @@ stages:
   displayName: 'Feature CI Build'
   jobs:
     - job: 'build'
-      displayName: 'Nightly Build'
+      displayName: 'Build'
       pool:
         name: Hosted Ubuntu 1604
       steps:
@@ -32,7 +32,7 @@ stages:
   displayName: 'PR Build from Feature into Master'
   jobs:
     - job: 'build'
-      displayName: 'PR Build'
+      displayName: 'Build'
       pool:
         name: Hosted Ubuntu 1604
       steps:
@@ -64,7 +64,7 @@ stages:
   displayName: 'Master CI Build'
   jobs:
     - job: 'build'
-      displayName: 'Master CI Build'
+      displayName: 'Build'
       pool:
         name: Hosted Ubuntu 1604
       steps:
@@ -154,7 +154,7 @@ stages:
             overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName)'
             deploymentMode: 'Incremental'
     - job: 'microservicereleaseregion'
-      displayName: 'Microservice Release (Regional)'
+      displayName: 'Microservice Release (Europe)'
       dependsOn: 'microservicereleaseglobal'
       pool:
         name: 'Hosted Windows 2019 with VS2019'
@@ -162,9 +162,12 @@ stages:
         aadClientId: '73e2635f-dadd-443b-9e47-89ac07f91485'
         aadB2cIssuer: 'https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn'
       strategy:
-        matrix: { westeurope: 
-          { region: 'West Europe', functionAppName: 'th-show-dev-weu-func', keyvaultName: 'th-show-dev-weu-kv', serviceResourceGroupName: 'th-show-dev-weu-rg' },
-          northeurope: { region: 'North Europe', functionAppName: 'th-show-dev-neu-func', keyvaultName: 'th-show-dev-neu-kv', serviceResourceGroupName: 'th-show-dev-neu-rg' } }
+        matrix: 
+          { 
+          westeurope: { region: 'West Europe', functionAppName: 'th-show-dev-weu-func', keyvaultName: 'th-show-dev-weu-kv', serviceResourceGroupName: 'th-show-dev-weu-rg' },
+          northeurope: { region: 'North Europe', functionAppName: 'th-show-dev-neu-func', keyvaultName: 'th-show-dev-neu-kv', serviceResourceGroupName: 'th-show-dev-neu-rg' }
+          }
+        maxParallel: 1
       steps:        
         # Setup the Sonar Cloud for analysis
         - task: DownloadPipelineArtifact@1
