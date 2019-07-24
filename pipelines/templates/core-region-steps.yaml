@@ -1,6 +1,6 @@
 steps:
         - task: AzureResourceGroupDeployment@2
-          displayName: 'Azure Deployment:Create Or Update Resource Group action on $(managementResourceGroupName)'
+          displayName: 'Ensure Management Storage Account $(managementResourceGroupName) is present'
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             resourceGroupName: '$(managementResourceGroupName)'
@@ -8,7 +8,7 @@ steps:
             csmFile: '$(System.DefaultWorkingDirectory)/arm-templates/storageAccount.json'
             overrideParameters: '-accountName $(managementStorageAccountName)'
         - task: AzureFileCopy@1
-          displayName: 'Copy ARM Templates to Blob Storage'
+          displayName: 'Copy ARM Templates to Management Storage Account: $(managementResourceGroupName)'
           inputs:
             SourcePath: '$(System.DefaultWorkingDirectory)/arm-templates'
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
@@ -18,7 +18,7 @@ steps:
             outputStorageUri: templateContainerUri
             outputStorageContainerSasToken: templateContainerSasToken
         - task: AzureResourceGroupDeployment@2
-          displayName: 'Azure Deployment:Create Or Update Resource Group action on $(resourceGroupName) copy'
+          displayName: 'Deploy $(region) Core Resource Group for $(environmentName) in $(resourceGroupName)y'
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             resourceGroupName: '$(resourceGroupName)'
