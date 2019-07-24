@@ -18,7 +18,7 @@ steps:
             outputStorageUri: templateContainerUri
             outputStorageContainerSasToken: templateContainerSasToken
         - task: AzureResourceGroupDeployment@2
-          displayName: 'Deploy $(region) Core Resource Group for $(environmentName) in $(resourceGroupName)y'
+          displayName: 'Deploy $(region) Core Resource Group for $(environmentName) in $(resourceGroupName)'
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             resourceGroupName: '$(resourceGroupName)'
