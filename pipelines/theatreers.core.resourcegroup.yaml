@@ -37,4 +37,41 @@ stages:
         name: 'Hosted Windows 2019 with VS2019'
       steps:
       - template: templates/core-global-steps.yaml
-
+- stage: 'Core_QA_Regional'
+  variables:
+    environmentName: 'qa'
+    managementResourceGroupName: 'th-mgt-qa-rg'
+    managementStorageAccountName: 'thmgtqaartifactstg'
+  dependsOn: [ 'Core_Dev_Global', 'Core_Dev_Regional']
+  displayName: 'Core - QA (Regional)'
+  jobs:
+    - job: 'Core_QA_Regional_Job'
+      displayName: 'Core - QA (Regional) Job'
+      pool:
+        name: 'Hosted Windows 2019 with VS2019'
+      strategy:
+        matrix: 
+          { 
+          westeurope: { namingPrefix: 'th-core-qa-weu', region: 'West Europe', resourceGroupName: 'th-core-qa-weu-rg'  },
+          northeurope: { namingPrefix: 'th-core-qa-neu', region: 'North Europe', resourceGroupName: 'th-core-qa-neu-rg'  }
+          }
+        maxParallel: 1
+      steps:
+      - template: templates/core-region-steps.yaml
+- stage: 'Core_QA_Global'
+  variables:
+    environmentName: 'qa'
+    managementResourceGroupName: 'th-mgt-qa-rg'
+    managementStorageAccountName: 'thmgtqaartifactstg'
+    namingPrefix: 'th-core-qa'
+    region: 'West Europe'
+    resourceGroupName: 'th-core-qa-rg'
+  dependsOn: [ 'Core_Dev_Global', 'Core_Dev_Regional']
+  displayName: 'Core - QA (Global)'
+  jobs:
+    - job: 'Core_QA_Global_Job'
+      displayName: 'Core - QA (Global) Job'
+      pool:
+        name: 'Hosted Windows 2019 with VS2019'
+      steps:
+      - template: templates/core-global-steps.yaml
