@@ -1,14 +1,14 @@
 stages:
-- stage: 'Core_Dev_Weu'
+- stage: 'Core_Dev_Regional'
   variables:
     environmentName: 'dev'
     managementResourceGroupName: 'th-mgt-dev-rg'
     managementStorageAccountName: 'thmgtdevartifactstg'
   dependsOn: []
-  displayName: 'Core - Dev (WEU)'
+  displayName: 'Core - Dev (Regional)'
   jobs:
-    - job: 'Core_Dev_Weu_Job'
-      displayName: 'Core - Dev (WEU) Job'
+    - job: 'Core_Dev_Regional_Job'
+      displayName: 'Core - Dev (Regional) Job'
       pool:
         name: 'Hosted Windows 2019 with VS2019'
       strategy:
@@ -20,4 +20,21 @@ stages:
         maxParallel: 1
       steps:
       - template: templates/core-region-steps.yaml
-      
+- stage: 'Core_Dev_Global'
+  variables:
+    environmentName: 'dev'
+    managementResourceGroupName: 'th-mgt-dev-rg'
+    managementStorageAccountName: 'thmgtdevartifactstg'
+    namingPrefix: 'th-core-dev'
+    region: 'West Europe'
+    resourceGroupName: 'th-core-dev-rg'
+  dependsOn: []
+  displayName: 'Core - Dev (Global)'
+  jobs:
+    - job: 'Core_Dev_Global_Job'
+      displayName: 'Core - Dev (Global) Job'
+      pool:
+        name: 'Hosted Windows 2019 with VS2019'
+      steps:
+      - template: templates/core-global-steps.yaml
+
