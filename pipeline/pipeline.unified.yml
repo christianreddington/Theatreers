@@ -173,7 +173,7 @@ stages:
             targetPath: '$(System.DefaultWorkingDirectory)'
         # Copy files to the management storage account
         - task: AzureFileCopy@3
-          displayName: 'Copy ARM Templates relating to Show Service to Management Storage Account: $(managementResourceGroupName)'
+          displayName: 'Copy ARM Templates relating to Show Service to Management Storage Account: $(artifactsAccountName)'
           inputs:
             SourcePath: '$(System.DefaultWorkingDirectory)/deploy/apim'
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
@@ -185,7 +185,7 @@ stages:
         # Deploy the resources that sit at a global level, underpinning
         # the regional stamps for the microservice.
         - task: AzureResourceGroupDeployment@2
-          displayName: 'Deploy Global Show Resource Group for $(environmentName) in $(resourceGroupName)'
+          displayName: 'Deploy Global Show Resource Group for $(environmentName) in $(serviceResourceGroupName)'
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             action: 'Create Or Update Resource Group'
@@ -227,7 +227,7 @@ stages:
             targetPath: '$(System.DefaultWorkingDirectory)/'
         # Copy the files from APIM folder in Git to Storage Account
         - task: AzureFileCopy@3
-          displayName: 'Copy ARM Templates relating to Show Service to Management Storage Account: $(managementResourceGroupName)'
+          displayName: 'Copy ARM Templates relating to Show Service to Management Storage Account: $(artifactsAccountName)'
           inputs:
             SourcePath: '$(System.DefaultWorkingDirectory)/deploy/apim'
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
@@ -238,7 +238,7 @@ stages:
             outputStorageContainerSasToken: 'templateContainerSasToken'
         # Create the appropriate storage account
         - task: AzureResourceGroupDeployment@2
-          displayName: 'Deploy $(region) Show Resource Group for $(environmentName) in $(resourceGroupName)'
+          displayName: 'Deploy $(region) Show Resource Group for $(environmentName) in $(serviceResourceGroupName)'
           inputs:
             azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             action: 'Create Or Update Resource Group'
