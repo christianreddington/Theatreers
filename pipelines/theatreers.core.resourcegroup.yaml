@@ -75,3 +75,41 @@ stages:
         name: 'Hosted Windows 2019 with VS2019'
       steps:
       - template: templates/core-global-steps.yaml
+- stage: 'Core_Prod_Regional'
+  variables:
+    environmentName: 'prod'
+    managementResourceGroupName: 'th-mgt-prd-rg'
+    managementStorageAccountName: 'thmgtprdartifactstg'
+  dependsOn: [ 'Core_QA_Global', 'Core_QA_Regional']
+  displayName: 'Core - Prod (Regional)'
+  jobs:
+    - job: 'Core_Prod_Regional_Job'
+      displayName: 'Core - Prod (Regional) Job'
+      pool:
+        name: 'Hosted Windows 2019 with VS2019'
+      strategy:
+        matrix: 
+          { 
+          westeurope: { namingPrefix: 'th-core-prd-weu', region: 'West Europe', resourceGroupName: 'th-core-prd-weu-rg'  },
+          northeurope: { namingPrefix: 'th-core-prd-neu', region: 'North Europe', resourceGroupName: 'th-core-prd-neu-rg'  }
+          }
+        maxParallel: 1
+      steps:
+      - template: templates/core-region-steps.yaml
+- stage: 'Core_Prod_Global'
+  variables:
+    environmentName: 'prod'
+    managementResourceGroupName: 'th-mgt-prd-rg'
+    managementStorageAccountName: 'thmgtprdartifactstg'
+    namingPrefix: 'th-core-prd'
+    region: 'West Europe'
+    resourceGroupName: 'th-core-prd-rg'
+  dependsOn: [ 'Core_QA_Global', 'Core_QA_Regional']
+  displayName: 'Core - Prod (Global)'
+  jobs:
+    - job: 'Core_Prod_Global_Job'
+      displayName: 'Core - Prod (Global) Job'
+      pool:
+        name: 'Hosted Windows 2019 with VS2019'
+      steps:
+      - template: templates/core-global-steps.yaml
