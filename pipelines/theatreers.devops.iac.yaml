@@ -1,15 +1,16 @@
 steps:
-- task: PowerShell@2
-  displayName: 'PowerShell Script'
-  inputs:
-    targetType: filePath
-    filePath: './arm-templates/arm-template-tests.ps1'
-    arguments: '-folder "arm-templates/" -outputFile "$(system.DefaultWorkingDirectory)/TestRun.xml"'
+- powershell: |
+   Install-Module -Name Pester -Force -Verbose -Scope CurrentUser 
+   Import-Module Pester
+   
+   ## Invoke Pester tests
+   Invoke-Pester -Script @{Path ='.\arm-templates\arm-template-tests.ps1'; Parameters = @{folder = '.\arm-templates\' }} -OutputFile TEST-CoreArmTemplates.xml -OutputFormat NUnitXml
+  displayName: 'Execute PESTER Tests'
 - task: PublishTestResults@2
   displayName: 'Publish Test Results **/*.xml'
   inputs:
     testResultsFormat: NUnit
-    testResultsFiles: '**/*.xml'
+    testResultsFiles: 'TEST-*.xml'
 - task: CopyFiles@2
   inputs:
     sourceFolder: ''# Optional

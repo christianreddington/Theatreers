@@ -1,25 +1,18 @@
 ﻿param(
-  [string]$folder = './',
-  [string] $outputFile = 'TestRun.xml'
+  [string]$folder = './'
 )
 
-#Register-PSRepository -Default -InstallationPolicy Trusted
-#Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
-Install-Module -Name Pester -Force -Verbose -Scope CurrentUser
- 
-Import-Module Pester
-Invoke-Pester -OutputFile $outputFile -OutputFormat NUnitXml
 Get-ChildItem "$folder" -Filter *.json | Foreach-Object {
     Write-Output "=> $($_.Name)"
 
     
-    $templateProperties = (get-content "$_." -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction SilentlyContinue)
+    $templateProperties = (get-content $_.FullName -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction SilentlyContinue)
     
     Describe "JSON Structure" {   
   
   
         It "$($_.Name) should be less than 1 Mb" {
-            Get-Item $_.Name | Select-Object -ExpandProperty Length | Should -BeLessOrEqual 1073741824
+            Get-Item $_.FullName | Select-Object -ExpandProperty Length | Should -BeLessOrEqual 1073741824
         }
         
         It "Converts from JSON" {
