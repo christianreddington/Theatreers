@@ -3,7 +3,7 @@
   [string] $outputFile = 'TestRun.xml'
 )
 
-Register-PSRepository -Name "PSGallery" –SourceLocation "https://www.powershellgallery.com/api/v2/" -InstallationPolicy Trusted
+Register-PSRepository -Default -InstallationPolicy Trusted
 Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
 Install-Module -Name Pester -Force -Verbose -Scope CurrentUser
  
