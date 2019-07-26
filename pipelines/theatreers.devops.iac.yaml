@@ -1,4 +1,15 @@
 steps:
+- task: PowerShell@2
+  displayName: 'PowerShell Script'
+  inputs:
+    targetType: filePath
+    filePath: './arm-templates/arm-template-tests.ps1'
+    arguments: '-folder "arm-templates/" -outputFile "$(system.DefaultWorkingDirectory)/TestRun.xml"'
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results **/*.xml'
+  inputs:
+    testResultsFormat: NUnit
+    testResultsFiles: '**/*.xml'
 - task: CopyFiles@2
   inputs:
     sourceFolder: ''# Optional
