@@ -4,7 +4,7 @@
 )
 
 #Register-PSRepository -Default -InstallationPolicy Trusted
-Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
+#Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
 Install-Module -Name Pester -Force -Verbose -Scope CurrentUser
  
 Import-Module Pester
