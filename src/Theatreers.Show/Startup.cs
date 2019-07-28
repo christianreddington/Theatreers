@@ -12,6 +12,7 @@ using Theatreers.Show.Abstractions;
 using Theatreers.Show.Actions;
 using Theatreers.Show;
 
+
 [assembly: FunctionsStartup(typeof(Startup))]
 
 namespace Theatreers.Show
@@ -23,7 +24,6 @@ namespace Theatreers.Show
     private static string _newsCollectionName = "shows";
     private static string _showCollectionName = "shows";
     private static string _showlistCollectionName = "showlist";
-    private static IConfiguration Configuration; 
     private static Uri _imageCollectionUri = UriFactory.CreateDocumentCollectionUri(_databaseId, _imageCollectionName);
     private static Uri _newsCollectionUri = UriFactory.CreateDocumentCollectionUri(_databaseId, _newsCollectionName);
     private static Uri _showCollectionUri = UriFactory.CreateDocumentCollectionUri(_databaseId, _showCollectionName);
@@ -31,6 +31,7 @@ namespace Theatreers.Show
     public override void Configure(IFunctionsHostBuilder builder)
     {
       var config = new ConfigurationBuilder()
+          .SetBasePath(Environment.CurrentDirectory)
           .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
           .AddEnvironmentVariables()
           .Build();
