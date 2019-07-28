@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Theatreers.Core.Abstractions;
 using Theatreers.Show.Models;
 
@@ -15,7 +16,7 @@ namespace Theatreers.Show.Functions
   public static class ChangeFeed
   {
     [FunctionName("ChangeFeed")]
-    public static async void ChangeFeedAsync(
+    public static async Task ChangeFeedAsync(
       [CosmosDBTrigger(
         databaseName: "theatreers",
         collectionName: "shows",
