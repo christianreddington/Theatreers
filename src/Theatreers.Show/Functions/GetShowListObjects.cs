@@ -9,38 +9,39 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Theatreers.Core.Models;
+using Theatreers.Show.Abstractions;
 using Theatreers.Show.Models;
 
 namespace Theatreers.Show.Functions
 {
-  public static class GetShowListObjects
+  public class GetShowListObjects
   {
-    [FunctionName("GetShowListObjects")]
-    public static async Task<IActionResult> GetShowListObjectsAsync(
+    private readonly IShowDomain _showDomain;
+
+    public GetShowListObjects(IShowDomain showDomain)
+    {
+      _showDomain = showDomain;
+    }
+
+    [FunctionName("GetShowListAsync")]
+    public async Task<IActionResult> GetShowListAsync(
       [HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
         Route = "shows/{letter}"
       )]HttpRequest req,
-      [CosmosDB(
-        databaseName: "theatreers",
-        collectionName: "showlist",
-        ConnectionStringSetting = "cosmosConnectionString",
-        PartitionKey = "{letter}"
-      )] IDocumentClient documentClient,
-      string letter,
-      ILogger log
-    )
+      ILogger log,
+      string letter)
     {
-      Actions.Actions action = new Show.Actions.Actions("theatreers", "showlist");
-      ICollection<ShowListObject> _object = await action.GetShowsAsync(documentClient, letter);
+      ICollection<ShowListObject> _object = await _showDomain.GetShowList(letter);
 
-      if (_object.Count > 0 && _object != null)
+      if (_object != null)
       {
         return new OkObjectResult(_object);
       }
 
-      return new NotFoundResult();
+      return new NotFoundObjectResult($"Sorry, but there are no shows that begin with {letter}!");
+
     }
   }
 }

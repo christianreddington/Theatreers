@@ -1,40 +1,37 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Threading.Tasks;
-using Theatreers.Core.Models;
-using Theatreers.Show.Actions;
+using Theatreers.Show.Abstractions;
 using Theatreers.Show.Models;
 
 namespace Theatreers.Show.Functions
 {
-  public static class GetShowObject
+  public class GetShowObject
   {
-    [FunctionName("GetShowObject")]
-    public static async Task<IActionResult> GetShowObjectsAsync(
+    private readonly IShowDomain _showDomain;
+
+    public GetShowObject(IShowDomain showDomain)
+    {
+      _showDomain = showDomain;
+    }
+
+    [FunctionName("GetShowAsync")]
+    public async Task<IActionResult> GetShowAsync(
       [HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
         Route = "show/{id}/show"
-      )]HttpRequest req,
-      [CosmosDB(
-        databaseName: "theatreers",
-        collectionName: "shows",
-        ConnectionStringSetting = "cosmosConnectionString",
-        Id = "{id}",
-        PartitionKey = "{id}"
-      )] IDocumentClient documentClient,
-      string id,
-      ILogger log
-    )
+      )]HttpRequest req, 
+      ILogger log,
+      string id)
     {
-      Actions.Actions action = new Show.Actions.Actions("theatreers", "shows");
-      ShowObject _object = await action.GetShowAsync(documentClient, id);
+      ShowObject _object = await _showDomain.GetShow(id);
 
       if (_object != null)
       {
@@ -42,6 +39,7 @@ namespace Theatreers.Show.Functions
       }
 
       return new NotFoundObjectResult($"Sorry, but the show with ID {id} does not exist!");
+
     }
   }
 }
