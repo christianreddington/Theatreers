@@ -58,64 +58,58 @@ namespace Theatreers.Show.Functions
     }
 
 
-    //[FunctionName("CreateShowImageObjectByHttpAsync")]
-    //public static async Task<IActionResult> CreateShowImageObjectByHttpAsync(
-    //  [HttpTrigger(
-    //    AuthorizationLevel.Anonymous,
-    //    methods: "post",
-    //    Route = "show/{id}/image"
-    //  )]HttpRequestMessage req,
-    //  [CosmosDB(
-    //    databaseName: databaseName,
-    //    collectionName: collectionName,
-    //    ConnectionStringSetting = "cosmosConnectionString"
-    //  )] IDocumentClient documentClient,
-    //  ClaimsPrincipal identity,
-    //  string id,
-    //  ILogger log
-    //    )
-    //{
-    //  if (identity != null && identity.Identity.IsAuthenticated)
-    //  {
 
-    //    ImageObject inputObject = JsonConvert.DeserializeObject<ImageObject>(await req.Content.ReadAsStringAsync());
-    //    MessageObject<ImageObject> message = new MessageObject<ImageObject>()
-    //    {
-    //      Headers = new MessageHeaders()
-    //      {
-    //        RequestCorrelationId = Guid.NewGuid().ToString(),
-    //        RequestCreatedAt = DateTime.Now
-    //      },
-    //      Body = new ImageObject()
-    //      {
-    //        CreatedAt = DateTime.Now,
-    //        Doctype = DocTypes.News,
-    //        ContentUrl = inputObject.ContentUrl,
-    //        HostPageUrl = inputObject.HostPageUrl,
-    //        ImageId = $"manual-{Guid.NewGuid().ToString()}",
-    //        Partition = id
-    //      }
-    //    };
+    [FunctionName("CreateImageObjectByHttpAsync")]
+    public async Task<IActionResult> CreateImageObjectByHttpAsync(
+      [HttpTrigger(
+        AuthorizationLevel.Anonymous,
+        methods: "post",
+        Route = "show/{id}/image"
+      )]HttpRequestMessage req,
+      ClaimsPrincipal identity,
+      string id,
+      ILogger log
+        )
+    {
+      if (identity != null && identity.Identity.IsAuthenticated)
+      {
+        ImageObject inputObject = JsonConvert.DeserializeObject<ImageObject>(await req.Content.ReadAsStringAsync());
 
-    //    Actions.Actions action = new Show.Actions.Actions(databaseName, collectionName);
+        MessageObject<ImageObject> message = new MessageObject<ImageObject>()
+        {
+          Headers = new MessageHeaders()
+          {
+            RequestCorrelationId = Guid.NewGuid().ToString(),
+            RequestCreatedAt = DateTime.Now
+          },
+          Body = new ImageObject()
+          {
+            CreatedAt = DateTime.Now,
+            Doctype = DocTypes.News,
+            ContentUrl = inputObject.ContentUrl,
+            HostPageUrl = inputObject.HostPageUrl,
+            ImageId = $"manual-{Guid.NewGuid().ToString()}",
+            Partition = id
+          }
+        };
 
-    //    try
-    //    {
-    //      await action.CreateImageAsync(documentClient, message);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //      log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of Image {message.Body.Name} failed :: {ex.Message}");
-    //      return new BadRequestObjectResult($"There was an error: {ex.Message}");
-    //    }
+        try
+        {
+          await _showDomain.CreateImageObject(message, log);
+        }
+        catch (Exception ex)
+        {
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of News Article {message.Body.Name} failed :: {ex.Message}");
+          return new BadRequestObjectResult($"There was an error: {ex.Message}");
+        }
 
-    //    log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of Image {message.Body.Name} succeeded");
-    //    return new OkResult();
-    //  }
-    //  else
-    //  {
-    //    return new UnauthorizedResult();
-    //  }
-    //}
+        log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Creation of News Article {message.Body.Name} succeeded");
+        return new OkResult();
+      }
+      else
+      {
+        return new UnauthorizedResult();
+      }
+    }
   }
 }

@@ -10,6 +10,9 @@ using Theatreers.Core.Models;
 using Theatreers.Show.Abstractions;
 using Theatreers.Show.Models;
 using ImageObject = Theatreers.Show.Models.ImageObject;
+using Microsoft.Azure.CognitiveServices.Search.NewsSearch;
+using NewsApiKeyServiceClientCredentials = Microsoft.Azure.CognitiveServices.Search.NewsSearch.ApiKeyServiceClientCredentials;
+using ImageApiKeyServiceClientCredentials = Microsoft.Azure.CognitiveServices.Search.ImageSearch.ApiKeyServiceClientCredentials;
 
 namespace Theatreers.Show.Actions
 {
@@ -22,6 +25,16 @@ namespace Theatreers.Show.Actions
       _dataLayer = dataLayer;
     }
 
+    public async Task<ICollection<ImageObject>> GetImageByShow(string id)
+    {
+      return await _dataLayer.GetImagesByShowAsync(id);
+    }
+
+    public async Task<ICollection<NewsObject>> GetNewsByShow(string id)
+    {
+      return await _dataLayer.GetNewsByShowAsync(id);
+    }
+
     public async Task<ShowObject> GetShow(string id)
     {
       return await _dataLayer.GetShowAsync(id);
@@ -31,10 +44,15 @@ namespace Theatreers.Show.Actions
       return await _dataLayer.GetShowsAsync(letter);
     }
 
+    public async Task CreateImageObject(MessageObject<ImageObject> message, ILogger log)
+    {
+      await _dataLayer.CreateImageAsync(message);
+    }
+
     public async Task CreateImageObjectsFromSearch(MessageObject<ShowObject> message, ILogger log)
     {
       //Leverage the Cognitive Services Bing Search API and log out the action
-      IImageSearchClient client = new ImageSearchClient(new ApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
+      IImageSearchClient client = new ImageSearchClient(new ImageApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
       log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Searching for associated images");
       Images imageResults = client.Images.SearchAsync(query: $"{message.Body.ShowName} (Musical)").Result;
 
@@ -75,6 +93,57 @@ namespace Theatreers.Show.Actions
         catch (Exception ex)
         {
           log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Image Creation Fail ::  :: Image ID: {_object.Body.ImageId} - {ex.Message}");
+        }
+      }
+    }
+    public async Task CreateNewsObject(MessageObject<NewsObject> message, ILogger log)
+    {
+      await _dataLayer.CreateNewsAsync(message);
+    }
+
+    public async Task CreateNewsObjectsFromSearch(MessageObject<ShowObject> message, ILogger log){
+      //Leverage the Cognitive Services Bing Search API and log out the action
+      INewsSearchClient client = new NewsSearchClient(new NewsApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
+      log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Searching for associated images");
+      Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.News newsResults = client.News.SearchAsync(query: $"{message.Body.ShowName} (Musical)").Result;
+
+      //Initialise a temporaryObject and loop through the results
+      //For each result, create a new NewsObject which has a condensed set 
+      //of properties, for storage in CosmosDB in line with the show data model
+      //Once looped through send an OK Result
+      //TODO: There is definitely a better way of doing this, but got a rough working approach out
+      MessageObject<NewsObject> _object = new MessageObject<NewsObject>()
+      {
+        Body = new NewsObject()
+        {
+          CreatedAt = DateTime.Now,
+          Doctype = DocTypes.News,
+          Partition = message.Body.Partition
+        },
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = message.Headers.RequestCorrelationId,
+          RequestCreatedAt = DateTime.Now
+        }
+      };
+      foreach (Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.NewsArticle newsItem in newsResults.Value)
+      {
+        try
+        {
+          _object.Body = new NewsObject()
+          {
+            BingId = newsItem.BingId,
+            DatePublished = newsItem.DatePublished,
+            Name = newsItem.Name,
+            Url = newsItem.Url
+          };
+
+          await _dataLayer.CreateNewsAsync(_object);
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Article Creation Success :: Image ID: {_object.Body.BingId} ");
+        }
+        catch (Exception ex)
+        {
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Article Creation Fail ::  :: Image ID: {_object.Body.BingId} - {ex.Message}");
         }
       }
     }
