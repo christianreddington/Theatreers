@@ -50,18 +50,18 @@ namespace Theatreers.Show
       await _showStore.CreateAsync(_object);
     }
 
-    public async Task DeleteImageAsync(ImageObject _object)
+    public async Task<bool> DeleteImageAsync(ImageObject _object)
     {
-      await _imageStore.DeleteAsync(_object);
+      return await _imageStore.DeleteAsync(_object);
     }
 
-    public async Task DeleteNewsAsync(NewsObject _object)
+    public async Task<bool> DeleteNewsAsync(NewsObject _object)
     {
-      await _newsStore.DeleteAsync(_object);
+      return await _newsStore.DeleteAsync(_object);
     }
-    public async Task DeleteShowAsync(ShowObject _object)
+    public async Task<bool> DeleteShowAsync(ShowObject _object)
     {
-      await _showStore.DeleteAsync(_object);
+      return await _showStore.DeleteAsync(_object);
     }
 
     public async Task<ICollection<ImageObject>> GetImagesByShowAsync(string showId)

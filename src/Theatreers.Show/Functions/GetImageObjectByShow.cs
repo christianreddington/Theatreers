@@ -22,24 +22,24 @@ namespace Theatreers.Show.Functions
       _showDomain = showDomain;
     }
 
-    [FunctionName("GetImageObjectByShow")]
+    [FunctionName("GetImageObjectsByShow")]
     public async Task<IActionResult> GetImageObjectByShowAsync(
         [HttpTrigger(
           AuthorizationLevel.Anonymous,
           "get",
-          Route = "show/{id}/image")]
+          Route = "show/{showId}/image")]
         HttpRequest req,
-        string id,
+        string showId,
         ILogger log)
     {
-      ICollection<NewsObject> _object = await _showDomain.GetNewsByShow(id);
+      ICollection<NewsObject> _object = await _showDomain.GetNewsByShow(showId);
 
       if (_object != null && _object.Count > 0)
       {
         return new OkObjectResult(_object);
       }
 
-      return new NotFoundObjectResult($"Sorry, but the show with ID {id} does not exist!");
+      return new NotFoundObjectResult($"Sorry, but the show with ID {showId} does not exist!");
     }
   }
 }

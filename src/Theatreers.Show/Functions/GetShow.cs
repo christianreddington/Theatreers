@@ -12,11 +12,11 @@ using Theatreers.Show.Models;
 
 namespace Theatreers.Show.Functions
 {
-  public class GetShowObject
+  public class GetShow
   {
     private readonly IShowDomain _showDomain;
 
-    public GetShowObject(IShowDomain showDomain)
+    public GetShow(IShowDomain showDomain)
     {
       _showDomain = showDomain;
     }
@@ -26,19 +26,19 @@ namespace Theatreers.Show.Functions
       [HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
-        Route = "show/{id}/show"
+        Route = "show/{showId}/show"
       )]HttpRequest req, 
       ILogger log,
-      string id)
+      string showId)
     {
-      ShowObject _object = await _showDomain.GetShow(id);
+      ShowObject _object = await _showDomain.GetShow(showId);
 
       if (_object != null)
       {
         return new OkObjectResult(_object);
       }
 
-      return new NotFoundObjectResult($"Sorry, but the show with ID {id} does not exist!");
+      return new NotFoundObjectResult($"Sorry, but the show with ID {showId} does not exist!");
 
     }
   }

@@ -64,10 +64,10 @@ namespace Theatreers.Show.Functions
       [HttpTrigger(
         AuthorizationLevel.Anonymous,
         methods: "post",
-        Route = "show/{id}/image"
+        Route = "show/{showId}/image"
       )]HttpRequestMessage req,
       ClaimsPrincipal identity,
-      string id,
+      string showId,
       ILogger log
         )
     {
@@ -89,7 +89,7 @@ namespace Theatreers.Show.Functions
             ContentUrl = inputObject.ContentUrl,
             HostPageUrl = inputObject.HostPageUrl,
             ImageId = $"manual-{Guid.NewGuid().ToString()}",
-            Partition = id
+            Partition = showId
           }
         };
 

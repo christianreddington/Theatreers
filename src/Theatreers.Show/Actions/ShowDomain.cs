@@ -13,6 +13,7 @@ using ImageObject = Theatreers.Show.Models.ImageObject;
 using Microsoft.Azure.CognitiveServices.Search.NewsSearch;
 using NewsApiKeyServiceClientCredentials = Microsoft.Azure.CognitiveServices.Search.NewsSearch.ApiKeyServiceClientCredentials;
 using ImageApiKeyServiceClientCredentials = Microsoft.Azure.CognitiveServices.Search.ImageSearch.ApiKeyServiceClientCredentials;
+using Theatreers.Show.Functions;
 
 namespace Theatreers.Show.Actions
 {
@@ -101,7 +102,8 @@ namespace Theatreers.Show.Actions
       await _dataLayer.CreateNewsAsync(message);
     }
 
-    public async Task CreateNewsObjectsFromSearch(MessageObject<ShowObject> message, ILogger log){
+    public async Task CreateNewsObjectsFromSearch(MessageObject<ShowObject> message, ILogger log)
+    {
       //Leverage the Cognitive Services Bing Search API and log out the action
       INewsSearchClient client = new NewsSearchClient(new NewsApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
       log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Searching for associated images");
@@ -146,6 +148,34 @@ namespace Theatreers.Show.Actions
           log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Article Creation Fail ::  :: Image ID: {_object.Body.BingId} - {ex.Message}");
         }
       }
+    }
+    public async Task CreateShowObject(MessageObject<ShowObject> message)
+    {
+      await _dataLayer.CreateShowAsync(message);
+    }
+    public async Task<bool> DeleteImageObject(MessageObject<ImageObject> message)
+    {
+      return await _dataLayer.DeleteImageAsync(message.Body);
+    }
+    public async Task<bool> DeleteNewsObject(MessageObject<NewsObject> message)
+    {
+      return await _dataLayer.DeleteNewsAsync(message.Body);
+    }
+    public async Task<bool> DeleteShowObject(MessageObject<ShowObject> message)
+    {
+      return await _dataLayer.DeleteShowAsync(message.Body);
+    }
+    public async Task<bool> UpdateImageObject(MessageObject<ImageObject> message)
+    {
+      return await _dataLayer.UpdateImageAsync(message.Body);
+    }
+    public async Task<bool> UpdateNewsObject(MessageObject<NewsObject> message)
+    {
+      return await _dataLayer.UpdateNewsAsync(message.Body);
+    }
+    public async Task<bool> UpdateShowObject(MessageObject<ShowObject> message)
+    {
+      return await _dataLayer.UpdateShowAsync(message.Body);
     }
   }
 }

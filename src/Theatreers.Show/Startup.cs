@@ -41,12 +41,6 @@ namespace Theatreers.Show
       builder.Services.AddScoped<IStorageProvider<NewsObject>, CosmosStorageProvider<NewsObject>>((s) => { return new CosmosStorageProvider<NewsObject>(client, _newsCollectionUri, _databaseId, _newsCollectionName); });
       builder.Services.AddScoped<IStorageProvider<ShowObject>, CosmosStorageProvider<ShowObject>>((s) => { return new CosmosStorageProvider<ShowObject>(client, _showCollectionUri, _databaseId, _showCollectionName); });
       builder.Services.AddScoped<IStorageProvider<ShowListObject>, CosmosStorageProvider<ShowListObject>>((s) => { return new CosmosStorageProvider<ShowListObject>(client, _showlistCollectionUri, _databaseId, _showlistCollectionName); });
-
-      IStorageProvider<ImageObject> _imageStore = new CosmosStorageProvider<ImageObject>(client, _imageCollectionUri, _databaseId, _imageCollectionName);
-      IStorageProvider<NewsObject> _newsStore = new CosmosStorageProvider<NewsObject>(client, _newsCollectionUri, _databaseId, _newsCollectionName);
-      IStorageProvider<ShowObject> _showStore = new CosmosStorageProvider<ShowObject>(client, _showCollectionUri, _databaseId, _showCollectionName);
-      IStorageProvider<ShowListObject> _showlistStore = new CosmosStorageProvider<ShowListObject>(client, _showlistCollectionUri, _databaseId, _showlistCollectionName);
-
       builder.Services.AddScoped<IDataLayer, DataLayer>();
       builder.Services.AddScoped<IShowDomain, ShowDomain>();
     }

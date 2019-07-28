@@ -10,9 +10,9 @@ namespace Theatreers.Show.Abstractions
     Task CreateImageAsync(MessageObject<ImageObject> _message);
     Task CreateNewsAsync(MessageObject<NewsObject> _message);
     Task CreateShowAsync(MessageObject<ShowObject> _message);
-    Task DeleteImageAsync(ImageObject _object);
-    Task DeleteNewsAsync(NewsObject _object);
-    Task DeleteShowAsync(ShowObject _object);
+    Task<bool> DeleteImageAsync(ImageObject _object);
+    Task<bool> DeleteNewsAsync(NewsObject _object);
+    Task<bool> DeleteShowAsync(ShowObject _object);
     Task<ICollection<ImageObject>> GetImagesByShowAsync(string showId);
     Task<ICollection<NewsObject>> GetNewsByShowAsync(string showId);
     Task<ShowObject> GetShowAsync(string showId);

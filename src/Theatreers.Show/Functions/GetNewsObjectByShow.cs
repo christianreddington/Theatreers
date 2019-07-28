@@ -27,19 +27,19 @@ namespace Theatreers.Show.Functions
         [HttpTrigger(
           AuthorizationLevel.Anonymous,
           "get",
-          Route = "show/{id}/news")]
+          Route = "show/{showId}/news")]
         HttpRequest req,
-        string id,
+        string showId,
         ILogger log)
     {
-      ICollection<ImageObject> _object = await _showDomain.GetImageByShow(id);
+      ICollection<ImageObject> _object = await _showDomain.GetImageByShow(showId);
 
       if (_object != null && _object.Count > 0)
       {
         return new OkObjectResult(_object);
       }
 
-      return new NotFoundObjectResult($"Sorry, but the show with ID {id} does not exist!");
+      return new NotFoundObjectResult($"Sorry, but the show with ID {showId} does not exist!");
     }
   }
 }

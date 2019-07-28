@@ -17,5 +17,12 @@ namespace Theatreers.Show.Abstractions
     Task CreateImageObjectsFromSearch(MessageObject<ShowObject> message, ILogger log);
     Task CreateNewsObject(MessageObject<NewsObject> message, ILogger log);
     Task CreateNewsObjectsFromSearch(MessageObject<ShowObject> message, ILogger log);
+    Task CreateShowObject(MessageObject<ShowObject> message);
+    Task<bool> DeleteImageObject(MessageObject<ImageObject> message);
+    Task<bool> DeleteNewsObject(MessageObject<NewsObject> message);
+    Task<bool> DeleteShowObject(MessageObject<ShowObject> message);
+    Task<bool> UpdateShowObject(MessageObject<ShowObject> message);
+    Task<bool> UpdateImageObject(MessageObject<ImageObject> message);
+    Task<bool> UpdateNewsObject(MessageObject<NewsObject> message);
   }
 }

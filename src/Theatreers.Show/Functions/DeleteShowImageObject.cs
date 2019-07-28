@@ -1,89 +1,87 @@
 
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.Azure.CognitiveServices.Search.ImageSearch;
-//using Microsoft.Azure.CognitiveServices.Search.ImageSearch.Models;
-//using Microsoft.Azure.Documents;
-//using Microsoft.Azure.Documents.Client;
-//using Microsoft.Azure.WebJobs;
-//using Microsoft.Azure.WebJobs.Extensions.Http;
-//using Microsoft.Extensions.Logging;
-//using Newtonsoft.Json;
-//using System;
-//using System.Linq;
-//using System.Net.Http;
-//using System.Security.Claims;
-//using System.Threading.Tasks;
-//using Theatreers.Show.Models;
-//using Theatreers.Show.Utils;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.CognitiveServices.Search.ImageSearch;
+using Microsoft.Azure.CognitiveServices.Search.ImageSearch.Models;
+using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using OfficeOpenXml;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Theatreers.Core.Models;
+using Theatreers.Show.Abstractions;
+using Theatreers.Show.Models;
+using Theatreers.Show.Utils;
+using ImageObject = Theatreers.Show.Models.ImageObject;
 
-//namespace Theatreers.Show.Functions
-//{
-//  public static class DeleteShowImageObject
-//  {
-//    [FunctionName("DeleteShowImageObject")]
+namespace Theatreers.Show.Functions
+{
+  public class DeleteShowImageObject
+  {
 
-//    public static async Task<IActionResult> DeleteShowImageObjectAsync(
-//      [HttpTrigger(
-//        AuthorizationLevel.Anonymous,
-//        methods: "DELETE",
-//        Route = "show/{id}/image/{imageid}"
-//      )] HttpRequestMessage req,
-//      ILogger log,
-//      [CosmosDB(
-//        databaseName: "theatreers",
-//        collectionName: "shows",
-//        ConnectionStringSetting = "cosmosConnectionString"
-//      )]  IDocumentClient documentClient,
-//      ClaimsPrincipal identity
-//    )
-//    {
-//      if (identity != null && identity.Identity.IsAuthenticated)
-//      {
-//        Uri showCollectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "shows");
-//        string correlationId = Guid.NewGuid().ToString();
-//        CosmosBaseObject<Models.ImageObject> submitObject = null;
-//        String requestId = req.RequestUri.AbsolutePath.Replace($"/api/show/", "").Replace($"/image/", "::");
-//        String[] ids = requestId.Split("::");
-//        Models.ImageObject message = new Models.ImageObject();
+    private IShowDomain _showDomain;
+    public DeleteShowImageObject(IShowDomain showDomain)
+    {
+      _showDomain = showDomain;
+    }
 
-//        var docExists = documentClient.CreateDocumentQuery<CosmosBaseObject<ShowObject>>(showCollectionUri, new FeedOptions { PartitionKey = new PartitionKey(ids[0]) })
-//                           .Where(doc => doc.Id == ids[1] && doc.Doctype == "image")
-//                           .AsEnumerable()
-//                           .Any();
+    [FunctionName("DeleteShowImageObject")]
 
-//        if (docExists)
-//        {
-//          try
-//          {
+    public async Task<IActionResult> DeleteShowImageObjectAsync(
+      [HttpTrigger(
+        AuthorizationLevel.Anonymous,
+        methods: "DELETE",
+        Route = "show/{showId}/image/{imageId}"
+      )] HttpRequestMessage req,
+      ILogger log,
+      ClaimsPrincipal identity,
+      string showId,
+      string imageId
+    )
+    {
+      if (identity != null && identity.Identity.IsAuthenticated)
+      {
+        MessageObject<ImageObject> message = new MessageObject<ImageObject>()
+        {
+          Headers = new MessageHeaders()
+          {
+            RequestCorrelationId = Guid.NewGuid().ToString(),
+            RequestCreatedAt = DateTime.Now
+          },
+          Body = new ImageObject()
+          {
+            Doctype = DocTypes.Image,
+            Id = imageId,
+            Partition = showId
+          }
+        };
 
-//            submitObject = new CosmosBaseObject<Models.ImageObject>()
-//            {
-//              Id = ids[1],
-//              Doctype = "image",
-//              ShowId = ids[0],
-//              Ttl = 10
-//            };
-
-//            await documentClient.UpsertDocumentAsync(showCollectionUri, submitObject);
-//            log.LogInformation($"[Request Correlation ID: {correlationId}] :: Image Deletion Success :: Object ID: {submitObject.Id} ");
-//          }
-//          catch (Exception ex)
-//          {
-//            log.LogInformation($"[Request Correlation ID: {correlationId}] :: Image Deletion Fail ::  :: Object ID: {submitObject.Id} - {ex.Message}");
-//            return new BadRequestResult();
-//          }
-//          return new OkResult();
-//        }
-//        else
-//        {
-//          return new NotFoundResult();
-//        }
-//      }
-//      else
-//      {
-//        return new UnauthorizedResult();
-//      }
-//    }
-//  }
-//}
+          try
+          {
+            if (await _showDomain.DeleteImageObject(message)){
+              return new OkResult();
+            } else
+            {
+              return new NotFoundResult();
+            }
+          }
+          catch (Exception ex)
+          {
+            log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Image Deletion Fail ::  :: Object ID: {imageId} - {ex.Message}");
+            return new BadRequestResult();
+          }
+        }
+        else
+        {
+          return new UnauthorizedResult();
+        }
+    }
+  }
+}

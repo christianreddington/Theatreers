@@ -55,10 +55,10 @@ namespace Theatreers.Show.Functions
       [HttpTrigger(
         AuthorizationLevel.Anonymous,
         methods: "post",
-        Route = "show/{id}/news"
+        Route = "show/{showId}/news"
       )]HttpRequestMessage req,
       ClaimsPrincipal identity,
-      string id,
+      string showId,
       ILogger log
         )
     {
@@ -81,7 +81,7 @@ namespace Theatreers.Show.Functions
             DatePublished = inputObject.DatePublished,
             Name = inputObject.Name,
             Url = inputObject.Url,
-            Partition = id
+            Partition = showId
           }
         };
 
