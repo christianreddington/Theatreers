@@ -7,10 +7,10 @@ using Theatreers.Core.Abstractions;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents;
 using Theatreers.Show.Utils;
-using Microsoft.Extensions.Configuration;
 using Theatreers.Show.Abstractions;
 using Theatreers.Show.Actions;
 using Theatreers.Show;
+using Microsoft.Extensions.Configuration.EnvironmentVariables;
 
 
 [assembly: FunctionsStartup(typeof(Startup))]
@@ -30,13 +30,7 @@ namespace Theatreers.Show
     private static Uri _showlistCollectionUri = UriFactory.CreateDocumentCollectionUri(_databaseId, _showlistCollectionName);
     public override void Configure(IFunctionsHostBuilder builder)
     {
-      var config = new ConfigurationBuilder()
-          .SetBasePath(Environment.CurrentDirectory)
-          .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-          .AddEnvironmentVariables()
-          .Build();
-
-      CosmosDBConnectionString cosmosDBConnectionString = new CosmosDBConnectionString(config.GetConnectionString("cosmosConnectionString"));
+      CosmosDBConnectionString cosmosDBConnectionString = new CosmosDBConnectionString(GetCosmosConnectionString("cosmosConnectionString"));
       IDocumentClient client = new DocumentClient(cosmosDBConnectionString.ServiceEndpoint, cosmosDBConnectionString.AuthKey);
       builder.Services.AddScoped<IStorageProvider<ImageObject>, CosmosStorageProvider<ImageObject>>((s) => { return new CosmosStorageProvider<ImageObject>(client, _imageCollectionUri, _databaseId, _imageCollectionName); });
       builder.Services.AddScoped<IStorageProvider<NewsObject>, CosmosStorageProvider<NewsObject>>((s) => { return new CosmosStorageProvider<NewsObject>(client, _newsCollectionUri, _databaseId, _newsCollectionName); });
@@ -44,6 +38,13 @@ namespace Theatreers.Show
       builder.Services.AddScoped<IStorageProvider<ShowListObject>, CosmosStorageProvider<ShowListObject>>((s) => { return new CosmosStorageProvider<ShowListObject>(client, _showlistCollectionUri, _databaseId, _showlistCollectionName); });
       builder.Services.AddScoped<IDataLayer, DataLayer>();
       builder.Services.AddScoped<IShowDomain, ShowDomain>();
+    }
+    public static string GetCosmosConnectionString(string name)
+    {
+      string conStr = System.Environment.GetEnvironmentVariable($"ConnectionStrings:{name}", EnvironmentVariableTarget.Process);
+      if (string.IsNullOrEmpty(conStr)) // Azure Functions App Service naming convention
+        conStr = System.Environment.GetEnvironmentVariable($"{name}", EnvironmentVariableTarget.Process);
+      return conStr;
     }
   }
 }
