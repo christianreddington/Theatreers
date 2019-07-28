@@ -1,93 +1,92 @@
 
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.Azure.CognitiveServices.Search.ImageSearch;
-//using Microsoft.Azure.CognitiveServices.Search.ImageSearch.Models;
-//using Microsoft.Azure.Documents;
-//using Microsoft.Azure.Documents.Client;
-//using Microsoft.Azure.WebJobs;
-//using Microsoft.Azure.WebJobs.Extensions.Http;
-//using Microsoft.Extensions.Logging;
-//using Newtonsoft.Json;
-//using System;
-//using System.Linq;
-//using System.Net.Http;
-//using System.Security.Claims;
-//using System.Threading.Tasks;
-//using Theatreers.Show.Models;
-//using Theatreers.Show.Utils;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.CognitiveServices.Search.ImageSearch;
+using Microsoft.Azure.CognitiveServices.Search.ImageSearch.Models;
+using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using System.Web.Http;
+using Theatreers.Core.Models;
+using Theatreers.Show.Abstractions;
+using Theatreers.Show.Models;
 
-//namespace Theatreers.Show.Functions
-//{
-//  public static class UpdateShowNewsObject
-//  {
-//    [FunctionName("UpdateShowNewsObject")]
+namespace Theatreers.Show.Functions
+{
+  public class UpdateShowNewsObject
+  {
 
-//    public static async Task<IActionResult> UpdateShowNewsObjectAsync(
-//      [HttpTrigger(
-//        AuthorizationLevel.Anonymous,
-//        methods: "PUT",
-//        Route = "show/{id}/news/{newsid}"
-//      )] HttpRequestMessage req,
-//      ILogger log,
-//      [CosmosDB(
-//        databaseName: "theatreers",
-//        collectionName: "shows",
-//        ConnectionStringSetting = "cosmosConnectionString"
-//      )]  IDocumentClient documentClient,
-//      ClaimsPrincipal identity
-//    )
-//    {
-//      if (identity != null && identity.Identity.IsAuthenticated)
-//      {
-//        Uri showCollectionUri = UriFactory.CreateDocumentCollectionUri("theatreers", "shows");
-//        string correlationId = Guid.NewGuid().ToString();
-//        CosmosBaseObject<Models.NewsObject> submitObject = null;
-//        String requestId = req.RequestUri.AbsolutePath.Replace($"/api/show/", "").Replace($"/news/", "::");
-//        String[] ids = requestId.Split("::");
-//        Models.NewsObject message = new Models.NewsObject();
+    private readonly IShowDomain _showDomain;
 
-//        var docExists = documentClient.CreateDocumentQuery<CosmosBaseObject<NewsObject>>(showCollectionUri, new FeedOptions { PartitionKey = new PartitionKey(ids[0]) })
-//                           .Where(doc => doc.Id == ids[1] && doc.Doctype == "news")
-//                           .AsEnumerable()
-//                           .Any();
+    public UpdateShowNewsObject(IShowDomain showDomain)
+    {
+      _showDomain = showDomain;
+    }
 
-//        if (docExists)
-//        {
-//          try
-//          {
-//            //Take the input as a string from the orchestrator function context
-//            //Deserialize into a transport object
-//            message = JsonConvert.DeserializeObject<Models.NewsObject>(await req.Content.ReadAsStringAsync());
-//            message.BingId = "manual";
+    [FunctionName("UpdateShowNewsObject")]
 
-//            submitObject = new CosmosBaseObject<Models.NewsObject>()
-//            {
-//              Id = ids[1],
-//              Doctype = "news",
-//              ShowId = ids[0],
-//              InnerObject = message
-//            };
+    public async Task<IActionResult> UpdateShowNewsObjectAsync(
+      [HttpTrigger(
+        AuthorizationLevel.Anonymous,
+        methods: "PUT",
+        Route = "show/{showId}/news/{newsId}"
+      )] HttpRequestMessage req,
+      ILogger log,
+      ClaimsPrincipal identity,
+      string showId,
+      string newsId
+    )
+    {
+      if (identity != null && identity.Identity.IsAuthenticated)
+      {
 
-//            await documentClient.UpsertDocumentAsync(showCollectionUri, submitObject);
-//            log.LogInformation($"[Request Correlation ID: {correlationId}] :: News Update Success :: Object ID: {submitObject.Id} ");
-//          }
-//          catch (Exception ex)
-//          {
-//            log.LogInformation($"[Request Correlation ID: {correlationId}] :: News Update Fail ::  :: Object ID: {submitObject.Id} - {ex.Message}");
-//            return new BadRequestResult();
-//          }
-//          return new OkResult();
-//        }
-//        else
-//        {
-//          return new NotFoundResult();
-//        }
-//      }
-//      else
-//      {
-//        return new UnauthorizedResult();
-//      }
-//    }
-//  }
-//}
+        // Initialise a message object, based upon the information passed into the Microservice
+        MessageObject<NewsObject> message = new MessageObject<NewsObject>()
+        {
+          Headers = new MessageHeaders()
+          {
+            RequestCorrelationId = Guid.NewGuid().ToString(),
+            RequestCreatedAt = DateTime.Now
+          },
+          Body = JsonConvert.DeserializeObject<NewsObject>(await req.Content.ReadAsStringAsync())
+        };
+        message.Body.Partition = showId;
+        message.Body.Doctype = DocTypes.News;
+        message.Body.Id = newsId;
+
+        // Try the UpdateObject method. If successful, return OK Result. Otherwise, return badrequestresult with an unexpected error.
+        // If an exception is generated, throw a BadRequestErrorMessage with the error message.
+        try
+        {
+          if (await _showDomain.UpdateNewsObject(message))
+          {
+            log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Update Success");
+            return new OkResult();
+          }
+          else
+          {
+            log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Update Fail");
+            return new BadRequestErrorMessageResult("An unexpected error occured");
+          }
+        }
+        catch (Exception ex)
+        {
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Update Fail :: {ex.Message}");
+          return new BadRequestErrorMessageResult(ex.Message);
+        }
+      }
+      else
+      {
+        return new UnauthorizedResult();
+      }
+    }
+  }
+}

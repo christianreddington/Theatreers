@@ -8,34 +8,38 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Theatreers.Core.Models;
+using Theatreers.Show.Abstractions;
 using Theatreers.Show.Models;
 
 namespace Theatreers.Show.Functions
 {
-  public static class GetNewsObjectByShow
+  public class GetNewsObjectByShow
   {
+    private readonly IShowDomain _showDomain;
+
+    public GetNewsObjectByShow(IShowDomain showDomain)
+    {
+      _showDomain = showDomain;
+    }
+
     [FunctionName("GetNewsObjectByShow")]
-    public static async Task<IActionResult> GetShowNewsObjectsAsync(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get",
-          Route = "show/{id}/news")]HttpRequest req,
-        [CosmosDB(
-          databaseName: "theatreers",
-          collectionName: "shows",
-          ConnectionStringSetting = "cosmosConnectionString",
-          Id = "{id}",
-          PartitionKey = "{id}")] IDocumentClient documentClient,
-        string id,
+    public async Task<IActionResult> GetShowNewsObjectsAsync(
+        [HttpTrigger(
+          AuthorizationLevel.Anonymous,
+          "get",
+          Route = "show/{showId}/news")]
+        HttpRequest req,
+        string showId,
         ILogger log)
     {
-      Actions.Actions action = new Show.Actions.Actions("theatreers", "shows");
-      ICollection<NewsObject> _object = await action.GetNewsByShowAsync(documentClient, id);
+      ICollection<ImageObject> _object = await _showDomain.GetImageByShow(showId);
 
       if (_object != null && _object.Count > 0)
       {
         return new OkObjectResult(_object);
       }
 
-      return new NotFoundObjectResult($"Sorry, but the show with ID {id} does not exist!");
+      return new NotFoundObjectResult($"Sorry, but the show with ID {showId} does not exist!");
     }
   }
 }

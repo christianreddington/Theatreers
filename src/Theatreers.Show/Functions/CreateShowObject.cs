@@ -13,24 +13,24 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Theatreers.Core.Models;
+using Theatreers.Show.Abstractions;
 using Theatreers.Show.Models;
 
 namespace Theatreers.Show.Functions
 {
-  public static class CreateShowObject
+  public class CreateShowObject
   {
-    private const string databaseName = "theatreers";
-    private const string collectionName = "shows";
+
+    private static IShowDomain _showDomain;
+    public CreateShowObject(IShowDomain showDomain)
+    {
+      _showDomain = showDomain;
+    }
 
     [FunctionName("CreateShowObjectByOrchestrator")]
     public static async Task<IActionResult> CreateShowObjectAsync(
       [OrchestrationTrigger] DurableOrchestrationContext context,
-      ILogger log,
-      [CosmosDB(
-        databaseName: databaseName,
-        collectionName: collectionName,
-        ConnectionStringSetting = "cosmosConnectionString"
-      )] IDocumentClient documentClient
+      ILogger log
     )
     {
       //Take the input as a string from the orchestrator function context
@@ -43,11 +43,9 @@ namespace Theatreers.Show.Functions
       message.Body.Id = message.Body.Partition;
       message.Body.CreatedAt = DateTime.Now;
 
-      Actions.Actions action = new Show.Actions.Actions(databaseName, collectionName);
-
       try
       {
-        await action.CreateShowAsync(documentClient, message);
+        await _showDomain.CreateShowObject(message);
       }
       catch (Exception ex)
       {
@@ -60,17 +58,12 @@ namespace Theatreers.Show.Functions
     }
 
     [FunctionName("CreateShowObjectByHttp")]
-    public static async Task<IActionResult> CreateShowObjectByHttpAsync(
+    public async Task<IActionResult> CreateShowObjectByHttpAsync(
       [HttpTrigger(
         AuthorizationLevel.Anonymous,
         "POST",
         Route = "show/show"
       )]HttpRequestMessage req,
-      [CosmosDB(
-        databaseName: "theatreers",
-        collectionName: "shows",
-        ConnectionStringSetting = "cosmosConnectionString"
-      )] IDocumentClient documentClient,
       ClaimsPrincipal identity,
       ILogger log
         )
@@ -89,23 +82,9 @@ namespace Theatreers.Show.Functions
           Body = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync())
         };
 
-        /*message.BOdy.
-
-        new ShowObject()
-        {
-          CreatedAt = DateTime.Now,
-          Doctype = "show",
-          Id = showId,
-          S
-                    InnerObject = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync()),
-          Partition = showId
-        }*/
-
-        Actions.Actions action = new Show.Actions.Actions(databaseName, collectionName);
-
         try
         {
-          await action.CreateShowAsync(documentClient, message);
+          await _showDomain.CreateShowObject(message);
         }
         catch (Exception ex)
         {
@@ -115,7 +94,9 @@ namespace Theatreers.Show.Functions
 
         log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Created of Show {message.Body.ShowName} succeeded");
         return new OkResult();
-      } else {
+      }
+      else
+      {
         return new UnauthorizedResult();
       }
     }
