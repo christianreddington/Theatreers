@@ -59,7 +59,7 @@ namespace Theatreers.Show.Functions
           Body = JsonConvert.DeserializeObject<NewsObject>(await req.Content.ReadAsStringAsync())
         };
         message.Body.Partition = showId;
-        message.Body.Doctype = DocTypes.Show;
+        message.Body.Doctype = DocTypes.News;
         message.Body.Id = newsId;
 
         // Try the UpdateObject method. If successful, return OK Result. Otherwise, return badrequestresult with an unexpected error.
@@ -68,18 +68,18 @@ namespace Theatreers.Show.Functions
         {
           if (await _showDomain.UpdateNewsObject(message))
           {
-            log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Image Update Success");
+            log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Update Success");
             return new OkResult();
           }
           else
           {
-            log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Image Update Success");
+            log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Update Fail");
             return new BadRequestErrorMessageResult("An unexpected error occured");
           }
         }
         catch (Exception ex)
         {
-          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Image Update Fail :: {ex.Message}");
+          log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: News Update Fail :: {ex.Message}");
           return new BadRequestErrorMessageResult(ex.Message);
         }
       }

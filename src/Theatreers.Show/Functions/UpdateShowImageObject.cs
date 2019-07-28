@@ -52,7 +52,7 @@ namespace Theatreers.Show.Functions
           Body = JsonConvert.DeserializeObject<ImageObject>(await req.Content.ReadAsStringAsync())
         };
         message.Body.Partition = showId;
-        message.Body.Doctype = DocTypes.Show;
+        message.Body.Doctype = DocTypes.Image;
         message.Body.Id = imageId;
 
         // Try the UpdateObject method. If successful, return OK Result. Otherwise, return badrequestresult with an unexpected error.
