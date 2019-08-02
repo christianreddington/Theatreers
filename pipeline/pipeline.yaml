@@ -24,7 +24,27 @@ stages:
       displayName: 'Nightly Build'
       pool:
         name: Hosted Ubuntu 1604
-      steps:
+      steps:      
+      # Setup the Sonar Cloud for analysis
+      - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+        displayName: 'Prepare analysis on SonarCloud'
+        inputs:
+          SonarCloud: 'Theatreers Sonarcloud'
+          organization: 'theatreers'
+          projectKey: $(projectName)
+          projectName: $(projectName) 
+      - task: WhiteSource Bolt@19
+        displayName: 'Execute WhiteSource Scanning'
+        inputs:
+          cwd: '$(System.DefaultWorkingDirectory)'      
+      - task: DotNetCoreCLI@2
+        displayName: 'dotnet build'
+        inputs:
+          command: 'build'
+          projects: 'src/Theatreers.Core.Tests/Theatreers.Core.Tests.csproj'
+      # Execute the Sonar Cloud Analysis, and push to Sonar Cloud
+      - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
+        displayName: 'Run Code Analysis'
       - script: dotnet test src/Theatreers.Core.Tests/Theatreers.Core.Tests.csproj --logger trx --filter ClassName=Theatreers.Core.Tests.NonPartitionedStorageProviderTest
         displayName: 'Execute Tests'
       - task: PublishTestResults@2
@@ -40,7 +60,28 @@ stages:
       displayName: 'Full Build'
       pool:
         name: 'Hosted VS2017'
-      steps:
+      steps:      
+      # Setup the Sonar Cloud for analysis
+      - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+        displayName: 'Prepare analysis on SonarCloud'
+        inputs:
+          SonarCloud: 'Theatreers Sonarcloud'
+          organization: 'theatreers'
+          projectKey: $(projectName)
+          projectName: $(projectName) 
+      # Execute WhiteSource bolt scanning
+      - task: WhiteSource Bolt@19
+        displayName: 'Execute WhiteSource Scanning'
+        inputs:
+          cwd: '$(System.DefaultWorkingDirectory)'          
+      - task: DotNetCoreCLI@2
+        displayName: 'dotnet build'
+        inputs:
+          command: 'build'
+          projects: 'src/Theatreers.Core.Tests/Theatreers.Core.Tests.csproj'   
+      # Execute the Sonar Cloud Analysis, and push to Sonar Cloud
+      - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
+        displayName: 'Run Code Analysis'
       - task: CosmosDbEmulator@2
         inputs:
           containerName: 'azure-cosmosdb-emulator'

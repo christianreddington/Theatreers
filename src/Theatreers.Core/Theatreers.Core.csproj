@@ -5,6 +5,7 @@
     <Version>0.0.6</Version>
     <Authors>Theatreers</Authors>
     <Description>Core capabilities required across the numerous microservices of the Theatreers project</Description>
+    <ProjectGuid>{F744F27E-B7A3-4339-A0CF-6D5D4A6A709C}</ProjectGuid>
   </PropertyGroup>
 
   <ItemGroup>
