@@ -50,12 +50,12 @@ namespace Theatreers.Show.Actions
       await _dataLayer.CreateImageAsync(message);
     }
 
-    public async Task CreateImageObjectsFromSearch(MessageObject<ShowObject> message, ILogger log)
+    public async Task CreateImageObjectsFromSearch(MessageObject<ShowObject> message, ILogger log, int count = 10)
     {
       //Leverage the Cognitive Services Bing Search API and log out the action
       IImageSearchClient client = new ImageSearchClient(new ImageApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
       log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Searching for associated images");
-      Images imageResults = client.Images.SearchAsync(query: $"{message.Body.ShowName} (Musical)").Result;
+      Images imageResults = client.Images.SearchAsync(query: $"{message.Body.ShowName} (Musical)", count: count).Result;
 
       //Initialise a temporaryObject and loop through the results
       //For each result, create a new NewsObject which has a condensed set 

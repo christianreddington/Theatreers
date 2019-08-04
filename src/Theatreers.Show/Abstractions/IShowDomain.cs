@@ -14,7 +14,7 @@ namespace Theatreers.Show.Abstractions
     Task<ICollection<ImageObject>> GetImageByShow(string id);
     Task<ICollection<NewsObject>> GetNewsByShow(string id);
     Task CreateImageObject(MessageObject<ImageObject> message, ILogger log);
-    Task CreateImageObjectsFromSearch(MessageObject<ShowObject> message, ILogger log);
+    Task CreateImageObjectsFromSearch(MessageObject<ShowObject> message, ILogger log, int count);
     Task CreateNewsObject(MessageObject<NewsObject> message, ILogger log);
     Task CreateNewsObjectsFromSearch(MessageObject<ShowObject> message, ILogger log);
     Task CreateShowObject(MessageObject<ShowObject> message);
