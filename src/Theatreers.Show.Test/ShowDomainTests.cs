@@ -31,9 +31,22 @@ namespace Theatreers.Show.Test
     private static List<string> ids = new List<string>() { "1", "2", "3", "4" };
 
 
+    public string getCosmosURI()
+    {
+      if (System.Environment.GetEnvironmentVariable("AZURE_COSMOS_DB_CONNECTION_STRING") == null)
+      {
+        return "https://localhost:8081";
+      }
+
+      return System.Environment.GetEnvironmentVariable("AZURE_COSMOS_DB_CONNECTION_STRING");
+    }
+
     public async Task InitializeAsync()
     {
-      IDocumentClient client = new DocumentClient(new System.Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+
+
+
+      IDocumentClient client = new DocumentClient(new Uri(getCosmosURI()), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
       IStorageProvider<ImageObject> _imageStore = new CosmosStorageProvider<ImageObject>(client, _imageCollectionUri, _databaseId, _imageCollectionName);
       IStorageProvider<NewsObject> _newsStore = new CosmosStorageProvider<NewsObject>(client, _newsCollectionUri, _databaseId, _newsCollectionName);
       IStorageProvider<ShowObject> _showStore = new CosmosStorageProvider<ShowObject>(client, _showCollectionUri, _databaseId, _showCollectionName);
@@ -46,7 +59,6 @@ namespace Theatreers.Show.Test
       string databaseName = "theatreers";
       string collectionName = "shows";
 
-      IDocumentClient documentClient = new DocumentClient(new Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
       Uri showCollectionUri = UriFactory.CreateDocumentCollectionUri(databaseName, collectionName);
       Uri databaseUri = UriFactory.CreateDatabaseUri(databaseName);
 
@@ -55,7 +67,7 @@ namespace Theatreers.Show.Test
         Id = databaseName
       };
 
-      await documentClient.CreateDatabaseIfNotExistsAsync(theatreersDatabase);
+      await client.CreateDatabaseIfNotExistsAsync(theatreersDatabase);
 
       DocumentCollection showCollection = new DocumentCollection()
       {
@@ -64,7 +76,7 @@ namespace Theatreers.Show.Test
 
       showCollection.PartitionKey.Paths.Add("/partition");
       showCollection.DefaultTimeToLive = -1;
-      await documentClient.CreateDocumentCollectionIfNotExistsAsync(databaseUri, showCollection);
+      await client.CreateDocumentCollectionIfNotExistsAsync(databaseUri, showCollection);
 
 
       foreach (string id in ids)
@@ -134,7 +146,7 @@ namespace Theatreers.Show.Test
       string databaseName = "theatreers";
       string collectionName = "shows";
 
-      IDocumentClient documentClient = new DocumentClient(new Uri("https://localhost:8081"), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+      IDocumentClient documentClient = new DocumentClient(new Uri(getCosmosURI()), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
       Uri showCollectionUri = UriFactory.CreateDocumentCollectionUri(databaseName, collectionName);
       Uri databaseUri = UriFactory.CreateDatabaseUri(databaseName);
 
