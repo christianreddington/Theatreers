@@ -50,12 +50,12 @@ namespace Theatreers.Show.Actions
       await _dataLayer.CreateImageAsync(message);
     }
 
-    public async Task CreateImageObjectsFromSearch(MessageObject<ShowObject> message, ILogger log)
+    public async Task CreateImageObjectsFromSearch(MessageObject<ShowObject> message, ILogger log, int count = 10)
     {
       //Leverage the Cognitive Services Bing Search API and log out the action
       IImageSearchClient client = new ImageSearchClient(new ImageApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
       log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Searching for associated images");
-      Images imageResults = client.Images.SearchAsync(query: $"{message.Body.ShowName} (Musical)").Result;
+      Images imageResults = client.Images.SearchAsync(query: $"{message.Body.ShowName} (Musical)", count: count).Result;
 
       //Initialise a temporaryObject and loop through the results
       //For each result, create a new NewsObject which has a condensed set 
@@ -102,12 +102,12 @@ namespace Theatreers.Show.Actions
       await _dataLayer.CreateNewsAsync(message);
     }
 
-    public async Task CreateNewsObjectsFromSearch(MessageObject<ShowObject> message, ILogger log)
+    public async Task CreateNewsObjectsFromSearch(MessageObject<ShowObject> message, ILogger log, int count)
     {
       //Leverage the Cognitive Services Bing Search API and log out the action
       INewsSearchClient client = new NewsSearchClient(new NewsApiKeyServiceClientCredentials(Environment.GetEnvironmentVariable("bingSearchSubscriptionKey")));
       log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Searching for associated images");
-      Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.News newsResults = client.News.SearchAsync(query: $"{message.Body.ShowName} (Musical)").Result;
+      Microsoft.Azure.CognitiveServices.Search.NewsSearch.Models.News newsResults = client.News.SearchAsync(query: $"{message.Body.ShowName} (Musical)", count: count).Result;
 
       //Initialise a temporaryObject and loop through the results
       //For each result, create a new NewsObject which has a condensed set 

@@ -40,7 +40,7 @@ namespace Theatreers.Show.Functions
 
       try
       {
-        await _showDomain.CreateNewsObjectsFromSearch(message, log);
+        await _showDomain.CreateNewsObjectsFromSearch(message, log, 10);
         return new OkResult();
       }
       catch

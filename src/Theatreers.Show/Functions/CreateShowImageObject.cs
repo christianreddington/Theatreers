@@ -48,7 +48,7 @@ namespace Theatreers.Show.Functions
 
       try
       {
-        await _showDomain.CreateImageObjectsFromSearch(message, log);
+        await _showDomain.CreateImageObjectsFromSearch(message, log, 10);
         return new OkResult();
       }
       catch

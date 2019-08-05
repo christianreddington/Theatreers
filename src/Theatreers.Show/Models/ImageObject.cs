@@ -6,6 +6,12 @@ namespace Theatreers.Show.Models
 {
   public class ImageObject : PartitionableStorableValidatableBaseObject
   {
+    public ImageObject() : base()
+    {
+      ValidationRules.Add(new ValidationRule() { AppliedToField = "ContentUrl", Mandatory = true });
+      ValidationRules.Add(new ValidationRule() { AppliedToField = "Name", Mandatory = true });
+    }
+
     [JsonProperty("ImageId")]
     public string ImageId { get; set; }
     [JsonProperty("contentUrl")]
