@@ -6,6 +6,10 @@ namespace Theatreers.Show.Models
 {
   public class ShowObject : PartitionableStorableValidatableBaseObject
   {
+    public ShowObject() : base()
+    {
+      ValidationRules.Add(new ValidationRule() { AppliedToField = "ShowName", Mandatory = true });
+    }
     [JsonProperty("showName")]
     public string ShowName { get; set; }
     [JsonProperty("description")]
