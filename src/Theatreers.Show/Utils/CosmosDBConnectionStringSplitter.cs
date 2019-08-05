@@ -3,7 +3,7 @@ using System.Data.Common;
 
 namespace Theatreers.Show.Utils
 {
-  internal class CosmosDBConnectionString
+  public class CosmosDBConnectionString
   {
     public CosmosDBConnectionString(string connectionString)
     {
@@ -27,5 +27,13 @@ namespace Theatreers.Show.Utils
     public Uri ServiceEndpoint { get; set; }
 
     public string AuthKey { get; set; }
+
+    public static string GetCosmosConnectionString(string name)
+    {
+      string conStr = System.Environment.GetEnvironmentVariable($"ConnectionStrings:{name}", EnvironmentVariableTarget.Process);
+      if (string.IsNullOrEmpty(conStr)) // Azure Functions App Service naming convention
+        conStr = System.Environment.GetEnvironmentVariable($"{name}", EnvironmentVariableTarget.Process);
+      return conStr;
+    }
   }
 }

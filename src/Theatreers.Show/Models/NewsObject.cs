@@ -7,6 +7,12 @@ namespace Theatreers.Show.Models
 
   public class NewsObject : PartitionableStorableValidatableBaseObject
   {
+    public NewsObject() : base()
+    {
+      ValidationRules.Add(new ValidationRule() { AppliedToField = "Url", Mandatory = true });
+      ValidationRules.Add(new ValidationRule() { AppliedToField = "Name", Mandatory = true });
+      ValidationRules.Add(new ValidationRule() { AppliedToField = "DatePublished", Mandatory = true });
+    }
     [JsonProperty("datePublished")]
     public string DatePublished { get; set; }
     [JsonProperty("bingId")]
