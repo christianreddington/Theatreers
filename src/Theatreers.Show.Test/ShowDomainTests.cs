@@ -1,6 +1,5 @@
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Logging;
-using Moq;
 using System;
 using System.Threading.Tasks;
 using Theatreers.Core.Abstractions;
@@ -8,14 +7,12 @@ using Theatreers.Show.Abstractions;
 using Theatreers.Show.Models;
 using Theatreers.Core.Providers;
 using Xunit;
-using Theatreers.Show.Utils;
 using Microsoft.Azure.Documents;
 using Theatreers.Core.Models;
 using Theatreers.Show.Actions;
-using Dynamitey.DynamicObjects;
 using System.Collections.Generic;
-using System.Collections;
 using System.Threading;
+using System.Collections;
 
 namespace Theatreers.Show.Test
 {
@@ -70,7 +67,8 @@ namespace Theatreers.Show.Test
       await documentClient.CreateDocumentCollectionIfNotExistsAsync(databaseUri, showCollection);
 
 
-      foreach (string id in ids){
+      foreach (string id in ids)
+      {
         await _showDomain.CreateShowObject(new MessageObject<ShowObject>()
         {
           Body = new ShowObject()
@@ -166,15 +164,62 @@ namespace Theatreers.Show.Test
 
 
     [Theory]
-    [InlineData("5")]
-    [InlineData("6")]
-    [InlineData("7")]
-    [InlineData("8")]
-    public async Task CheckImagesExistByShowIdThatDoesntExist(string showId)
+    [InlineData("1")]
+    [InlineData("2")]
+    [InlineData("3")]
+    [InlineData("4")]
+    public async Task GetImageObjectByShowSucceedsForValidId(string showId)
     {
       // Arrange
       int idAsInteger = 0;
+      int expectedCount = 0;
       Int32.TryParse(showId, out idAsInteger);
+      expectedCount = idAsInteger * idAsInteger;
+
+      // Act  
+      ICollection<NewsObject> newsObjects = await _showDomain.GetNewsByShow(showId);
+
+      //Assert
+      Assert.Equal(expectedCount, newsObjects.Count);
+    }
+
+    [Theory]
+    [InlineData("1")]
+    [InlineData("2")]
+    [InlineData("3")]
+    [InlineData("4")]
+    public async Task GetNewsObjectByShowSucceedsForValidId(string showId)
+    {
+      // Arrange
+      int idAsInteger = 0;
+      int expectedCount = 0;
+      Int32.TryParse(showId, out idAsInteger);
+      expectedCount = idAsInteger * idAsInteger;
+
+      // Act  
+      ICollection<NewsObject> newsObjects = await _showDomain.GetNewsByShow(showId);
+
+      //Assert
+      Assert.Equal(expectedCount, newsObjects.Count);
+    }
+
+
+    [Fact]
+    public async Task GetNewsObjectByShowReturnsZeroForNonExistingId()
+    {
+      string showId = "5";
+
+      // Act  
+      ICollection<NewsObject> newsObjects = await _showDomain.GetNewsByShow(showId);
+
+      //Assert
+      Assert.Equal(0, newsObjects.Count);
+    }
+
+    [Fact]
+    public async Task GetImageObjectByShowReturnsZeroForNonExistingId()
+    {
+      string showId = "5";
 
       // Act  
       ICollection<ImageObject> imageObjects = await _showDomain.GetImageByShow(showId);
@@ -188,27 +233,7 @@ namespace Theatreers.Show.Test
     [InlineData("2")]
     [InlineData("3")]
     [InlineData("4")]
-    public async Task CheckNewsExistsByShow(string showId)
-    {
-      // Arrange
-      int idAsInteger = 0;
-      int expectedCount = 0;
-      Int32.TryParse(showId, out idAsInteger);
-      expectedCount = idAsInteger * idAsInteger;
-
-      // Act  
-      ICollection<NewsObject> newsObjects = await _showDomain.GetNewsByShow(showId);
-
-      //Assert
-      Assert.Equal(expectedCount, newsObjects .Count);
-    }
-
-    [Theory]
-    [InlineData("1")]
-    [InlineData("2")]
-    [InlineData("3")]
-    [InlineData("4")]
-    public async Task CheckShowExists(string showId)
+    public async Task GetShowSucceedsWithValidId(string showId)
     {
       // Arrange
       int idAsInteger = 0;
@@ -220,7 +245,46 @@ namespace Theatreers.Show.Test
       //Assert
       Assert.NotNull(showObject);
     }
-    
+
+
+
+    [Theory]
+    [InlineData("P")]
+    [InlineData("J")]
+    public async Task GetShowListSucceedsWithValidPartition(string partition)
+    {
+      // Act  
+      ICollection<ShowListObject> showList = await _showDomain.GetShowList(partition);
+
+      //Assert
+      Assert.NotNull(showList);
+      Assert.Equal(1, showList.Count);
+    }
+
+    [Fact]
+    public async Task GetShowListReturnzZeroWithNonExistingPartition()
+    {
+      string partition = "NotAPartition";
+      // Act  
+      ICollection<ShowListObject> showList = await _showDomain.GetShowList(partition);
+
+      //Assert
+      Assert.NotNull(showList);
+      Assert.Equal(0, showList.Count);
+    }
+
+    [Fact]
+    public async Task GetShowReturnsNullWithInvalidId()
+    {
+      string showId = "5";
+
+      // Act  
+      ShowObject showObject = await _showDomain.GetShow(showId);
+
+      //Assert
+      Assert.Null(showObject);
+    }
+
     [Theory]
     [InlineData("1")]
     [InlineData("2")]
@@ -231,7 +295,7 @@ namespace Theatreers.Show.Test
       int idAsInteger = 0;
       Int32.TryParse(showId, out idAsInteger);
       int numberOfChildObjects = idAsInteger * idAsInteger;
-               
+
       // Act
       for (int i = 0; i < numberOfChildObjects; i++)
       {
@@ -368,27 +432,27 @@ namespace Theatreers.Show.Test
       string imageId = "100";
       string showId = "1";
 
-        ImageObject imageObject = new ImageObject()
-        {
-          Id = $"i{imageId}",
-          Partition = showId,
-          Doctype = DocTypes.Image,
-          Name = $"Example Show {showId}",
-          ContentUrl = "http://localhost.com"
-        };
+      ImageObject imageObject = new ImageObject()
+      {
+        Id = $"i{imageId}",
+        Partition = showId,
+        Doctype = DocTypes.Image,
+        Name = $"Example Show {showId}",
+        ContentUrl = "http://localhost.com"
+      };
 
-        MessageObject<ImageObject> message = new MessageObject<ImageObject>
+      MessageObject<ImageObject> message = new MessageObject<ImageObject>
+      {
+        Headers = new MessageHeaders()
         {
-          Headers = new MessageHeaders()
-          {
-            RequestCorrelationId = Guid.NewGuid().ToString(),
-            RequestCreatedAt = DateTime.Now
-          },
-          Body = imageObject
-        };
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = imageObject
+      };
 
-        // Act
-        Assert.False(await _showDomain.DeleteImageObject(message));
+      // Act
+      Assert.False(await _showDomain.DeleteImageObject(message));
 
       // Assert
       Thread.Sleep(2000);
@@ -493,8 +557,6 @@ namespace Theatreers.Show.Test
       int idAsInteger = 0;
       Int32.TryParse(showId, out idAsInteger);
 
-
-
       // Act
       var ex = await Record.ExceptionAsync(() => _showDomain.DeleteShowObject(message));
 
@@ -502,6 +564,65 @@ namespace Theatreers.Show.Test
       Thread.Sleep(2000);
       Assert.Null(ex);
       Assert.Null(await _showDomain.GetShow(showId));
+    }
+
+    [Fact]
+    public async Task DeleteShowThrowsWhenMissingId()
+    {
+      string showId = "1";
+      ShowObject showObject = new ShowObject()
+      {
+        Partition = showId,
+        Doctype = DocTypes.Show,
+        ShowName = $"Example Show {showId}"
+      };
+
+      MessageObject<ShowObject> message = new MessageObject<ShowObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = showObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.DeleteShowObject(message));
+
+      // Assert
+      Thread.Sleep(2000);
+      Assert.NotNull(await _showDomain.GetShow(showId));
+    }
+
+
+    [Fact]
+    public async Task DeleteShowThrowsWhenMissingPartition()
+    {
+      string showId = "1";
+      ShowObject showObject = new ShowObject()
+      {
+        Id = showId,
+        Doctype = DocTypes.Show,
+        ShowName = $"Example Show {showId}"
+      };
+
+      MessageObject<ShowObject> message = new MessageObject<ShowObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = showObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.DeleteShowObject(message));
+
+      // Assert
+      Thread.Sleep(2000);
+      Assert.NotNull(await _showDomain.GetShow(showId));
     }
 
     [Theory]
@@ -1368,6 +1489,520 @@ namespace Theatreers.Show.Test
       Assert.NotNull(ex);
       Assert.Equal(0, (await _showDomain.GetImageByShow(showId)).Count);
     }
-  }
 
+    [Fact]
+    public async Task UpdateShowSucceedsWithValidData()
+    {
+      String showId = "1";
+      String showName = $"Updated Show Object for Show #{showId}";
+      ShowObject showObject = new ShowObject()
+      {
+        Id = showId,
+        Partition = showId,
+        Doctype = DocTypes.Show,
+        ShowName = showName
+      };
+
+      MessageObject<ShowObject> message = new MessageObject<ShowObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = showObject
+      };
+
+      // Act
+      bool updatedSuccessfully = await _showDomain.UpdateShowObject(message);
+
+      // Assert
+      Assert.True(updatedSuccessfully);
+      Assert.Equal(showName, (await _showDomain.GetShow(showId)).ShowName);
+    }
+
+    [Fact]
+    public async Task UpdateShowThrowsWithNonExistingIdAndNonExistingPartition()
+    {
+      string showId = "5";
+      string showName = $"Updated Show Object for Show #{showId}";
+      ShowObject showObject = new ShowObject()
+      {
+        Id = showId,
+        Partition = showId,
+        Doctype = DocTypes.Show,
+        ShowName = showName
+      };
+
+      MessageObject<ShowObject> message = new MessageObject<ShowObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = showObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateShowObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.Null(await _showDomain.GetShow(showId));
+    }
+
+    [Fact]
+    public async Task UpdateShowThrowsWithNonExistingIdAndExistingPartition()
+    {
+      string showId = "5";
+      string randomPartition = "1";
+      string showName = $"Updated Show Object for Show #{showId}";
+      ShowObject showObject = new ShowObject()
+      {
+        Id = showId,
+        Partition = randomPartition,
+        Doctype = DocTypes.Show,
+        ShowName = showName
+      };
+
+      MessageObject<ShowObject> message = new MessageObject<ShowObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = showObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateShowObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.Null(await _showDomain.GetShow(showId));
+    }
+
+
+    [Fact]
+    public async Task UpdateShowThrowsWithMissingId()
+    {
+      string showId = "5";
+      string randomPartition = "1";
+      string showName = $"Updated Show Object for Show #{showId}";
+      ShowObject showObject = new ShowObject()
+      {
+        Partition = randomPartition,
+        Doctype = DocTypes.Show,
+        ShowName = showName
+      };
+
+      MessageObject<ShowObject> message = new MessageObject<ShowObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = showObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateShowObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.Null(await _showDomain.GetShow(showId));
+    }
+
+
+    [Fact]
+    public async Task UpdateShowThrowsWithMissingPartition()
+    {
+      string showId = "5";
+      string showName = $"Updated Show Object for Show #{showId}";
+      ShowObject showObject = new ShowObject()
+      {
+        Id = showId,
+        Doctype = DocTypes.Show,
+        ShowName = showName
+      };
+
+      MessageObject<ShowObject> message = new MessageObject<ShowObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = showObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateShowObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.Null(await _showDomain.GetShow(showId));
+    }
+
+    [Theory]
+    [InlineData("1")]
+    [InlineData("2")]
+    [InlineData("3")]
+    [InlineData("4")]
+    public async Task UpdateImageSucceedsWithValidData(string showId)
+    {
+      int idAsInteger = 0;
+      Int32.TryParse(showId, out idAsInteger);
+      int numberOfChildObjects = idAsInteger * idAsInteger;
+
+      // Act
+      for (int i = 0; i < numberOfChildObjects; i++)
+      {
+        String imageName = $"Updated Show Object for Image #{i}";
+        ImageObject imageObject = new ImageObject()
+        {
+          Id = $"i{i}",
+          Partition = showId,
+          Doctype = DocTypes.Image,
+          ContentUrl = "http://localhost.com/someimage.jpg",
+          Name = "Blah"
+        };
+
+        MessageObject<ImageObject> message = new MessageObject<ImageObject>
+        {
+          Headers = new MessageHeaders()
+          {
+            RequestCorrelationId = Guid.NewGuid().ToString(),
+            RequestCreatedAt = DateTime.Now
+          },
+          Body = imageObject
+        };
+        bool updatedSuccessfully = await _showDomain.UpdateImageObject(message);
+        Assert.True(updatedSuccessfully);
+      }
+
+      Assert.Equal(numberOfChildObjects, (await _showDomain.GetImageByShow(showId)).Count);
+      Assert.NotNull(await _showDomain.GetShow(showId));
+    }
+
+    [Fact]
+    public async Task UpdateImageThrowsWithNonExistingIdAndNonExistingPartition()
+    {
+      string showId = "5";
+      String imageName = $"Updated Image Name for Image #{showId}";
+      ImageObject imageObject = new ImageObject()
+      {
+        Id = $"i{showId}",
+        Partition = showId,
+        Doctype = DocTypes.Image,
+        ContentUrl = "http://localhost.com/someimage.jpg",
+        Name = "Blah"
+      };
+
+      MessageObject<ImageObject> message = new MessageObject<ImageObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = imageObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateImageObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.NotNull(await _showDomain.GetImageByShow(showId));
+      Assert.Equal(0, (await _showDomain.GetImageByShow(showId)).Count);
+    }
+
+    [Fact]
+    public async Task UpdateImageThrowsWithNonExistingIdAndExistingPartition()
+    {
+      string showId = "5";
+      string randomPartition = "1";
+      string name = $"Updated Show Object for Show #{showId}";
+      ImageObject imageObject = new ImageObject()
+      {
+        Id = $"i{showId}",
+        Partition = randomPartition,
+        Doctype = DocTypes.Image,
+        ContentUrl = "http://localhost.com/someimage.jpg",
+        Name = name
+      };
+
+      MessageObject<ImageObject> message = new MessageObject<ImageObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = imageObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateImageObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.NotNull(await _showDomain.GetImageByShow(showId));
+      Assert.Equal(0, (await _showDomain.GetImageByShow(showId)).Count);
+    }
+
+
+    [Fact]
+    public async Task UpdateImageThrowsWithMissingId()
+    {
+      string showId = "5";
+      string name = $"Updated Show Object for Show #{showId}";
+
+      ImageObject imageObject = new ImageObject()
+      {
+        Id = $"i{showId}",
+        Doctype = DocTypes.Image,
+        ContentUrl = "http://localhost.com/someimage.jpg",
+        Name = name
+      };
+
+      MessageObject<ImageObject> message = new MessageObject<ImageObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = imageObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateImageObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.NotNull(await _showDomain.GetImageByShow(showId));
+      Assert.Equal(0, (await _showDomain.GetImageByShow(showId)).Count);
+    }
+
+
+    [Fact]
+    public async Task UpdateImageThrowsWithMissingPartition()
+    {
+      string showId = "5";
+      string name = $"Updated Show Object for Show #{showId}";
+      ImageObject imageObject = new ImageObject()
+      {
+        Id = $"i{showId}",
+        Partition = showId,
+        Doctype = DocTypes.Image,
+        ContentUrl = "http://localhost.com/someimage.jpg",
+        Name = name
+      };
+
+      MessageObject<ImageObject> message = new MessageObject<ImageObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = imageObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateImageObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.NotNull(await _showDomain.GetImageByShow(showId));
+      Assert.Equal(0, (await _showDomain.GetImageByShow(showId)).Count);
+    }
+
+    [Theory]
+    [InlineData("1")]
+    [InlineData("2")]
+    [InlineData("3")]
+    [InlineData("4")]
+    public async Task UpdateNewsSucceedsWithValidData(string showId)
+    {
+      int idAsInteger = 0;
+      Int32.TryParse(showId, out idAsInteger);
+      int numberOfChildObjects = idAsInteger * idAsInteger;
+
+      // Act
+      for (int i = 0; i < numberOfChildObjects; i++)
+      {
+        String newsName = $"Updated Show Object for News #{i}";
+        NewsObject newsObject = new NewsObject()
+        {
+          Id = $"n{i}",
+          Partition = showId,
+          Doctype = DocTypes.News,
+          DatePublished = DateTime.Now.ToString(),
+          Url = "http://localhost.com/someimage.jpg",
+          Name = newsName
+        };
+
+        MessageObject<NewsObject> message = new MessageObject<NewsObject>
+        {
+          Headers = new MessageHeaders()
+          {
+            RequestCorrelationId = Guid.NewGuid().ToString(),
+            RequestCreatedAt = DateTime.Now
+          },
+          Body = newsObject
+        };
+        bool updatedSuccessfully = await _showDomain.UpdateNewsObject(message);
+        Assert.True(updatedSuccessfully);
+      }
+
+      Assert.Equal(numberOfChildObjects, (await _showDomain.GetNewsByShow(showId)).Count);
+      Assert.NotNull(await _showDomain.GetShow(showId));
+    }
+
+    [Fact]
+    public async Task UpdateNewsThrowsWithNonExistingIdAndNonExistingPartition()
+    {
+      string showId = "5";
+      String newsName = $"Updated News Name for News #{showId}";
+
+      NewsObject newsObject = new NewsObject()
+      {
+        Id = $"n{showId}",
+        Partition = showId,
+        Doctype = DocTypes.News,
+        DatePublished = DateTime.Now.ToString(),
+        Url = "http://localhost.com/someimage.jpg",
+        Name = newsName
+      };
+
+      MessageObject<NewsObject> message = new MessageObject<NewsObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = newsObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateNewsObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.NotNull(await _showDomain.GetNewsByShow(showId));
+      Assert.Equal(0, (await _showDomain.GetNewsByShow(showId)).Count);
+    }
+
+    [Fact]
+    public async Task UpdateNewsThrowsWithNonExistingIdAndExistingPartition()
+    {
+      string showId = "5";
+      string randomPartition = "1";
+      string name = $"Updated News Name for News #n{showId}";
+
+      String imageName = $"Updated Show Object for News #{showId}";
+      NewsObject newsObject = new NewsObject()
+      {
+        Id = $"n{showId}",
+        Partition = randomPartition,
+        Doctype = DocTypes.News,
+        DatePublished = DateTime.Now.ToString(),
+        Url = "http://localhost.com/someimage.jpg",
+        Name = "Blah"
+      };
+
+      MessageObject<NewsObject> message = new MessageObject<NewsObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = newsObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateNewsObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.NotNull(await _showDomain.GetNewsByShow(showId));
+      Assert.Equal(0, (await _showDomain.GetNewsByShow(showId)).Count);
+    }
+
+
+    [Fact]
+    public async Task UpdateNewsThrowsWithMissingId()
+    {
+      string showId = "5";
+      string name = $"Updated News Object for Show #{showId}";
+      NewsObject newsObject = new NewsObject()
+      {
+        Partition = showId,
+        Doctype = DocTypes.News,
+        DatePublished = DateTime.Now.ToString(),
+        Url = "http://localhost.com/someimage.jpg",
+        Name = name
+      };
+
+      MessageObject<NewsObject> message = new MessageObject<NewsObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = newsObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateNewsObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.NotNull(await _showDomain.GetNewsByShow(showId));
+      Assert.Equal(0, (await _showDomain.GetNewsByShow(showId)).Count);
+    }
+
+
+    [Fact]
+    public async Task UpdateNewsThrowsWithMissingPartition()
+    {
+      string showId = "5";
+      string name = $"Updated News Object for Show #{showId}";
+      NewsObject newsObject = new NewsObject()
+      {
+        Id = $"n{showId}",
+        Doctype = DocTypes.News,
+        DatePublished = DateTime.Now.ToString(),
+        Url = "http://localhost.com/someimage.jpg",
+        Name = name
+      };
+
+      MessageObject<NewsObject> message = new MessageObject<NewsObject>
+      {
+        Headers = new MessageHeaders()
+        {
+          RequestCorrelationId = Guid.NewGuid().ToString(),
+          RequestCreatedAt = DateTime.Now
+        },
+        Body = newsObject
+      };
+
+      // Act
+      var ex = await Record.ExceptionAsync(() => _showDomain.UpdateNewsObject(message));
+
+      // Assert
+      Assert.NotNull(ex);
+      Assert.NotNull(await _showDomain.GetNewsByShow(showId));
+      Assert.Equal(0, (await _showDomain.GetNewsByShow(showId)).Count);
+    }
+  }
 }
