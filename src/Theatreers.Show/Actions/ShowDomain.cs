@@ -14,6 +14,10 @@ using Microsoft.Azure.CognitiveServices.Search.NewsSearch;
 using NewsApiKeyServiceClientCredentials = Microsoft.Azure.CognitiveServices.Search.NewsSearch.ApiKeyServiceClientCredentials;
 using ImageApiKeyServiceClientCredentials = Microsoft.Azure.CognitiveServices.Search.ImageSearch.ApiKeyServiceClientCredentials;
 using Theatreers.Show.Functions;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace Theatreers.Show.Actions
 {
@@ -24,6 +28,29 @@ namespace Theatreers.Show.Actions
     public ShowDomain(IDataLayer dataLayer)
     {
       _dataLayer = dataLayer;
+
+      // Only needed for local unit test
+
+      /*using (var file = File.OpenText("Properties\\launchSettings.json"))
+      {
+
+         var reader = new JsonTextReader(file);
+        var jObject = JObject.Load(reader);
+
+        var variables = jObject
+            .GetValue("profiles")
+            //select a proper profile here
+            .SelectMany(profiles => profiles.Children())
+            .SelectMany(profile => profile.Children<JProperty>())
+            .Where(prop => prop.Name == "environmentVariables")
+            .SelectMany(prop => prop.Value.Children<JProperty>())
+            .ToList();
+
+        foreach (var variable in variables)
+        {
+          Environment.SetEnvironmentVariable(variable.Name, variable.Value.ToString());
+        } 
+      }*/
     }
 
     public async Task<ICollection<ImageObject>> GetImageByShow(string id)
@@ -64,12 +91,7 @@ namespace Theatreers.Show.Actions
       //TODO: There is definitely a better way of doing this, but got a rough working approach out
       MessageObject<ImageObject> _object = new MessageObject<ImageObject>()
       {
-        Body = new ImageObject()
-        {
-          CreatedAt = DateTime.Now,
-          Doctype = DocTypes.News,
-          Partition = message.Body.Partition
-        },
+        Body = null,
         Headers = new MessageHeaders()
         {
           RequestCorrelationId = message.Headers.RequestCorrelationId,
@@ -82,10 +104,14 @@ namespace Theatreers.Show.Actions
         {
           _object.Body = new Models.ImageObject()
           {
+            Id = Guid.NewGuid().ToString(),
             ContentUrl = image.ContentUrl,
             HostPageUrl = image.HostPageUrl,
             ImageId = image.ImageId,
-            Name = image.Name
+            Name = image.Name,
+            CreatedAt = DateTime.Now,
+            Doctype = DocTypes.Image,
+            Partition = message.Body.Partition
           };
 
           await _dataLayer.CreateImageAsync(_object);
@@ -116,12 +142,7 @@ namespace Theatreers.Show.Actions
       //TODO: There is definitely a better way of doing this, but got a rough working approach out
       MessageObject<NewsObject> _object = new MessageObject<NewsObject>()
       {
-        Body = new NewsObject()
-        {
-          CreatedAt = DateTime.Now,
-          Doctype = DocTypes.News,
-          Partition = message.Body.Partition
-        },
+        Body = null,
         Headers = new MessageHeaders()
         {
           RequestCorrelationId = message.Headers.RequestCorrelationId,
@@ -134,10 +155,14 @@ namespace Theatreers.Show.Actions
         {
           _object.Body = new NewsObject()
           {
+            Id = Guid.NewGuid().ToString(),
             BingId = newsItem.BingId,
             DatePublished = newsItem.DatePublished,
             Name = newsItem.Name,
-            Url = newsItem.Url
+            Url = newsItem.Url,
+            CreatedAt = DateTime.Now,
+            Doctype = DocTypes.News,
+            Partition = message.Body.Partition
           };
 
           await _dataLayer.CreateNewsAsync(_object);

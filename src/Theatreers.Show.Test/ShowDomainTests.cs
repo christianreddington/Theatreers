@@ -13,6 +13,10 @@ using Theatreers.Show.Actions;
 using System.Collections.Generic;
 using System.Threading;
 using System.Collections;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace Theatreers.Show.Test
 {
@@ -43,9 +47,6 @@ namespace Theatreers.Show.Test
 
     public async Task InitializeAsync()
     {
-
-
-
       IDocumentClient client = new DocumentClient(new Uri(getCosmosURI()), "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
       IStorageProvider<ImageObject> _imageStore = new CosmosStorageProvider<ImageObject>(client, _imageCollectionUri, _databaseId, _imageCollectionName);
       IStorageProvider<NewsObject> _newsStore = new CosmosStorageProvider<NewsObject>(client, _newsCollectionUri, _databaseId, _newsCollectionName);

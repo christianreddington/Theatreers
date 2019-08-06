@@ -11,7 +11,10 @@ using Theatreers.Show.Abstractions;
 using Theatreers.Show.Actions;
 using Theatreers.Show;
 using Microsoft.Extensions.Configuration.EnvironmentVariables;
-
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Linq;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 

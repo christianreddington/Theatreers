@@ -20,4 +20,10 @@
     <ProjectReference Include="..\Theatreers.Show\Theatreers.Show.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Properties\launchSettings.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
