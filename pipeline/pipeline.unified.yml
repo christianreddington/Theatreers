@@ -133,7 +133,7 @@ stages:
             hostDirectory: '$(Build.BinariesDirectory)\azure-cosmosdb-emulator'
         - script: dotnet test src/Theatreers.Show.Test/Theatreers.Show.Test.csproj --logger trx
           displayName: 'Execute Tests'
-          env: { 'AZURE_COSMOS_DB_CONNECTION_STRING': "$(CosmosDbEmulator.Endpoint)" }
+          env: { 'AZURE_COSMOS_DB_CONNECTION_STRING': "$(CosmosDbEmulator.Endpoint)", 'bingSearchSubscriptionKey': "$(bingSearchSubscriptionKey)" }
         - task: PublishTestResults@2
           inputs:
             testResultsFormat: 'VSTest'
