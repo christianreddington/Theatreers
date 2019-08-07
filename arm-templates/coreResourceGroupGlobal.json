@@ -99,7 +99,7 @@
                 }
             },
             "comments": "Downstream template to deploy the Traffic Manager to front the Regional API deployments"
-        },
+        }
     ],
     "outputs": {}
 }
