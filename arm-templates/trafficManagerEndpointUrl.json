@@ -8,7 +8,7 @@
               "description": "The name prefix"
             }
           },         
-          "endpointPrefix": {
+          "endpointLocation": {
               "type": "string",
               "metadata": {
                 "description": "The region of the endpoint"
@@ -28,11 +28,12 @@
         {
             "apiVersion": "2018-04-01",
             "type": "Microsoft.Network/trafficManagerProfiles/ExternalEndpoints",
-            "name": "[concat(variables('trafficManagerProfileName'), '/', parameters('endpointPrefix'), '-endpoint')]",
+            "name": "[concat(variables('trafficManagerProfileName'), '/', parameters('endpointLocation'), '-endpoint')]",
             "location": "global",
             "properties": {
                 "target": "[parameters('target')]",
-                "endpointStatus": "Enabled"
+                "endpointStatus": "Enabled",
+                "location": "[parameters('endpointLocation')]"
             },
             "comments": "Building block for a traffic manager endpoint for an external url"
         }

@@ -137,7 +137,7 @@
                     "namePrefix": {
                         "value": "[variables('coreApiTrafficManager')]"
                     },
-                    "endpointPrefix": {
+                    "endpointLocation": {
                         "value": "[variables('regionalResourceGroupLocation')]"
                     },
                     "target": {
