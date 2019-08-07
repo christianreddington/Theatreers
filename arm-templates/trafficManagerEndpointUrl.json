@@ -27,7 +27,7 @@
     "resources": [        
         {
             "apiVersion": "2018-04-01",
-            "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+            "type": "Microsoft.Network/trafficManagerProfiles/ExternalEndpoints",
             "name": "[concat(variables('trafficManagerProfileName'), '/', parameters('endpointPrefix'), '-endpoint')]",
             "location": "global",
             "properties": {
