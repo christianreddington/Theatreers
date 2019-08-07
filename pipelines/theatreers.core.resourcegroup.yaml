@@ -5,6 +5,7 @@ stages:
     managementResourceGroupName: 'th-mgt-dev-rg'
     managementStorageAccountName: 'thmgtdevartifactstg'
     coreResourceGroupName: 'th-core-dev-rg'
+    coreNamingPrefix: 'th-core-dev'
   dependsOn: []
   displayName: 'Core - Dev (Regional)'
   jobs:
@@ -44,6 +45,7 @@ stages:
     managementResourceGroupName: 'th-mgt-qa-rg'
     managementStorageAccountName: 'thmgtqaartifactstg'
     coreResourceGroupName: 'th-core-qa-rg'
+    coreNamingPrefix: 'th-core-qa'
   dependsOn: [ 'Core_Dev_Global', 'Core_Dev_Regional']
   displayName: 'Core - QA (Regional)'
   jobs:
@@ -83,6 +85,7 @@ stages:
     managementResourceGroupName: 'th-mgt-prd-rg'
     managementStorageAccountName: 'thmgtprdartifactstg'
     coreResourceGroupName: 'th-core-prd-rg'
+    coreNamingPrefix: 'th-core-prd'
   dependsOn: [ 'Core_QA_Global', 'Core_QA_Regional']
   displayName: 'Core - Prod (Regional)'
   jobs:
