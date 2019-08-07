@@ -19,13 +19,22 @@
              "metadata": {
                  "description": "Storage Account Name of the Origin"
              }
+         },
+         "globalCoreResourcePrefix": {
+             "type": "string",
+             "metadata": {
+                 "description": "Prefix for the Core Global set of resources"
+             }
          }
     },
     "variables": {
         "apimServiceName": "[concat(parameters('namingPrefix'), '-apim')]",
         "appInsightsName": "[concat(parameters('namingPrefix'), '-ai')]",        
         "cogSvcAccountName": "[concat(parameters('namingPrefix'), '-search')]",
-        "prefixNameWithoutDashes": "[replace(parameters('namingPrefix'), '-', '')]"
+        "coreApiTrafficManager": "[concat(parameters('globalCoreResourcePrefix'), '-api-')]",
+        "prefixNameWithoutDashes": "[replace(parameters('namingPrefix'), '-', '')]",
+        "regionalResourceGroupLocation": "[resourceGroup().location]",
+        "regionalResourceGroupName": "[resourceGroup().name]"
     },
     "resources": [        
         {
@@ -103,6 +112,34 @@
                 }
             },
             "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "trafficManagerEndpointDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('coreResourceGroupName')]",
+            "dependsOn": [
+                "apimDeployment"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/trafficManagerEndpointUrl.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "namePrefix": {
+                        "value": "[variables('coreApiTrafficManager')]"
+                    },
+                    "endpointPrefix": {
+                        "value": "[variables('regionalResourceGroupLocation')]"
+                    },
+                    "target": {
+                        "value": "[concat(parameters('namingPrefix'), '-apim.azure-api.net')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy the logger for an API Microservice"
         }
     ],
     "outputs": {}

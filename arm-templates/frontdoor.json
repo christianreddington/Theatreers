@@ -23,36 +23,18 @@
       "apiVersion": "2018-08-01",
       "name": "[parameters('frontdoorName')]",
       "location": "Global",
-      "properties": {
-        "backendPools": [
-          {
-            "id": "[concat(resourceId('Microsoft.Network/frontdoors', parameters('frontdoorName')), '/BackendPools/frontend')]",
-            "name": "frontend",
-            "properties": {
-              "backends": [
-                {
-                  "address": "thfrontenddev.z6.web.core.windows.net",
-                  "httpPort": 80,
-                  "httpsPort": 443,
-                  "priority": 1,
-                  "weight": 50,
-                  "backendHostHeader": "thfrontenddev.z6.web.core.windows.net"
-                }
-              ]
-            }
-          }
-        ]
-      }
+      "properties": {}
     },
     {        
       "name": "[concat(parameters('frontdoorName'), '/', variables('pool'))]",
+      "location": "Global",
       "type": "Microsoft.Network/frontDoors/backendPools",
       "apiVersion": "2019-04-01",
       "dependsOn": [
         "[resourceId('Microsoft.Network/frontdoors', parameters('frontdoorName'))]",
         "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', parameters('frontdoorName'), variables('loadbalancer'))]",
         "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', parameters('frontdoorName'), variables('healthProbe'))]"
-    ],
+      ],
       "properties": {
         "backends": [
           {
@@ -75,6 +57,7 @@
     },
     {
       "name": "[concat(parameters('frontdoorName'), '/', variables('healthProbe') )]",
+      "location": "Global",
       "type": "Microsoft.Network/frontDoors/healthProbeSettings",      
       "apiVersion": "2019-04-01",      
       "dependsOn": [
@@ -89,6 +72,7 @@
     },
     {
       "name": "[concat(parameters('frontdoorName'), '/', variables('defaultFrontendEndpoint') )]",
+      "location": "Global",
       "type": "Microsoft.Network/frontDoors/frontendEndpoints",
       "apiVersion": "2019-04-01",
       "dependsOn": [
@@ -102,6 +86,7 @@
     }, 
     {
       "name": "[concat(parameters('frontdoorName'), '/', variables('frontendEndpoint') )]",
+      "location": "Global",
       "type": "Microsoft.Network/frontDoors/frontendEndpoints",
       "apiVersion": "2019-04-01",      
       "dependsOn": [
@@ -115,6 +100,7 @@
     },
     {
       "name": "[concat(parameters('frontdoorName'), '/', variables('loadbalancer') )]",
+      "location": "Global",
       "type": "Microsoft.Network/frontDoors/loadBalancingSettings",
       "apiVersion": "2019-04-01",      
       "dependsOn": [
@@ -128,6 +114,7 @@
     },
     {
       "name": "[concat(parameters('frontdoorName'), '/', variables('routingrules') )]",
+      "location": "Global",
       "type": "Microsoft.Network/frontDoors/routingRules",
       "apiVersion": "2019-04-01",
       "dependsOn": [

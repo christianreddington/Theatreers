@@ -24,7 +24,8 @@
     "variables": {    
         "bingSearchAccountName": "[concat(parameters('namingPrefix'), '-search')]",
         "textAnalyticsAccountName": "[concat(parameters('namingPrefix'), '-text')]",
-        "cosmosDBAccountName": "[concat(parameters('namingPrefix'), '-cosmos')]"
+        "cosmosDBAccountName": "[concat(parameters('namingPrefix'), '-cosmos')]",
+        "apiTrafficManagerNamePrefix": "[concat(parameters('namingPrefix'), '-api')]"
     },
     "resources": [    
         {
@@ -80,7 +81,25 @@
                 }
             },
             "comments": "Downstream template to deploy a CosmosDB Account to be used by many microservices."
-        }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "trafficManagerDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/trafficManager.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "namePrefix": {
+                        "value": "[variables('apiTrafficManagerNamePrefix')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy the Traffic Manager to front the Regional API deployments"
+        },
     ],
     "outputs": {}
 }
