@@ -25,6 +25,12 @@
              "metadata": {
                  "description": "Prefix for the Core Global set of resources"
              }
+         },
+         "coreResourceGroupName": {
+             "type": "string",
+             "metadata": {
+                 "description": "Name of the Core Resource Group"
+             }
          }
     },
     "variables": {
