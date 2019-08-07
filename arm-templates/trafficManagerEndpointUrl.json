@@ -33,7 +33,7 @@
             "properties": {
                 "target": "[parameters('target')]",
                 "endpointStatus": "Enabled",
-                "location": "[parameters('endpointLocation')]"
+                "endpointLocation": "[parameters('endpointLocation')]"
             },
             "comments": "Building block for a traffic manager endpoint for an external url"
         }
