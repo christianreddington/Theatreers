@@ -25,7 +25,7 @@
         "bingSearchAccountName": "[concat(parameters('namingPrefix'), '-search')]",
         "textAnalyticsAccountName": "[concat(parameters('namingPrefix'), '-text')]",
         "cosmosDBAccountName": "[concat(parameters('namingPrefix'), '-cosmos')]",
-        "apiTrafficManagerNamePrefix": "[concat(parameters('namingPrefix'), '-api')]"
+        "apiTrafficManagerNamePrefix": "[concat(parameters('namingPrefix'), '-api-')]"
     },
     "resources": [    
         {
