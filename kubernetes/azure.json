@@ -1,7 +1,0 @@
-{
-  "tenantId": "#{tenantID}#",
-  "subscriptionId": "#{dnsSubscriptionID}#",
-  "aadClientId": "#{devopsSPClientID}#",
-  "aadClientSecret": "#{devopsSPKey}#",
-  "resourceGroup": "#{dnsResourceGroupName}#"
-}
