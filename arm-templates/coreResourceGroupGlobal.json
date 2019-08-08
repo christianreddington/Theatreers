@@ -95,6 +95,9 @@
                 "parameters": {
                     "namePrefix": {
                         "value": "[variables('apiTrafficManagerNamePrefix')]"
+                    },
+                    "httpsProbeEnabled": {
+                        "value": "true"
                     }
                 }
             },
