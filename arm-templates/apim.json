@@ -1,96 +1,229 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "namePrefix": {
-           "type": "string",
-           "metadata": {
-                "description": "Prefix of the resource"
-            }
-        },
-        "location": {
-           "type": "string",
-           "metadata": {
-                "description": "Location of the APIM deployment"
-            },
-            "defaultValue": "[resourceGroup().location]"
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Prefix of the resource"
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location of the APIM deployment"
+      },
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "hostName": {
+      "type": "string",
+      "metadata": {
+        "description": "Custom hostname of the APIM resuorce e.g. api.theatreers.com"
+      }
+    },
+    "keyVaultSecretId": {
+      "type": "string",
+      "metadata": {
+        "description": "http based route of the secret of the certificate e.g. https://constosovault.vault.azure.net/secrets/msitestingCert"
+      }
+    },
+    "subscriptionIdForKeyVaultHousingDomainCertificate": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Azure KeyVault that houses the Domain Certificate for the APIM"
+      }
+    },
+    "resourceGroupForKeyVaultHousingDomainCertificate": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Azure KeyVault that houses the Domain Certificate for the APIM"
+      }
+    },
+    "keyvaultNameHousingDomainCertificate": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Azure KeyVault that houses the Domain Certificate for the APIM"
+      }
+    },
+    "templateContainerUri": {
+      "type": "string",
+      "metadata": {
+        "description": "URI of the Blob Storage Container containing the ARM Templates"
+      }
+    },
+    "templateContainerSasToken": {
+      "type": "string",
+      "metadata": {
+        "description": "The SAS token of the container containing the ARM Templates"
+      }
+    }
+  },
+  "variables": {
+    "apimName": "[concat(parameters('namePrefix'), '-apim')]",
+    "redisCacheName": "[concat(parameters('namePrefix'), '-cache')]",
+    "apimServiceIdentityResourceId": "[concat(resourceId('Microsoft.ApiManagement/service', variables('apimName')),'/providers/Microsoft.ManagedIdentity/Identities/default')]",
+    "subscriptionId": "[subscription().subscriptionId]",
+    "resourceGroupName": "[resourceGroup().name]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[variables('redisCacheName')]",
+      "type": "Microsoft.Cache/Redis",
+      "location": "[parameters('location')]",
+      "properties": {
+        "enableNonSslPort": "false",
+        "sku": {
+          "capacity": "0",
+          "family": "C",
+          "name": "Basic"
         }
+      }
     },
-    "variables": {
-        "apimName": "[concat(parameters('namePrefix'), '-apim')]"
+    {
+      "name": "[variables('apimName')]",
+      "type": "Microsoft.ApiManagement/service",
+      "location": "[parameters('location')]",
+      "apiVersion": "2019-01-01",
+      "properties": {
+        "publisherEmail": "chris@theatreers.com",
+        "publisherName": "Christian Reddington"
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "sku": {
+        "name": "Consumption"
+      }
     },
-    "resources": [
-        {
-            "name": "[variables('apimName')]",
-            "type": "Microsoft.ApiManagement/service",
-            "location": "[parameters('location')]",
-            "apiVersion": "2019-01-01",
-            "properties": {
-                "publisherEmail": "chris@theatreers.com",
-                "publisherName": "Christian Reddington"
-            },
-            "sku": {
-                "name": "Consumption"
-            }
-          },          
-          {
-              "type": "Microsoft.ApiManagement/service/policies",
-              "apiVersion": "2019-01-01",
-              "name": "[concat(variables('apimName'), '/policy')]",
-              "dependsOn": [
-                  "[resourceId('Microsoft.ApiManagement/service', variables('apimName'))]"
-              ],
-              "properties": {
-                  "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - Only the <forward-request> policy element can appear within the <backend> section element.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy position the cursor at the desired insertion point and click on the round button associated with the policy.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <cors>\r\n      <allowed-origins>\r\n        <origin>http://localhost:8080</origin>\r\n        <origin>https://www.theatreers.com</origin>\r\n      </allowed-origins>\r\n      <allowed-methods preflight-result-max-age=\"300\">\r\n        <method>GET</method>\r\n        <method>POST</method>\r\n        <method>PATCH</method>\r\n        <method>DELETE</method>\r\n      </allowed-methods>\r\n      <allowed-headers>\r\n        <header>*</header>\r\n      </allowed-headers>\r\n    </cors>\r\n  </inbound>\r\n  <backend>\r\n    <forward-request />\r\n  </backend>\r\n  <outbound>\r\n    <set-header name=\"Access-Control-Allow-Origin\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n    <set-header name=\"Access-Control-Allow-Credentials\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n  </outbound>\r\n  <on-error />\r\n</policies>",
-                  "format": "xml"
-              }
+    {
+      "apiVersion": "2017-05-10",
+      "name": "apimWithKeyVaultDeployment",
+      "type": "Microsoft.Resources/deployments",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service', variables('apimName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('templateContainerUri'), '/apimWithKeyVault.json', parameters('templateContainerSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "namePrefix": {
+            "value": "[parameters('namePrefix')]"
           },
-          {
-              "type": "Microsoft.ApiManagement/service/apis",
-              "apiVersion": "2019-01-01",
-              "name": "[concat(variables('apimName'), '/root')]",
-              "dependsOn": [
-                  "[resourceId('Microsoft.ApiManagement/service', variables('apimName'))]"
-              ],
-              "properties": {
-                  "displayName": "Root",
-                  "apiRevision": "1",
-                  "subscriptionRequired": false,
-                  "protocols": [
-                      "https"
-                  ],
-                  "isCurrent": true,
-                  "path": ""
-              }
+          "hostName": {
+            "value": "[parameters('hostName')]"
           },
-          {
-              "type": "Microsoft.ApiManagement/service/apis/operations",
-              "apiVersion": "2019-01-01",
-              "name": "[concat(variables('apimName'), '/root/getroot')]",
-              "dependsOn": [
-                  "[resourceId('Microsoft.ApiManagement/service/apis', variables('apimName'), 'root')]"
-              ],
-              "properties": {
-                  "displayName": "GetRoot",
-                  "method": "GET",
-                  "urlTemplate": "/",
-                  "templateParameters": [],
-                  "responses": []
-              }
-          },
-          {
-              "type": "Microsoft.ApiManagement/service/apis/policies",
-              "apiVersion": "2019-01-01",
-              "name": "[concat(variables('apimName'), '/root/policy')]",
-              "dependsOn": [
-                  "[resourceId('Microsoft.ApiManagement/service/apis', variables('apimName'), 'root')]",
-                  "[resourceId('Microsoft.ApiManagement/service', variables('apimName'))]"
-              ],
-              "properties": {
-                  "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <base />\r\n    <mock-response status-code=\"200\" content-type=\"application/json\" />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
-                  "format": "xml"
-              }
+          "keyvaultSecretId": {
+            "value": "[parameters('keyvaultSecretId')]"
           }
-    ],
-    "outputs": {}
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-05-10",
+      "name": "keyvaultAccessPolicyDeployment",
+      "type": "Microsoft.Resources/deployments",
+      "subscriptionId": "[parameters('subscriptionIdForKeyVaultHousingDomainCertificate')]",
+      "resourceGroup": "[parameters('resourceGroupForKeyVaultHousingDomainCertificate')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service', variables('apimName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('templateContainerUri'), '/keyvaultPermissions.json', parameters('templateContainerSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "keyvaultName": {
+            "value": "[parameters('keyvaultNameHousingDomainCertificate')]"
+          },
+          "subscriptionIdHousingApiManagementService": {
+            "value": "[variables('subscriptionId')]"
+          },
+          "resourceGroupdHousingApiManagementService": {
+            "value": "[variables('resourceGroupName')]"
+          },
+          "apiManagementServiceName": {
+            "value": "[variables('apimName')]"
+          }
+        }
+      },
+      "comments": "Downstream template to deploy the logger for an API Microservice"
+    },
+    {
+      "type": "Microsoft.ApiManagement/service/caches",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apimName'), '/', parameters('location'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'apimWithKeyVaultDeployment')]",
+        "[resourceId('Microsoft.Cache/Redis', variables('redisCacheName'))]"
+      ],
+      "properties": {
+        "connectionString": "[concat(variables('redisCacheName'),'.redis.cache.windows.net,abortConnect=false,ssl=true,password=', listKeys(resourceId('Microsoft.Cache/Redis', variables('redisCacheName')), '2015-08-01').primaryKey)]"
+      }
+    },
+    {
+      "type": "Microsoft.ApiManagement/service/policies",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apimName'), '/policy')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'apimWithKeyVaultDeployment')]"
+      ],
+      "properties": {
+        "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - Only the <forward-request> policy element can appear within the <backend> section element.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy position the cursor at the desired insertion point and click on the round button associated with the policy.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <cors>\r\n      <allowed-origins>\r\n        <origin>http://localhost:8080</origin>\r\n        <origin>https://www.theatreers.com</origin>\r\n      </allowed-origins>\r\n      <allowed-methods preflight-result-max-age=\"300\">\r\n        <method>GET</method>\r\n        <method>POST</method>\r\n        <method>PATCH</method>\r\n        <method>DELETE</method>\r\n      </allowed-methods>\r\n      <allowed-headers>\r\n        <header>*</header>\r\n      </allowed-headers>\r\n    </cors>\r\n  </inbound>\r\n  <backend>\r\n    <forward-request />\r\n  </backend>\r\n  <outbound>\r\n    <set-header name=\"Access-Control-Allow-Origin\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n    <set-header name=\"Access-Control-Allow-Credentials\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n  </outbound>\r\n  <on-error />\r\n</policies>",
+        "format": "xml"
+      }
+    },
+    {
+      "type": "Microsoft.ApiManagement/service/apis",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apimName'), '/root')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'apimWithKeyVaultDeployment')]"
+      ],
+      "properties": {
+        "displayName": "Root",
+        "apiRevision": "1",
+        "subscriptionRequired": false,
+        "protocols": [
+          "https"
+        ],
+        "isCurrent": true,
+        "path": ""
+      }
+    },
+    {
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apimName'), '/root/getroot')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'apimWithKeyVaultDeployment')]"
+      ],
+      "properties": {
+        "displayName": "GetRoot",
+        "method": "GET",
+        "urlTemplate": "/",
+        "templateParameters": [],
+        "responses": []
+      }
+    },
+    {
+      "type": "Microsoft.ApiManagement/service/apis/policies",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apimName'), '/root/policy')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', variables('apimName'), 'root')]",
+        "[resourceId('Microsoft.Resources/deployments', 'apimWithKeyVaultDeployment')]"
+      ],
+      "properties": {
+        "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <base />\r\n    <mock-response status-code=\"200\" content-type=\"application/json\" />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+        "format": "xml"
+      }
+    }
+  ],
+  "outputs": {}
 }
