@@ -1,96 +1,101 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "namePrefix": {
-           "type": "string",
-           "metadata": {
-                "description": "Prefix of the resource"
-            }
-        },
-        "location": {
-           "type": "string",
-           "metadata": {
-                "description": "Location of the APIM deployment"
-            },
-            "defaultValue": "[resourceGroup().location]"
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Prefix of the resource"
+      }
     },
-    "variables": {
-        "apimName": "[concat(parameters('namePrefix'), '-apim')]"
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location of the API Management Service deployment"
+      },
+      "defaultValue": "[resourceGroup().location]"
+    }
+  },
+  "variables": {
+    "apiManagementServiceName": "[concat(parameters('namePrefix'), '-apim')]"
+  },
+  "resources": [
+    {
+      "name": "[variables('apiManagementServiceName')]",
+      "type": "Microsoft.ApiManagement/service",
+      "location": "[parameters('location')]",
+      "apiVersion": "2019-01-01",
+      "properties": {
+        "publisherEmail": "chris@theatreers.com",
+        "publisherName": "Christian Reddington"
+      },
+      "sku": {
+        "name": "Consumption"
+      },
+      "comments": "The API Management Service resource to be deployed."
     },
-    "resources": [
-        {
-            "name": "[variables('apimName')]",
-            "type": "Microsoft.ApiManagement/service",
-            "location": "[parameters('location')]",
-            "apiVersion": "2019-01-01",
-            "properties": {
-                "publisherEmail": "chris@theatreers.com",
-                "publisherName": "Christian Reddington"
-            },
-            "sku": {
-                "name": "Consumption"
-            }
-          },          
-          {
-              "type": "Microsoft.ApiManagement/service/policies",
-              "apiVersion": "2019-01-01",
-              "name": "[concat(variables('apimName'), '/policy')]",
-              "dependsOn": [
-                  "[resourceId('Microsoft.ApiManagement/service', variables('apimName'))]"
-              ],
-              "properties": {
-                  "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - Only the <forward-request> policy element can appear within the <backend> section element.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy position the cursor at the desired insertion point and click on the round button associated with the policy.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <cors>\r\n      <allowed-origins>\r\n        <origin>http://localhost:8080</origin>\r\n        <origin>https://www.theatreers.com</origin>\r\n      </allowed-origins>\r\n      <allowed-methods preflight-result-max-age=\"300\">\r\n        <method>GET</method>\r\n        <method>POST</method>\r\n        <method>PATCH</method>\r\n        <method>DELETE</method>\r\n      </allowed-methods>\r\n      <allowed-headers>\r\n        <header>*</header>\r\n      </allowed-headers>\r\n    </cors>\r\n  </inbound>\r\n  <backend>\r\n    <forward-request />\r\n  </backend>\r\n  <outbound>\r\n    <set-header name=\"Access-Control-Allow-Origin\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n    <set-header name=\"Access-Control-Allow-Credentials\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n  </outbound>\r\n  <on-error />\r\n</policies>",
-                  "format": "xml"
-              }
-          },
-          {
-              "type": "Microsoft.ApiManagement/service/apis",
-              "apiVersion": "2019-01-01",
-              "name": "[concat(variables('apimName'), '/root')]",
-              "dependsOn": [
-                  "[resourceId('Microsoft.ApiManagement/service', variables('apimName'))]"
-              ],
-              "properties": {
-                  "displayName": "Root",
-                  "apiRevision": "1",
-                  "subscriptionRequired": false,
-                  "protocols": [
-                      "https"
-                  ],
-                  "isCurrent": true,
-                  "path": ""
-              }
-          },
-          {
-              "type": "Microsoft.ApiManagement/service/apis/operations",
-              "apiVersion": "2019-01-01",
-              "name": "[concat(variables('apimName'), '/root/getroot')]",
-              "dependsOn": [
-                  "[resourceId('Microsoft.ApiManagement/service/apis', variables('apimName'), 'root')]"
-              ],
-              "properties": {
-                  "displayName": "GetRoot",
-                  "method": "GET",
-                  "urlTemplate": "/",
-                  "templateParameters": [],
-                  "responses": []
-              }
-          },
-          {
-              "type": "Microsoft.ApiManagement/service/apis/policies",
-              "apiVersion": "2019-01-01",
-              "name": "[concat(variables('apimName'), '/root/policy')]",
-              "dependsOn": [
-                  "[resourceId('Microsoft.ApiManagement/service/apis', variables('apimName'), 'root')]",
-                  "[resourceId('Microsoft.ApiManagement/service', variables('apimName'))]"
-              ],
-              "properties": {
-                  "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <base />\r\n    <mock-response status-code=\"200\" content-type=\"application/json\" />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
-                  "format": "xml"
-              }
-          }
-    ],
-    "outputs": {}
+    {
+      "type": "Microsoft.ApiManagement/service/policies",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apiManagementServiceName'), '/policy')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service', variables('apiManagementServiceName'))]"
+      ],
+      "properties": {
+        "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - Only the <forward-request> policy element can appear within the <backend> section element.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy position the cursor at the desired insertion point and click on the round button associated with the policy.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <cors>\r\n      <allowed-origins>\r\n        <origin>http://localhost:8080</origin>\r\n        <origin>https://www.theatreers.com</origin>\r\n      </allowed-origins>\r\n      <allowed-methods preflight-result-max-age=\"300\">\r\n        <method>GET</method>\r\n        <method>POST</method>\r\n        <method>PATCH</method>\r\n        <method>DELETE</method>\r\n      </allowed-methods>\r\n      <allowed-headers>\r\n        <header>*</header>\r\n      </allowed-headers>\r\n    </cors>\r\n  </inbound>\r\n  <backend>\r\n    <forward-request />\r\n  </backend>\r\n  <outbound>\r\n    <set-header name=\"Access-Control-Allow-Origin\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n    <set-header name=\"Access-Control-Allow-Credentials\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n  </outbound>\r\n  <on-error />\r\n</policies>",
+        "format": "xml"
+      },
+      "comments": "A global policy to be set on the API Management Service. Iniitially, allows certain CORS rules, but should be adapted to be more reusable and rigorous in the future."
+    },
+    {
+      "type": "Microsoft.ApiManagement/service/apis",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apiManagementServiceName'), '/root')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service', variables('apiManagementServiceName'))]"
+      ],
+      "properties": {
+        "displayName": "Root",
+        "apiRevision": "1",
+        "subscriptionRequired": false,
+        "protocols": [
+          "https"
+        ],
+        "isCurrent": true,
+        "path": ""
+      },
+      "comments": "A separate service for a dummy backend endpoint for health monitoring purposes."
+    },
+    {
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apiManagementServiceName'), '/root/getroot')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', variables('apiManagementServiceName'), 'root')]"
+      ],
+      "properties": {
+        "displayName": "GetRoot",
+        "method": "GET",
+        "urlTemplate": "/",
+        "templateParameters": [],
+        "responses": []
+      },
+      "comments": "An API endpoint/route on the service to route towards for health monitoring purposes."
+    },
+    {
+      "type": "Microsoft.ApiManagement/service/apis/policies",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apiManagementServiceName'), '/root/policy')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', variables('apiManagementServiceName'), 'root')]",
+        "[resourceId('Microsoft.ApiManagement/service', variables('apiManagementServiceName'))]"
+      ],
+      "properties": {
+        "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <base />\r\n    <mock-response status-code=\"200\" content-type=\"application/json\" />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+        "format": "xml"
+      },
+      "comments": "A policy that is associated with the 'root' endpoint (i.e. dummy health endpoint) to mock a JSON 200 response and validate the API Management Service instance is a life to any probes calling it."
+    }
+  ],
+  "outputs": {}
 }
