@@ -31,6 +31,18 @@
              "metadata": {
                  "description": "Name of the Core Resource Group"
              }
+         },
+         "environmentName": {
+             "type": "string",
+             "metadata": {
+                 "description": "Name of the environment"
+             }
+         },
+         "subscriptionIdForKeyVaultHousingDomainCertificate": {
+             "type": "string",
+             "metadata": {
+                 "description": "Subscription ID where the KeyVault is held"
+             }
          }
     },
     "variables": {
@@ -38,9 +50,20 @@
         "appInsightsName": "[concat(parameters('namingPrefix'), '-ai')]",        
         "cogSvcAccountName": "[concat(parameters('namingPrefix'), '-search')]",
         "coreApiTrafficManager": "[concat(parameters('globalCoreResourcePrefix'), '-api-')]",
+        "keyvaultNameHousingDomainCertificate": "th-mgt-prd-kv",
+        "keyVaultSecretId": "https://th-mgt-prd-kv.vault.azure.net/secrets/theatreers",
+        "resourceGroupForKeyVaultHousingDomainCertificate": "th-mgt-prd-rg",
         "prefixNameWithoutDashes": "[replace(parameters('namingPrefix'), '-', '')]",
         "regionalResourceGroupLocation": "[resourceGroup().location]",
-        "regionalResourceGroupName": "[resourceGroup().name]"
+        "regionalResourceGroupName": "[resourceGroup().name]",
+        "dev": {
+            "apiManagementServiceCustomHostname": "api-tm.theatreers.com"
+        },
+        "prod": {
+            "apiManagementServiceCustomHostname": "prod.api-tm.theatreers.com"
+        },
+        "currentEnvironmentSettings": "[variables(parameters('environmentName'))]",
+        "apiManagementServiceCustomHostname": "[variables('currentEnvironmentSettings').apiManagementServiceCustomHostname]"
     },
     "resources": [        
         {
@@ -72,7 +95,28 @@
                 },
                 "parameters": {
                     "namePrefix": {
-                        "value": "[concat(parameters('namingPrefix'))]"
+                        "value": "[variables('apiManagementServiceCustomHostname')]"
+                    },
+                    "hostName": {
+                        "value": "[parameters('namingPrefix')]"
+                    },
+                    "keyVaultSecretId": {
+                        "value": "[variables('keyVaultSecretId')]"
+                    },
+                    "subscriptionIdForKeyVaultHousingDomainCertificate": {
+                        "value": "[parameters('subscriptionIdForKeyVaultHousingDomainCertificate')]"
+                    },
+                    "resourceGroupForKeyVaultHousingDomainCertificate": {
+                        "value": "[variables('resourceGroupForKeyVaultHousingDomainCertificate')]"
+                    },
+                    "keyvaultNameHousingDomainCertificate": {
+                        "value": "[variables('keyvaultNameHousingDomainCertificate')]"
+                    },
+                    "templateContainerUri": {
+                        "value": "[parameters('templateContainerUri')]"
+                    },
+                    "templateContainerSasToken": {
+                        "value": "[parameters('templateContainerSasToken')]"
                     }
                 }
             }
