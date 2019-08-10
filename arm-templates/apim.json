@@ -59,9 +59,9 @@
     }
   },
   "variables": {
-    "apimName": "[concat(parameters('namePrefix'), '-apim')]",
+    "apiManagementServiceName": "[concat(parameters('namePrefix'), '-apim')]",
     "redisCacheName": "[concat(parameters('namePrefix'), '-cache')]",
-    "apimServiceIdentityResourceId": "[concat(resourceId('Microsoft.ApiManagement/service', variables('apimName')),'/providers/Microsoft.ManagedIdentity/Identities/default')]",
+    "apimServiceIdentityResourceId": "[concat(resourceId('Microsoft.ApiManagement/service', variables('apiManagementServiceName')),'/providers/Microsoft.ManagedIdentity/Identities/default')]",
     "subscriptionId": "[subscription().subscriptionId]",
     "resourceGroupName": "[resourceGroup().name]"
   },
@@ -78,11 +78,11 @@
           "family": "C",
           "name": "Basic"
         },
-      "comments": "The API Management Service resource to be deployed."
+        "comments": "The API Management Service resource to be deployed."
       }
     },
     {
-      "name": "[variables('apimName')]",
+      "name": "[variables('apiManagementServiceName')]",
       "type": "Microsoft.ApiManagement/service",
       "location": "[parameters('location')]",
       "apiVersion": "2019-01-01",
@@ -102,7 +102,7 @@
       "name": "apimWithKeyVaultDeployment",
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service', variables('apimName'))]"
+        "[resourceId('Microsoft.ApiManagement/service', variables('apiManagementServiceName'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -130,7 +130,7 @@
       "subscriptionId": "[parameters('subscriptionIdForKeyVaultHousingDomainCertificate')]",
       "resourceGroup": "[parameters('resourceGroupForKeyVaultHousingDomainCertificate')]",
       "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service', variables('apimName'))]"
+        "[resourceId('Microsoft.ApiManagement/service', variables('apiManagementServiceName'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -149,7 +149,7 @@
             "value": "[variables('resourceGroupName')]"
           },
           "apiManagementServiceName": {
-            "value": "[variables('apimName')]"
+            "value": "[variables('apiManagementServiceName')]"
           }
         }
       },
@@ -158,7 +158,7 @@
     {
       "type": "Microsoft.ApiManagement/service/caches",
       "apiVersion": "2019-01-01",
-      "name": "[concat(variables('apimName'), '/', parameters('location'))]",
+      "name": "[concat(variables('apiManagementServiceName'), '/', parameters('location'))]",
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'apimWithKeyVaultDeployment')]",
         "[resourceId('Microsoft.Cache/Redis', variables('redisCacheName'))]"
@@ -170,7 +170,7 @@
     {
       "type": "Microsoft.ApiManagement/service/policies",
       "apiVersion": "2019-01-01",
-      "name": "[concat(variables('apimName'), '/policy')]",
+      "name": "[concat(variables('apiManagementServiceName'), '/policy')]",
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'apimWithKeyVaultDeployment')]"
       ],
@@ -183,7 +183,7 @@
     {
       "type": "Microsoft.ApiManagement/service/apis",
       "apiVersion": "2019-01-01",
-      "name": "[concat(variables('apimName'), '/root')]",
+      "name": "[concat(variables('apiManagementServiceName'), '/root')]",
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'apimWithKeyVaultDeployment')]"
       ],
@@ -202,7 +202,7 @@
     {
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
-      "name": "[concat(variables('apimName'), '/root/getroot')]",
+      "name": "[concat(variables('apiManagementServiceName'), '/root/getroot')]",
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'apimWithKeyVaultDeployment')]"
       ],
@@ -218,9 +218,9 @@
     {
       "type": "Microsoft.ApiManagement/service/apis/policies",
       "apiVersion": "2019-01-01",
-      "name": "[concat(variables('apimName'), '/root/policy')]",
+      "name": "[concat(variables('apiManagementServiceName'), '/root/policy')]",
       "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', variables('apimName'), 'root')]",
+        "[resourceId('Microsoft.ApiManagement/service/apis', variables('apiManagementServiceName'), 'root')]",
         "[resourceId('Microsoft.Resources/deployments', 'apimWithKeyVaultDeployment')]"
       ],
       "properties": {
