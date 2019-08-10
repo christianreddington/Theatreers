@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "apimServiceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the API Management Service Resource that will have the logger associated to it."
+      }
+    },
+    "appInsightsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the App Insights Resource to be associated."
+      }
+    }
+  },
+  "resources": [
+    {
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('appInsightsName'))]",
+      "type": "Microsoft.ApiManagement/service/loggers",
+      "apiVersion": "2019-01-01",
+      "properties": {
+        "loggerType": "applicationInsights",
+        "credentials": {
+          "instrumentationKey": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2014-04-01').InstrumentationKey]"
+        }
+      },
+      "comments": "Logger sink within the API Management Service (i.e Part of the connection from API Management to App Insights)."
+    },
+    {
+      "type": "Microsoft.ApiManagement/service/properties",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('appInsightsName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('apimServiceName'), parameters('appInsightsName'))]"
+      ],
+      "properties": {
+        "displayName": "[concat('Logger-', parameters('appInsightsName'))]",
+        "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2014-04-01').InstrumentationKey]",
+        "secret": true
+      },
+      "comments": "Property on the API Management Service for the App Insights Instrumentation Key (i.e Part of the connection from API Management to App Insights)."
+    },
+    {
+      "type": "Microsoft.ApiManagement/service/diagnostics",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(parameters('apimServiceName'), '/applicationinsights')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('apimServiceName'), parameters('appInsightsName'))]"
+      ],
+      "properties": {
+        "alwaysLog": "allErrors",
+        "enableHttpCorrelationHeaders": true,
+        "loggerId": "[resourceId('Microsoft.ApiManagement/service/loggers', parameters('apimServiceName'), parameters('appInsightsName'))]",
+        "sampling": {
+          "samplingType": "fixed",
+          "percentage": 50
+        },
+        "frontend": {
+          "request": {
+            "headers": [],
+            "body": {
+              "bytes": 0
+            }
+          },
+          "response": {
+            "headers": [],
+            "body": {
+              "bytes": 0
+            }
+          }
+        },
+        "backend": {
+          "request": {
+            "headers": [],
+            "body": {
+              "bytes": 0
+            }
+          },
+          "response": {
+            "headers": [],
+            "body": {
+              "bytes": 0
+            }
+          }
+        }
+      },
+      "comments": "Configuration of the sampling rate from API Management to App Insights (i.e Part of the connection from API Management to App Insights)."
+    }
+  ]
+}

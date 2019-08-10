@@ -77,7 +77,8 @@
           "capacity": "0",
           "family": "C",
           "name": "Basic"
-        }
+        },
+      "comments": "The API Management Service resource to be deployed."
       }
     },
     {
@@ -176,7 +177,8 @@
       "properties": {
         "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - Only the <forward-request> policy element can appear within the <backend> section element.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy position the cursor at the desired insertion point and click on the round button associated with the policy.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <cors>\r\n      <allowed-origins>\r\n        <origin>http://localhost:8080</origin>\r\n        <origin>https://www.theatreers.com</origin>\r\n      </allowed-origins>\r\n      <allowed-methods preflight-result-max-age=\"300\">\r\n        <method>GET</method>\r\n        <method>POST</method>\r\n        <method>PATCH</method>\r\n        <method>DELETE</method>\r\n      </allowed-methods>\r\n      <allowed-headers>\r\n        <header>*</header>\r\n      </allowed-headers>\r\n    </cors>\r\n  </inbound>\r\n  <backend>\r\n    <forward-request />\r\n  </backend>\r\n  <outbound>\r\n    <set-header name=\"Access-Control-Allow-Origin\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n    <set-header name=\"Access-Control-Allow-Credentials\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n  </outbound>\r\n  <on-error />\r\n</policies>",
         "format": "xml"
-      }
+      },
+      "comments": "A global policy to be set on the API Management Service. Iniitially, allows certain CORS rules, but should be adapted to be more reusable and rigorous in the future."
     },
     {
       "type": "Microsoft.ApiManagement/service/apis",
@@ -194,7 +196,8 @@
         ],
         "isCurrent": true,
         "path": ""
-      }
+      },
+      "comments": "A separate service for a dummy backend endpoint for health monitoring purposes."
     },
     {
       "type": "Microsoft.ApiManagement/service/apis/operations",
@@ -209,7 +212,8 @@
         "urlTemplate": "/",
         "templateParameters": [],
         "responses": []
-      }
+      },
+      "comments": "An API endpoint/route on the service to route towards for health monitoring purposes."
     },
     {
       "type": "Microsoft.ApiManagement/service/apis/policies",
@@ -222,7 +226,8 @@
       "properties": {
         "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n  <inbound>\r\n    <base />\r\n    <mock-response status-code=\"200\" content-type=\"application/json\" />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
         "format": "xml"
-      }
+      },
+      "comments": "A policy that is associated with the 'root' endpoint (i.e. dummy health endpoint) to mock a JSON 200 response and validate the API Management Service instance is a life to any probes calling it."
     }
   ],
   "outputs": {}

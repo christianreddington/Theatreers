@@ -62,7 +62,7 @@
                     }
                 }
             },
-            "comments": "Downstream template to deploy a Cognitive Services account for Bing Searches."
+            "comments": "Downstream template to deploy a Cognitive Services account for Text Analytics."
         },
         {
             "apiVersion": "2017-05-10",
@@ -95,6 +95,9 @@
                 "parameters": {
                     "namePrefix": {
                         "value": "[variables('apiTrafficManagerNamePrefix')]"
+                    },
+                    "httpsProbeEnabled": {
+                        "value": true
                     }
                 }
             },
