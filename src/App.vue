@@ -56,6 +56,11 @@ var sdkInstance="appInsightsSDK";window[sdkInstance]="appInsights";var aiName=wi
 window[aiName]=aisdk,aisdk.queue&&0===aisdk.queue.length&&aisdk.trackPageView({});
 </script>
 
+
+<style lang="scss" scoped>
+   @import './main.scss'
+</style>
+
 <style>
 #app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;

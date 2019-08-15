@@ -14,6 +14,7 @@ const GetGroups = () => import('@/views/group/GetGroups')
 // Show
 const CreateShow = () => import('@/views/show/CreateShow')
 const EditShow = () => import('@/views/show/EditShow')
+//const GetShow = (resolve) => require(['@/views/show/GetShow.vue'], m => resolve(m.default))
 const GetShow = () => import('@/views/show/GetShow')
 const GetShows = () => import('@/views/show/GetShows')
 
