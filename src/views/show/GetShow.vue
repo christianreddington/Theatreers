@@ -8,10 +8,10 @@
         :to="{ name: 'editshow', params: { id: $route.params.id } }"
       >Edit</b-button>
     </div>
-    <h1 v-if="show">{{ show.innerObject.showName }}</h1>
-    <p v-if="show">{{ show.innerObject.showName }}</p>
-    <p v-if="show">Composer: {{ show.innerObject.composer }}</p>
-    <p v-if="show">Author: {{ show.innerObject.author }}</p>
+    <h1 v-if="show">{{ show.showName }}</h1>
+    <p v-if="show">{{ show.showName }}</p>
+    <p v-if="show">Composer: {{ show.composer }}</p>
+    <p v-if="show">Author: {{ show.author }}</p>
 
     <h1>News</h1>  
     <ShowNews :newsObjects="news" v-if="news" />
@@ -38,7 +38,7 @@ export default {
     ShowImage,
     ShowNews
   },   
-  mounted: function() {
+  mounted: async function() {
     this.isLoading = true;
     var urls = [
       `https://api.theatreers.com/show/show/${this.$route.params.id}/show`,
@@ -46,10 +46,10 @@ export default {
       `https://api.theatreers.com/show/show/${this.$route.params.id}/news`
     ]
 
-    this.myData = getAllUrls(urls). then((data) => {
-      this.show = data[0][0]
-      this.images = data[1]
-      this.news = data[2]
+    this.myData = getAllUrls(urls).then((data) => {      
+        this.show = data[0]
+        this.images = data[1]
+        this.news = data[2]
 
       this.isLoading = false
       this.breadcrumbs = [
@@ -66,49 +66,36 @@ export default {
           active: true
         }
       ];
-    }) 
-    /*
-    fetch(
-      `https://th-show-neu-dev-func.azurewebsites.net/api/show/${
-        this.$route.params.id
-      }/show`,
-      {
-        method: "get"
-      }
-    )
-      .then(function(response) {
-        return response.json();
-      })
-      .then(jsonData => {
-        this.isLoading = false;
-        this.show = jsonData[0];
-        this.breadcrumbs = [
-          {
-            text: "Theatreers",
-            href: this.$router.resolve({ name: "root" }).href
-          },
-          {
-            text: "Shows",
-            href: this.$router.resolve({ name: "getshows" }).href
-          },
-          {
-            text: this.show.showName,
-            active: true
-          }
-        ];
-      });*/
+    })
+    .catch((error) => {
+      console.log("error here " + error);
+    })
   }
 };
 
 async function getAllUrls(urls) {
   try {
     var data = await Promise.all(
-      urls.map(url => fetch(url).then(response => response.json()))
+      urls.map(url => getContent(url))
     );
     return data;
   } catch (error) {
     console.log(error);
     throw error;
   }
+}
+
+async function getContent(url){  
+  let response = await fetch(url);
+
+  if (response.ok) { // if HTTP-status is 200-299
+    console.log("returning response");
+    return await response.json();
+  } else {
+    console.log("HTTP-Error: " + response.status);
+    var emptyObject = new Array();
+    return await [];
+  }
+
 }
 </script>

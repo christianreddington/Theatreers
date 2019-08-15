@@ -1,10 +1,15 @@
 <template>
   <div>
-    <b-row v-for="(images, groupIndex) in groupedImages(imageObjects, 3)" v-bind:key="groupIndex">
-      <b-col v-for="(image, imageIndex) in images" v-bind:key="imageIndex">
-          <b-img thumbnail fluid :src="image.innerObject.contentUrl" :thing="image.innerObject.name" />
-      </b-col>
-    </b-row>
+    <div v-if="imageObjects.length > 0 && imageObjects != null">
+      <b-row v-for="(images, groupIndex) in groupedImages(imageObjects, 3)" v-bind:key="groupIndex">
+        <b-col v-for="(image, imageIndex) in images" v-bind:key="imageIndex">
+            <b-img thumbnail fluid :src="image.innerObject.contentUrl" :thing="image.innerObject.name" />
+        </b-col>
+      </b-row>
+    </div>
+    <div v-else>
+      <h4>There are no images available</h4>
+    </div>
   </div>
 </template>
 

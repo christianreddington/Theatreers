@@ -25,11 +25,11 @@ export default {
     },
     methods: {
       onSubmit(evt) {
-        fetch("https://th-show-weu-dev-func.azurewebsites.net/api/updateshow", {
+        fetch(`https://api.theatreers.com/show/show/${this.$route.params.id}`, {
           headers: {
           'Accept': 'application/json'
           },
-          method: 'POST',
+          method: 'PUT',
           body: JSON.stringify(this.show)
         })
         .then(function (response) {      
@@ -37,13 +37,13 @@ export default {
         })
         .catch(function (error) {
           console.log(error)
-          console.log("HELLO WORLD")
+          console.log("blah")
         })
       }
     },
     mounted: function () {
       this.isLoading = true
-      fetch(`https://th-show-weu-dev-func.azurewebsites.net/api/show/${this.$route.params.id}/show`, {
+      fetch(`https://api.theatreers.com/show/show/${this.$route.params.id}/show`, {
         method: 'GET'
       })
         .then(function (response) {
@@ -51,7 +51,7 @@ export default {
         })
         .then((jsonData) => {
           this.isLoading = false
-          this.show = jsonData[0],          
+          this.show = jsonData,          
           this.breadcrumbs = [
             {
               text: 'Theatreers',

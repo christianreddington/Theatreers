@@ -29,8 +29,8 @@
           <text x="50%" y="50%" fill="#dee2e6" dy=".3em">64x64</text>
         </svg>
 
-        <h2 align="left"><router-link :to="`/show/${item.showId}`">{{ item.innerObject.showName }}</router-link></h2>
-        <p align="left">Description of {{ item.innerObject.showName }}</p>
+        <h2 align="left"><router-link :to="`/show/${item.id}`">{{ item.showName }}</router-link></h2>
+        <p align="left">Description of {{ item.showName }}</p>
 
         <!-- b-[Optional: add media children here for nesting] -->
       </b-media>

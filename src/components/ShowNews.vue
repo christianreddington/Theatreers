@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div v-if="newsObjects.length > 0 && newsObjects != null">
     <b-row v-for="(newsItems, groupIndex) in groupedImages(newsObjects, 5)" v-bind:key="groupIndex">
       <b-col v-for="(newsItem, newsIndex) in newsItems" v-bind:key="newsIndex">
           <b-card tag="article" style="max-width: 20rem;" class="mb-2">
@@ -7,8 +8,13 @@
               <b-link :href="newsItem.innerObject.url">{{ newsItem.innerObject.name }}</b-link>
             </b-card-text>
           </b-card>
-      </b-col>
-    </b-row>
+      
+        </b-col>
+      </b-row>
+    </div>
+    <div v-else>
+      <h4>There are no articles available</h4>
+    </div>
   </div>
 </template>
 <script>
