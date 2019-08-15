@@ -72,14 +72,18 @@ export default class AuthService {
       })
   }
 
-  getApi (uri, token) {
+  getApiWithoutToken (uri) {
+    return fetch(`${uri}`, { method: 'GET'})
+  }
+
+  getApiWithToken (uri, token = null) {
     const headers = { 
       'Authorization': `Bearer ${token}`
     }
     return fetch(`${uri}`, {headers: headers, method: 'GET'})
   }
 
-  postApi (uri, body, token) {
+  postApiWithToken (uri, body, token) {
    // const headers = new Headers({ Authorization: `Bearer ${token}` })
     const headers = {
       'Authorization': `Bearer ${token}`,

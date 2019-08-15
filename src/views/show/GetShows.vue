@@ -98,12 +98,9 @@ export default {
       immediate: false,
       handler () {
         this.isLoading = true        
-        self = this  
-        this.$AuthService.getAccessToken(['https://theatreers.onmicrosoft.com/show-api/user_impersonation'])
-        .then(bearerToken => {              
-          self.$AuthService.getApi(`https://api.theatreers.com/show/shows/${self.selectedPartition}`, 
-          bearerToken)  
-          .catch(function (error) {                
+        self = this             
+          self.$AuthService.getApiWithoutToken(`https://api.theatreers.com/show/shows/${self.selectedPartition}`)  
+          .catch(function (error) { 
             self.alert = {
               visible: true,
               content: `${error}`,
@@ -118,7 +115,6 @@ export default {
             this.isLoading = false
             this.items = jsonData
           })
-        })
       }
     }
   }

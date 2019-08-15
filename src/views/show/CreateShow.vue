@@ -37,7 +37,7 @@ export default {
         self = this  
         this.$AuthService.getAccessToken(['https://theatreers.onmicrosoft.com/show-api/user_impersonation'])
         .then(bearerToken => {              
-          self.$AuthService.postApi('https://th-show-dev-neu-func.azurewebsites.net/api/show', 
+          self.$AuthService.postApiWithToken('https://th-show-dev-neu-func.azurewebsites.net/api/show', 
           JSON.stringify(this.show), 
           bearerToken)           
           .catch(function () {                
