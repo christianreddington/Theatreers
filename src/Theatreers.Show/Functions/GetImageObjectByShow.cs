@@ -39,7 +39,9 @@ namespace Theatreers.Show.Functions
         return new OkObjectResult(_object);
       }
 
-      return new NotFoundObjectResult($"Sorry, but the show with ID {showId} does not exist!");
+      JsonResult result = new JsonResult($"Sorry, but the show with ID {showId} does not exist!");
+      result.StatusCode = 404;
+      return result;
     }
   }
 }

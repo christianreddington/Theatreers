@@ -13,36 +13,25 @@ using Theatreers.Show.Models;
 
 namespace Theatreers.Show.Functions
 {
-  public class GetShow
-  {
+  public class HealthCheck
+    {
     private readonly IShowDomain _showDomain;
 
-    public GetShow(IShowDomain showDomain)
+    public HealthCheck(IShowDomain showDomain)
     {
       _showDomain = showDomain;
     }
 
-    [FunctionName("GetShowAsync")]
+    [FunctionName("HealthCheckProbe")]
     public async Task<IActionResult> GetShowAsync(
       [HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
-        Route = "show/{showId}/show"
+        Route = "health"
       )]HttpRequest req, 
-      ILogger log,
-      string showId)
+      ILogger log)
     {
-      ShowObject _object = await _showDomain.GetShow(showId);
-
-      if (_object != null)
-      {
-        return new OkObjectResult(_object);
-      }
-
-      JsonResult result = new JsonResult($"Sorry, but the show with ID {showId} does not exist!");
-      result.StatusCode = 404;
-      return result;
-
+        return new OkResult();
     }
   }
 }
