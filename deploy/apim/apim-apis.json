@@ -40,21 +40,18 @@
       }
     },
     {
-        "type": "Microsoft.ApiManagement/service/apis/operations",
-        "apiVersion": "2019-01-01",
-        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/healthcheck')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]",          
-            "[resourceId('Microsoft.ApiManagement/service', parameters('apimServiceName'))]"
-        ],
-        "properties": {
-            "displayName": "HealthCheck",
-            "method": "GET",
-            "urlTemplate": "/health",
-            "templateParameters": [],
-            "description": "Health Check Pattern",
-            "responses": []
-        }
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/healthcheck')]",
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
+      ],
+      "properties": {
+        "description": "HealthCheck Pattern",
+        "displayName": "HealthCheck",
+        "method": "GET",
+        "urlTemplate": "/health"
+      }
     },
     {
       "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/createshoworchestrator')]",
