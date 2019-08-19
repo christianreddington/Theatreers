@@ -135,34 +135,6 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(parameters('location'), 'TrafficManagerEndpointDeployment')]",
-            "type": "Microsoft.Resources/deployments",
-            "dependsOn": [
-                "functionDeployment"
-            ],
-            "resourceGroup": "[variables('serviceGlobalResourceGroupName')]",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('templateContainerUri'), 'trafficManagerEndpoint.json', parameters('templateContainerSasToken'))]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "namePrefix": {
-                        "value": "[variables('serviceGlobalNamePrefix')]"
-                    },
-                    "endpointPrefix": {
-                        "value": "[parameters('location')]"
-                    },
-                    "targetResourceId": {
-                        "value": "[reference('functionDeployment').outputs.targetResourceId.value]"
-                    }
-                }
-            },
-            "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
-        },
-        {
-            "apiVersion": "2017-05-10",
             "name": "[concat(variables('serviceRegionalFunctionName'), 'ServiceAPIsDeployment')]",
             "type": "Microsoft.Resources/deployments",
             "resourceGroup": "[variables('coreRegionalResourceGroupName')]",
