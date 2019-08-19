@@ -32,7 +32,7 @@ namespace Theatreers.Show.Functions
         string showId,
         ILogger log)
     {
-      ICollection<ImageObject> _object = await _showDomain.GetImageByShow(showId);
+      ICollection<NewsObject> _object = await _showDomain.GetNewsByShow(showId);
 
       if (_object != null && _object.Count > 0)
       {
