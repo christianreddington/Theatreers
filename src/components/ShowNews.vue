@@ -5,7 +5,7 @@
       <b-col v-for="(newsItem, newsIndex) in newsItems" v-bind:key="newsIndex">
           <b-card tag="article" style="max-width: 20rem;" class="mb-2">
             <b-card-text>
-              <b-link :href="newsItem.innerObject.url">{{ newsItem.innerObject.name }}</b-link>
+              <b-link :href="newsItem.url">{{ newsItem.name }}</b-link>
             </b-card-text>
           </b-card>
       
