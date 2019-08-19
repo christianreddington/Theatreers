@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Theatreers.Core.Abstractions;
+using Theatreers.Core.Models;
 using Theatreers.Show.Models;
 
 namespace Theatreers.Show.Functions
@@ -121,8 +122,8 @@ namespace Theatreers.Show.Functions
                 log.LogInformation($"Deleting the Show List listing failed for {showId} :: {ex.Message}");
               }
 
-              List <IPartitionableStorableValidatable> showObjects = outputs.CreateDocumentQuery<IPartitionableStorableValidatable>(showCollectionUri, new FeedOptions { PartitionKey = new PartitionKey(showId) })
-                                          .Where(c => c.Id == showId)
+              List <ShowDomainObject> showObjects = outputs.CreateDocumentQuery<ShowDomainObject>(showCollectionUri, new FeedOptions { PartitionKey = new PartitionKey(showId) })
+                                          .Where(c => c.Partition == showId)
                                           .ToList();
 
               foreach (dynamic showObject in showObjects)
@@ -137,11 +138,11 @@ namespace Theatreers.Show.Functions
                   //If successful, push the output to CosmosDB, log the creation and return an OkObjectResult
                   //If unsuccessful, catch any exception, log that and throw a BadRequestResult
                   await outputs.UpsertDocumentAsync(showCollectionUri, showObject);
-                  log.LogInformation($"Deleting the item {showObject.Id} for {showObject.ShowId} was successful");
+                  log.LogInformation($"Deleting the item {showObject.Id} for {showObject.Partition} was successful");
                 }
                 catch (Exception ex)
                 {
-                  log.LogInformation($"Deleting the the item {showObject.Id} for {showObject.ShowId} has failed :: {ex.Message}");
+                  log.LogInformation($"Deleting the the item {showObject.Id} for {showObject.Partition} has failed :: {ex.Message}");
                 }
               }
 

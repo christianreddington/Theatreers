@@ -4,7 +4,7 @@ using Theatreers.Show.Abstractions;
 
 namespace Theatreers.Show.Models
 {
-  public class ImageObject : PartitionableStorableValidatableBaseObject
+  public class ImageObject : ShowDomainObject
   {
     public ImageObject() : base()
     {

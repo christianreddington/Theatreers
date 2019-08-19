@@ -28,7 +28,7 @@ namespace Theatreers.Show.Functions
     }
 
     [FunctionName("CreateShowObjectByOrchestrator")]
-    public static async Task<IActionResult> CreateShowObjectAsync(
+    public async Task<IActionResult> CreateShowObjectAsync(
       [OrchestrationTrigger] DurableOrchestrationContext context,
       ILogger log
     )

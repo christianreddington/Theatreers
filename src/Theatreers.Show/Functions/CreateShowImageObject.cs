@@ -30,7 +30,7 @@ namespace Theatreers.Show.Functions
 
     [FunctionName("CreateShowImageObjectByOrchestrator")]
 
-    public static async Task<IActionResult> CreateShowImageObjectByOrchestrator(
+    public async Task<IActionResult> CreateShowImageObjectByOrchestrator(
       [OrchestrationTrigger] DurableOrchestrationContext context,
       ILogger log,
       [CosmosDB(
