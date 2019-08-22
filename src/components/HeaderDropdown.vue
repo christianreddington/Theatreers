@@ -22,19 +22,22 @@ export default {
     }
   },
   mounted () {
-    this.setUser()
+    if (msalInstance.getAccount() != null){
+      this.user = msalInstance.getAccount()
+    }
   },
   methods: {
     logout () {
       this.user = null
-      auth.logout()
+      logout()
     },
     login () {
       // this.$AuthService.loginPopup() // with a popup
-      auth.login() // with a redirect
+      login() // with a redirect
+      this.user = msalInstance.getAccount()
     },
     setUser () {
-      this.user = auth.getUser()
+      this.user = msalInstance.getAccount()
     }
   }
 }
