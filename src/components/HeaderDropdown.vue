@@ -10,12 +10,15 @@
 </template>
 
 <script>
+import * as auth from '.././msal'
+
 export default {
   name: 'HeaderDropdown',
   data: () => {
     return {
       itemsCount: 42,
       user: null
+
     }
   },
   mounted () {
@@ -24,14 +27,14 @@ export default {
   methods: {
     logout () {
       this.user = null
-      this.$AuthService.logout()
+      auth.logout()
     },
     login () {
       // this.$AuthService.loginPopup() // with a popup
-      this.$AuthService.loginRedirect() // with a redirect
+      auth.login() // with a redirect
     },
     setUser () {
-      this.user = this.$AuthService.getUser()
+      this.user = auth.getUser()
     }
   }
 }

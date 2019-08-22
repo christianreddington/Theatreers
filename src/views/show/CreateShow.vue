@@ -20,6 +20,7 @@ export default {
       return {
         show: {
           showName: '',
+          description: '',
           author: '',
           composer: ''
         },
@@ -37,7 +38,7 @@ export default {
         self = this  
         this.$AuthService.getAccessToken(['https://theatreers.onmicrosoft.com/show-api/user_impersonation'])
         .then(bearerToken => {              
-          self.$AuthService.postApiWithToken('https://th-show-dev-neu-func.azurewebsites.net/api/show', 
+          self.$AuthService.postApiWithToken('https://api.theatreers.com/show/show', 
           JSON.stringify(this.show), 
           bearerToken)           
           .catch(function () {                
