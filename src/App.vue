@@ -39,7 +39,6 @@
 </template>
 
 <script>
-  //var auth = require('./msal');
   import HeaderDropdown from './components/HeaderDropdown'
 
 export default {

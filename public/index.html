@@ -19,7 +19,7 @@
       
   var config = {
   clientId: "74568295-9e88-47db-bd81-e99a23fdcee8",
-  redirectUrl: 'https://www.theatreers.com',
+  redirectUrl: 'https://localhost:8080/callback',
   //redirectUrl: "http://localhost:8080",
   authority: "https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/B2C_1_SiUpIn",
   apiUrl: "https://api.theatreers.com",
@@ -45,11 +45,39 @@ msalInstance.handleRedirectCallback((error, response) => {
 });
 
 
+// if the user is already logged in you can acquire a token
+if (msalInstance.getAccount()) {
+	var tokenRequest = {
+		scopes: ["user.read", "mail.send"]
+	};
+	msalInstance.acquireTokenSilent(tokenRequest)
+		.then(response => {
+			// get access token from response
+			// response.accessToken
+		})
+		.catch(err => {
+			// could also check if err instance of InteractionRequiredAuthError if you can import the class.
+			if (err.name === "InteractionRequiredAuthError") {
+				return msalInstance.acquireTokenPopup(tokenRequest)
+					.then(response => {
+						// get access token from response
+						// response.accessToken
+					})
+					.catch(err => {
+						// handle error
+					});
+			}
+		});
+} else {
+  //this.logout();
+	// user is not logged in, you will need to log them in to acquire a token
+}
+
 function login() {
   var loginRequest = {
     scopes: config.scopes
   };
-  msalInstance.loginPopup(loginRequest).then(function (loginResponse) {
+  msalInstance.loginRedirect(loginRequest).then(function (loginResponse) {
     var tokenRequest = {
         scopes: config.scopes
     };

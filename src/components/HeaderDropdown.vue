@@ -17,7 +17,7 @@ export default {
   data: () => {
     return {
       itemsCount: 42,
-      user: null
+      user: msalInstance.getAccount()
 
     }
   },
