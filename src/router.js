@@ -2,6 +2,9 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 
+// Admin
+const AdminRoot  = () => import('@/views/admin/AdminRoot')
+const GetPermissions = () => import('@/views/admin/GetPermissions')
 
 // Event
 const GetEvent = () => import('@/views/event/GetEvent')
@@ -28,6 +31,8 @@ export default new Router({
     { path: '/show/create', name: 'createshow', component: CreateShow },
     { path: '/show/:id', name: 'getshow', component: GetShow},
     { path: '/show/:id/edit', name: 'editshow', component: EditShow },
+    { path: '/admin/', name: 'AdminRoot', component: AdminRoot },
+    { path: '/admin/permissions', name: 'GetPermissions', component: GetPermissions },
     { path: '/', name: 'root', component: Home }
   ]
 })
