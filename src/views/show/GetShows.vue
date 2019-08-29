@@ -39,8 +39,6 @@
   </div>
 </template>
 <script>
-import * as core from '../.././msal'
-
 export default {
   data () {
     return {
@@ -101,7 +99,7 @@ export default {
       handler () {
         this.isLoading = true        
         self = this             
-          core.getApiWithoutToken(`https://api.theatreers.com/show/shows/${self.selectedPartition}`)  
+          getApiWithoutToken(`https://api.theatreers.com/show/shows/${self.selectedPartition}`)  
           .catch(function (error) { 
             self.alert = {
               visible: true,
