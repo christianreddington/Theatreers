@@ -3,13 +3,22 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "ApimServiceName": {
-      "type": "string"
+      "type": "string",
+      "metadata": {
+        "description": "Name of the API Management Service Instance"
+      }
     },
     "functionName": {
-      "type": "string"
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Azure Function App"
+      }
     },
     "functionResourceGroup": {
-      "type": "string"
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Azure Function's Resource Group"
+      }
     }
   },
   "resources": [
