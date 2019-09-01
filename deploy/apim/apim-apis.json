@@ -75,7 +75,7 @@
           "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'createshoworchestrator')]"
         ],
         "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
             "format": "xml"
         }
     },
@@ -108,7 +108,7 @@
           "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'createchowimageobjectbyhttp')]"
         ],
         "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
             "format": "xml"
         }
     },
@@ -141,7 +141,7 @@
           "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'createshownewsobjectbyhttp')]"
         ],
         "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
             "format": "xml"
         }
     },
@@ -179,7 +179,7 @@
           "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'deleteshowimageobject')]"
         ],
         "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
             "format": "xml"
         }
     },
@@ -217,7 +217,7 @@
           "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'deleteshownewsobject')]"
         ],
         "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
             "format": "xml"
         }
     },
@@ -250,7 +250,7 @@
           "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'deleteshowobject')]"
         ],
         "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
             "format": "xml"
         }
     },
@@ -370,7 +370,7 @@
           "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'updateshow')]"
         ],
         "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
             "format": "xml"
         }
     },
@@ -408,7 +408,7 @@
           "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'updateshowimageobject')]"
         ],
         "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
             "format": "xml"
         }
     },
@@ -446,7 +446,7 @@
           "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'updateshownewsobject')]"
         ],
         "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
             "format": "xml"
         }
     }
