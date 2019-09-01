@@ -1,24 +1,22 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
-using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Theatreers.Core.Models;
 using Theatreers.Show.Abstractions;
 using Theatreers.Show.Models;
+using Theatreers.Show.Utils;
 
 namespace Theatreers.Show.Functions
 {
-  public class CreateShowObject
+    public class CreateShowObject
   {
 
     private static IShowDomain _showDomain;
@@ -57,6 +55,7 @@ namespace Theatreers.Show.Functions
       return new OkResult();
     }
 
+    [FunctionAuthorize]
     [FunctionName("CreateShowObjectByHttp")]
     public async Task<IActionResult> CreateShowObjectByHttpAsync(
       [HttpTrigger(
@@ -68,9 +67,11 @@ namespace Theatreers.Show.Functions
       ILogger log
         )
     {
-      if (identity != null && identity.Identity.IsAuthenticated)
-      {
-        string showId = Guid.NewGuid().ToString();
+
+            string authorizationStatus = req.Headers.GetValues("AuthorizationStatus").FirstOrDefault();
+            if (Convert.ToInt32(authorizationStatus).Equals((int)HttpStatusCode.Accepted))
+            {
+                string showId = Guid.NewGuid().ToString();
 
         MessageObject<ShowObject> message = new MessageObject<ShowObject>()
         {

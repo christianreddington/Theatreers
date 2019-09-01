@@ -3,12 +3,15 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Theatreers.Core.Models;
 using Theatreers.Show.Abstractions;
 using Theatreers.Show.Models;
+using Theatreers.Show.Utils;
 
 namespace Theatreers.Show.Functions
 {
@@ -21,6 +24,7 @@ namespace Theatreers.Show.Functions
       _showDomain = showDomain;
     }
 
+    [FunctionAuthorize]
     [FunctionName("DeleteShowNewsObject")]
 
     public async Task<IActionResult> DeleteShowNewsObjectAsync(
@@ -35,11 +39,12 @@ namespace Theatreers.Show.Functions
       string newsId
     )
     {
-      if (identity != null && identity.Identity.IsAuthenticated)
-      {
+            string authorizationStatus = req.Headers.GetValues("AuthorizationStatus").FirstOrDefault();
+            if (Convert.ToInt32(authorizationStatus).Equals((int)HttpStatusCode.Accepted))
+            {
 
 
-        MessageObject<NewsObject> message = new MessageObject<NewsObject>()
+                MessageObject<NewsObject> message = new MessageObject<NewsObject>()
         {
           Headers = new MessageHeaders()
           {
