@@ -290,7 +290,7 @@ namespace Theatreers.Core.Tests
 
       // Act  
       var deletion = await _storageProvider.DeleteAsync(_object);
-      Thread.Sleep(2000);
+      Thread.Sleep(11000);
 
       // Assert
       IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
@@ -310,7 +310,7 @@ namespace Theatreers.Core.Tests
 
       // Act 
       var deletion = await _storageProvider.DeleteAsync(_object);
-      Thread.Sleep(2000);
+      Thread.Sleep(11000);
 
       // Assert
       IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
