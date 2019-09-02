@@ -87,6 +87,7 @@ namespace Theatreers.Core.Tests
       {
         await _storageProvider.DeleteAsync(document);
       }
+          await  Task.Delay(6000);
     }
 
     [Fact]
@@ -290,7 +291,7 @@ namespace Theatreers.Core.Tests
 
       // Act  
       var deletion = await _storageProvider.DeleteAsync(_object);
-      Thread.Sleep(11000);
+      await Task.Delay(6000);
 
       // Assert
       IQueryable<PartitionedTestObject> query = await _storageProvider.Query();
@@ -310,7 +311,7 @@ namespace Theatreers.Core.Tests
 
       // Act 
       var deletion = await _storageProvider.DeleteAsync(_object);
-      Thread.Sleep(11000);
+      await Task.Delay(6000);
 
       // Assert
       IQueryable<PartitionedTestObject> query = await _storageProvider.Query();

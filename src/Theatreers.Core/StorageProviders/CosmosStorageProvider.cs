@@ -97,7 +97,7 @@ namespace Theatreers.Core.Providers
       if (await CheckExistsAsync(_object)) 
       {
         T _deletedObject = await ReadAsync(_object);
-        _deletedObject.Ttl = 10;
+        _deletedObject.Ttl = 5;
       await UpsertAsync(_deletedObject);
       return true;
       }
