@@ -23,7 +23,6 @@ namespace Theatreers.Show.Functions
         collectionName: "shows",
         ConnectionStringSetting = "cosmosConnectionString",
         LeaseCollectionName = "leases",
-        LeaseCollectionPrefix = "local",
         CreateLeaseCollectionIfNotExists = true
       )]IReadOnlyList<Document> inputs,
       ILogger log,

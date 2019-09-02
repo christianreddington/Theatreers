@@ -222,7 +222,7 @@ stages:
       # the regional deployment for our dev environment.
       variables:
         aadClientId: '73e2635f-dadd-443b-9e47-89ac07f91485'
-        aadB2cIssuer: 'https://login.microsoftonline.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn'
+        aadB2cIssuer: 'https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn'
       # Use a matrix strategy to repeat this set of tasks across multiple regions
       # It means that it will execute maxParallel number of instances at a time of this
       # phase, and use those key value pairs within each line item of the matrix to
