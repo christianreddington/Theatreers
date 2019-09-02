@@ -51,13 +51,8 @@ namespace Theatreers.Show.Functions
             RequestCorrelationId = Guid.NewGuid().ToString(),
             RequestCreatedAt = DateTime.Now
           },
-          Body = new ShowObject()
-          {
-            Doctype = DocTypes.Image,
-            Id = showId,
-            Partition = showId
-          }
-        };
+          Body = await _showDomain.GetShow(showId)
+            };
 
         try
         {
