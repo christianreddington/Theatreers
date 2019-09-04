@@ -1,0 +1,200 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {             
+        "aadClientId": {
+            "type": "string",
+            "metadata": {
+              "description": "Client ID of the AAD B2C Application linked to the API Auth"
+            }
+          },            
+          "aadB2cIssuer": {
+              "type": "string",
+              "metadata": {
+                "description": "Link to the well known Open ID Configuration for the sign in policy."
+              }
+            },          
+        "environmentName": {
+            "type": "string",
+            "allowedValues": [
+                "dev",
+                "test",
+                "qa",
+                "prod"
+            ],
+            "defaultValue": "dev",
+            "metadata": {
+                "description": "Define which environment is being deployed, this will affect naming convention of all resources"
+            }
+        },            
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },   
+        "servicePrincipalObjectId": {
+            "type": "string",
+            "metadata": {
+                "description": "Object ID (not application ID) of the Azure DevOps service principal to be granted access to the KeyVault."
+            }
+        },        
+        "tenantId": {
+            "type": "string",
+            "metadata": {
+                "description": "GUID of the Azure AD Tenant associated with the Azure KeyVault"
+            }
+        },      
+        "templateContainerUri": {
+            "type": "string",
+            "metadata": {
+                "description": "URI of the Blob Storage Container containing the ARM Template building blocks"
+            }
+        },
+        "templateContainerSasToken": {
+            "type": "string",
+            "metadata": {
+                "description": "The SAS token of the container containing the ARM Template building blocks"
+            }
+        }
+    },
+    "variables": {
+        "abbreviations": {
+            "northeurope": "neu",
+            "westeurope": "weu"
+        },        
+        "coreGlobalCogSvcSearchName": "[concat(variables('coreGlobalNamePrefix'), 'search')]",
+        "coreGlobalResourceGroupName": "[concat(variables('coreGlobalNamePrefix'), 'rg')]",
+        "coreGlobalNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-')]",
+        "coreRegionalApimServiceName": "[concat(variables('coreRegionalNamePrefix'),'apim')]",
+        "coreRegionalAppinsightsName": "[concat(variables('coreRegionalNamePrefix'), 'ai')]",
+        "coreRegionalNamePrefix": "[concat(variables('organisationPrefix'), '-core-', parameters('environmentName'), '-', variables('abbreviations')[parameters('location')], '-')]",
+        "coreRegionalResourceGroupName": "[concat(variables('coreRegionalNamePrefix'), 'rg')]",
+        "serviceGlobalNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'), '-')]",
+        "serviceGlobalResourceGroupName": "[concat(variables('serviceGlobalNamePrefix'), 'rg')]",
+        "serviceRegionalFunctionName": "[concat(variables('serviceRegionalNamePrefix'), 'func')]",
+        "serviceRegionalKeyvaultName": "[concat(variables('serviceRegionalNamePrefix'), 'kv')]",
+        "serviceRegionalNamePrefix": "[concat(variables('organisationPrefix'),'-', variables('serviceName'), '-', parameters('environmentName'),'-', variables('abbreviations')[parameters('location')], '-')]",
+        "serviceRegionalNamePrefixWithoutDashes": "[replace(variables('serviceRegionalNamePrefix'), '-', '')]",
+        "serviceResourceGroupName": "[concat(variables('serviceRegionalNamePrefix'), 'rg')]",
+        "organisationPrefix": "th",
+        "serviceName": "admin"
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "functionDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'function.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "aadClientId": {
+                        "value": "[parameters('aadClientId')]"
+                    },
+                    "aadB2cIssuer": {
+                        "value": "[parameters('aadB2cIssuer')]"
+                    },
+                    "namePrefix": {
+                        "value": "[variables('serviceRegionalNamePrefix')]"
+                    },
+                    "namePrefixWithoutDashes": {
+                        "value": "[variables('serviceRegionalNamePrefixWithoutDashes')]"
+                    },
+                    "appInsightsResourceGroup": {
+                        "value": "[variables('coreRegionalResourceGroupName')]"
+                    },
+                    "appInsightsName": {
+                        "value": "[variables('coreRegionalAppinsightsName')]"
+                    },
+                    "cogSvcResourceGroup": {
+                        "value": "[variables('coreGlobalResourceGroupName')]"
+                    },
+                    "cogSvcAccountName": {
+                        "value": "[variables('coreGlobalCogSvcSearchName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('serviceRegionalFunctionName'), 'ServiceAPIsDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('coreRegionalResourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'apim-apis.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "apimServiceName": {
+                        "value": "[variables('coreRegionalApimServiceName')]"
+                    },
+                    "functionName": {
+                        "value": "[variables('serviceRegionalFunctionName')]"
+                    },
+                    "serviceName": {
+                        "value": "[variables('serviceName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy an APIs for the given Microservice."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('serviceRegionalFunctionName'), 'BackendDeployment')]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('coreRegionalResourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'apim-backend.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "apimServiceName": {
+                        "value": "[variables('coreRegionalApimServiceName')]"
+                    },
+                    "functionName": {
+                        "value": "[variables('serviceRegionalFunctionName')]"
+                    },
+                    "functionResourceGroup": {
+                        "value": "[variables('serviceResourceGroupName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy an APIs for the given Microservice."
+        },  
+        {
+            "apiVersion": "2017-05-10",
+            "name": "keyVaultDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), 'keyVault.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vaultName": {
+                        "value": "[variables('serviceRegionalKeyvaultName')]"
+                    },
+                    "tenantId": {
+                        "value": "[parameters('tenantId')]"
+                    },
+                    "objectId": {
+                        "value": "[parameters('servicePrincipalObjectId')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy Azure KeyVault, associate it with a gievn tenant and assign a Service Principal Object with access to secrets. This uses the Theatreers Azure KeyVault Building Block."
+        }
+    ],
+    "outputs": {}
+}
