@@ -219,7 +219,7 @@ stages:
             location: '$(region)'
             templateLocation: 'Linked artifact'
             csmFile: '$(System.DefaultWorkingDirectory)/deploy/regional.json'
-            overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup) -aadClientId $(aadClientId) -aadB2cIssuer $(aadB2cIssuer)'
+            overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -aadClientId $(aadClientId) -aadB2cIssuer $(aadB2cIssuer)'
             deploymentMode: 'Incremental'
         # Download the secres from Azure KeyVault
         - task: AzureKeyVault@1
