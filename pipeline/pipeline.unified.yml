@@ -176,7 +176,7 @@ stages:
     # This next job is the regional deployment.
     - job: 'microservice_dev_release_regional_job'
       displayName: 'Microservice Release (Regional)'
-      dependsOn: 'microservice_dev_release_global_job'
+      dependsOn: []
       pool:
         name: 'Hosted Windows 2019 with VS2019'
       # Set variables which exist within the scope of this phase, i.e.
