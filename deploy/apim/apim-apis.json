@@ -44,7 +44,7 @@
           "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
       ],
       "properties": {
-          "value": "<policies>\r\n  <inbound>\r\n    <base />\r\n    <set-backend-service base-url=\"https://th-show-dev-weu-func.azurewebsites.net/api/\" />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+          "value": "[concat('<policies>\r\n  <inbound>\r\n    <base />\r\n    <set-backend-service base-url=\"https://', parameters('functionName'), '.azurewebsites.net/api/\" />\r\n<cors>\r\n      <allowed-origins>\r\n        <origin>http://localhost:8080</origin>\r\n        <origin>https://www.theatreers.com</origin>\r\n      </allowed-origins>\r\n      <allowed-methods preflight-result-max-age=\"300\">\r\n        <method>GET</method>\r\n        <method>POST</method>\r\n        <method>PATCH</method>\r\n        <method>DELETE</method>\r\n        <method>OPTIONS</method>\r\n      </allowed-methods>\r\n      <allowed-headers>\r\n        <header>*</header>\r\n      </allowed-headers>\r\n    </cors>\r\n    <cache-lookup vary-by-developer=\"false\" vary-by-developer-groups=\"false\">\r\n      <vary-by-header>Accept</vary-by-header>\r\n      <vary-by-header>Accept-Charset</vary-by-header>\r\n      <vary-by-header>Authorization</vary-by-header>\r\n    </cache-lookup>\r\n   </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n <set-header name=\"Access-Control-Allow-Origin\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n    <set-header name=\"Access-Control-Allow-Credentials\" exists-action=\"append\">\r\n      <value>*</value>\r\n    </set-header>\r\n    <cache-store caching-mode=\"cache-on\" duration=\"20\" />\r\n   </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>')]",
           "format": "xml"
       }
     },
@@ -63,33 +63,33 @@
       }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/createshoworchestrator')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/getuserpermissions')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
         "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
       ],
       "properties": {
-        "description": "API used to create a Show. This triggers the creation of images and news objects for a show.",
-        "displayName": "CreateShowOrchestrator",
-        "method": "POST",
-        "urlTemplate": "/show"
+        "description": "API used to Get Users via Backend Microservice and Microsoft Graph.",
+        "displayName": "GetUserPermissions",
+        "method": "GET",
+        "urlTemplate": "/moderation/permission"
       }
     },
     {
         "type": "Microsoft.ApiManagement/service/apis/operations/policies",
         "apiVersion": "2019-01-01",
-        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/createshoworchestrator/policy')]",
+        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/getuserpermissions/policy')]",
         "dependsOn": [
           "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'createshoworchestrator')]"
         ],
         "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>d86031af-7704-4706-b2d2-2c771177f729</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
             "format": "xml"
         }
     },
     {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/createchowimageobjectbyhttp')]",
+      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/setpermissions')]",
       "type": "Microsoft.ApiManagement/service/apis/operations",
       "apiVersion": "2019-01-01",
       "dependsOn": [
@@ -98,364 +98,26 @@
       "properties": {
         "templateParameters": [
           {
-            "name": "id",
+            "name": "userId",
             "type": "Guid",
             "required": true
           }
         ],
-        "description": "API used to create an individual Show Image Object manually, rather than the Cognitive Services API.",
-        "displayName": "CreateShowImageObjectByHttp",
-        "method": "POST",
-        "urlTemplate": "/show/{id}/image"
+        "description": "API used to set permission (via Azure Function and Microsoft Graph)",
+        "displayName": "SetPermissions",
+        "method": "PUT",
+        "urlTemplate": "/moderation/permission/{id}"
       }
     },
     {
         "type": "Microsoft.ApiManagement/service/apis/operations/policies",
         "apiVersion": "2019-01-01",
-        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/createchowimageobjectbyhttp/policy')]",
+        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/setpermissions/policy')]",
         "dependsOn": [
           "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'createchowimageobjectbyhttp')]"
         ],
         "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
-            "format": "xml"
-        }
-    },
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/createshownewsobjectbyhttp')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "id",
-            "type": "Guid",
-            "required": true
-          }
-        ],
-        "description": "API used to create an individual Show News Object manually, rather than the Cognitive Services API.",
-        "displayName": "CreateShowNewsObjectByHttp",
-        "method": "POST",
-        "urlTemplate": "/show/{id}/news"
-      }
-    },
-    {
-        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-        "apiVersion": "2019-01-01",
-        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/createshownewsobjectbyhttp/policy')]",
-        "dependsOn": [
-          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'createshownewsobjectbyhttp')]"
-        ],
-        "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
-            "format": "xml"
-        }
-    },
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/deleteshowimageobject')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "id",
-            "type": "Guid",
-            "required": true
-          },
-          {
-            "name": "imageId",
-            "type": "Guid",
-            "required": true
-          }
-        ],
-        "description": "API used to delete a specified Show Image Object.",
-        "displayName": "DeleteShowImageObject",
-        "method": "DELETE",
-        "urlTemplate": "/show/{id}/image/{imageId}"
-      }
-    },
-    {
-        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-        "apiVersion": "2019-01-01",
-        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/deleteshowimageobject/policy')]",
-        "dependsOn": [
-          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'deleteshowimageobject')]"
-        ],
-        "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
-            "format": "xml"
-        }
-    },
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/deleteshownewsobject')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "id",
-            "type": "Guid",
-            "required": true
-          },
-          {
-            "name": "newsId",
-            "type": "Guid",
-            "required": true
-          }
-        ],
-        "description": "API used to delete a specified Show News Object.",
-        "displayName": "DeleteShowNewsObject",
-        "method": "DELETE",
-        "urlTemplate": "/show/{id}/news/{newsId}"
-      }
-    },
-    {
-        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-        "apiVersion": "2019-01-01",
-        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/deleteshownewsobject/policy')]",
-        "dependsOn": [
-          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'deleteshownewsobject')]"
-        ],
-        "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
-            "format": "xml"
-        }
-    },
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/deleteshowobject')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "id",
-            "type": "Guid",
-            "required": true
-          }
-        ],
-        "description": "API used to delete a specified Show Object. This will trigger the CosmosDB Change feed and cascade the deletion of any related objects to the Show.",
-        "displayName": "DeleteShowObject",
-        "method": "DELETE",
-        "urlTemplate": "/show/{id}"
-      }
-    },
-    {
-        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-        "apiVersion": "2019-01-01",
-        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/deleteshowobject/policy')]",
-        "dependsOn": [
-          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'deleteshowobject')]"
-        ],
-        "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
-            "format": "xml"
-        }
-    },
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/GetImageObjectsByShow')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "id",
-            "type": "Guid",
-            "required": true
-          }
-        ],
-        "description": "API used to get all images relating to a show when passing in a specific ShowID",
-        "displayName": "GetImageObjectsByShow",
-        "method": "GET",
-        "urlTemplate": "/show/{id}/image"
-      }
-    },   
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/getnewsobjectbyshow')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "id",
-            "type": "Guid",
-            "required": true
-          }
-        ],
-        "description": "API used to get all news objects relating to a show when passing in a specific ShowID",
-        "displayName": "GetNewsObjectByShow",
-        "method": "GET",
-        "urlTemplate": "/show/{id}/news"
-      }
-    },
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/getshowlistobject')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "letter",
-            "type": "String",
-            "required": true,
-            "values": [
-              "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "0-9"
-            ]
-          }
-        ],
-        "description": "API to retrieve a list of all shows, when passing in the start letter.",
-        "displayName": "GetShowListObject",
-        "method": "GET",
-        "urlTemplate": "/shows/{letter}"
-      }
-    },
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/getshowobject')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "id",
-            "type": "Guid",
-            "required": true
-          }
-        ],
-        "description": "API used to get a show object when passing in a specific ShowID",
-        "displayName": "GetShowObject",
-        "method": "GET",
-        "urlTemplate": "/show/{id}/show"
-      }
-    },
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/updateshow')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "id",
-            "type": "Guid",
-            "required": true
-          }
-        ],
-        "description": "Updates a specific show when passing in the ShowID",
-        "displayName": "UpdateShow",
-        "method": "PUT",
-        "urlTemplate": "/show/{id}"
-      }
-    },
-    {
-        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-        "apiVersion": "2019-01-01",
-        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/updateshow/policy')]",
-        "dependsOn": [
-          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'updateshow')]"
-        ],
-        "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
-            "format": "xml"
-        }
-    },
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/updateshowimageobject')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "id",
-            "type": "Guid",
-            "required": true
-          },
-          {
-            "name": "imageId",
-            "type": "Guid",
-            "required": true
-          }
-        ],
-        "description": "API used to update a specified Show Image Object.",
-        "displayName": "updateshowimageobject",
-        "method": "PUT",
-        "urlTemplate": "/show/{id}/image/{imageId}"
-      }
-    },
-    {
-        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-        "apiVersion": "2019-01-01",
-        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/updateshowimageobject/policy')]",
-        "dependsOn": [
-          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'updateshowimageobject')]"
-        ],
-        "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
-            "format": "xml"
-        }
-    },
-    {
-      "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/updateshownewsobject')]",
-      "type": "Microsoft.ApiManagement/service/apis/operations",
-      "apiVersion": "2019-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), parameters('serviceName'))]"
-      ],
-      "properties": {
-        "templateParameters": [
-          {
-            "name": "id",
-            "type": "Guid",
-            "required": true
-          },
-          {
-            "name": "newsId",
-            "type": "Guid",
-            "required": true
-          }
-        ],
-        "description": "API used to update a specified Show News Object.",
-        "displayName": "UpdateShowNewsObject",
-        "method": "PUT",
-        "urlTemplate": "/show/{id}/news/{newsId}"
-      }
-    },
-    {
-        "type": "Microsoft.ApiManagement/service/apis/operations/policies",
-        "apiVersion": "2019-01-01",
-        "name": "[concat(parameters('apimServiceName'), '/', parameters('serviceName'), '/updateshownewsobject/policy')]",
-        "dependsOn": [
-          "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), parameters('serviceName'), 'updateshownewsobject')]"
-        ],
-        "properties": {
-            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>73e2635f-dadd-443b-9e47-89ac07f91485</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+            "value": "<policies>\r\n  <inbound>\r\n    <validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n      <openid-config url=\"https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn\" />\r\n      <audiences>\r\n        <audience>d86031af-7704-4706-b2d2-2c771177f729</audience>\r\n      </audiences>\r\n    </validate-jwt>\r\n    <base />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
             "format": "xml"
         }
     }
