@@ -15,9 +15,9 @@
           </thead>
           <tbody>
             <tr v-for="item in sortedItems">
-              <td>{{ item.objectId }}</td>
+              <td>{{ item.id }}</td>
               <td>{{ item.displayName }}</td>
-              <td v-bind:id="item.objectId" v-bind:ref="item.objectId" contenteditable @focus="enterCell(item.objectId)" @blur="exitCell(item.objectId)">{{ item.extension_309951ebe380415e84418cf29a596f64_permissions }}</td>
+              <td v-bind:id="item.id" v-bind:ref="item.id" contenteditable @focus="enterCell(item.id)" @blur="exitCell(item.id)">{{ item.extension_309951ebe380415e84418cf29a596f64_permissions }}</td>
             </tr>
           </tbody>
         </table>
@@ -33,7 +33,7 @@ export default {
         dirtyPermission: null,
         columns: [
           {
-            'itemsKey': 'objectId',
+            'itemsKey': 'id',
             'displayName': 'Object ID'
           },
           {
