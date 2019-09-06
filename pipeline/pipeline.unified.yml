@@ -236,5 +236,5 @@ stages:
             appType: 'functionApp'
             appName: '$(functionAppName)'
             package: '$(System.DefaultWorkingDirectory)/src/*.zip'
-            appSettings: ''
+            appSettings: '-TheatreersAdminClientId $(TheatreersAdminClientId) -TheatreersAdminClientSecret $(TheatreersAdminClientSecret)'
             deploymentMethod: 'auto'
