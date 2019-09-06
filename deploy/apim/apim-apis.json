@@ -106,7 +106,7 @@
         "description": "API used to set permission (via Azure Function and Microsoft Graph)",
         "displayName": "SetPermissions",
         "method": "PUT",
-        "urlTemplate": "/moderation/permission/{id}"
+        "urlTemplate": "/moderation/permission/{userId}"
       }
     },
     {
