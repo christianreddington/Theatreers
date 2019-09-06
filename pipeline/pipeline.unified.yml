@@ -191,8 +191,8 @@ stages:
       strategy:
         matrix: 
           { 
-          westeurope: { region: 'West Europe', functionAppName: 'th-show-dev-weu-func', keyvaultName: 'th-show-dev-weu-kv', serviceResourceGroupName: 'th-show-dev-weu-rg' },
-          northeurope: { region: 'North Europe', functionAppName: 'th-show-dev-neu-func', keyvaultName: 'th-show-dev-neu-kv', serviceResourceGroupName: 'th-show-dev-neu-rg' }
+          westeurope: { region: 'West Europe', functionAppName: 'th-show-dev-weu-func', keyvaultName: 'th-show-dev-weu-kv', serviceResourceGroupName: 'th-show-dev-weu-rg' }
+          #northeurope: { region: 'North Europe', functionAppName: 'th-show-dev-neu-func', keyvaultName: 'th-show-dev-neu-kv', serviceResourceGroupName: 'th-show-dev-neu-rg' }
           }
         maxParallel: 1
       steps:        
