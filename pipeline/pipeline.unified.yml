@@ -173,45 +173,6 @@ stages:
     servicePrincipalObjectId: '6ee1bb40-e589-4884-90bc-c705d88bb3e0'
     serviceResourceGroupName: 'th-show-dev-rg'
   jobs:
-    # The release has two phases or jobs, one for a global stamp (those
-    # resources all of the regional deployments, and the regional 
-    # deployments or stamps). The first is the global resources.
-    - job: 'microservice_dev_release_global_job'
-      displayName: 'Microservice Release (Global)'
-      pool:
-        name: 'Hosted Windows 2019 with VS2019'
-      steps:
-        # Download the artifacts published previously within this pipeline
-        - task: DownloadPipelineArtifact@1
-          displayName: 'Download Pipeline Artifacts'
-          inputs:
-            buildType: 'current'
-            artifactName: 'drop'
-            targetPath: '$(System.DefaultWorkingDirectory)'
-        # Copy files to the management storage account
-        - task: AzureFileCopy@3
-          displayName: 'Copy ARM Templates relating to Show Service to Management Storage Account: $(artifactsAccountName)'
-          inputs:
-            SourcePath: '$(System.DefaultWorkingDirectory)/deploy/apim'
-            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
-            Destination: 'AzureBlob'
-            storage: '$(artifactsAccountName)'
-            ContainerName: 'templates'
-            outputStorageUri: 'templateContainerUri'
-            outputStorageContainerSasToken: 'templateContainerSasToken'
-        # Deploy the resources that sit at a global level, underpinning
-        # the regional stamps for the microservice.
-        - task: AzureResourceGroupDeployment@2
-          displayName: 'Deploy Global Show Resource Group for $(environmentName) in $(serviceResourceGroupName)'
-          inputs:
-            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
-            action: 'Create Or Update Resource Group'
-            resourceGroupName: '$(serviceResourceGroupName)'
-            location: '$(region)'
-            templateLocation: 'Linked artifact'
-            csmFile: '$(System.DefaultWorkingDirectory)/deploy/show-global.json'
-            overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName)'
-            deploymentMode: 'Incremental'
     # This next job is the regional deployment.
     - job: 'microservice_dev_release_regional_job'
       displayName: 'Microservice Release (Regional)'
