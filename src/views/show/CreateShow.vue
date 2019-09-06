@@ -35,29 +35,25 @@ export default {
     },
     methods: {
       onSubmit(evt) {
-        self = this  
-        this.$AuthService.getAccessToken(['https://theatreers.onmicrosoft.com/show-api/user_impersonation'])
-        .then(bearerToken => {              
-          self.$AuthService.postApiWithToken('https://api.theatreers.com/show/show', 
-          JSON.stringify(this.show), 
-          bearerToken)           
-          .catch(function () {                
-            self.alert = {
-              visible: true,
-              content: `${self.show.showName} has not been successfully created`,
-              type: 'danger',
-              display: true
-            }
+
+         var tokenRequest = {
+        scopes: ['https://theatreers.onmicrosoft.com/show-api/user_impersonation']
+      };
+
+      var jsonBody = JSON.stringify(this.show)
+
+        getAccessToken(tokenRequest)
+        .then(bearerToken => { 
+          postApiWithToken('https://api.theatreers.com/show/show', jsonBody, bearerToken.accessToken)  
+          .catch(function (error) { 
+            console.log("Error: " + error)
           })
-          .then(function() {         
-            self.alert = {
-              visible: true,
-              content: `${self.show.showName} has been successfully created`,
-              type: 'success',
-              display: true
-            }
+          .then(function (response) { 
+            console.log("Succeeded")
           })
-        })  
+        });
+        this.cleanPermission = null
+        this.dirtyPermission = null
       }
     },
     mounted: function () {       
