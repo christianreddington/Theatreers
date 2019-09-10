@@ -28,11 +28,57 @@ export default new Router({
     { path: '/group', name: 'getgroups', component: GetGroups },
     { path: '/group/:id', name: 'getgroup', component: GetGroup },
     { path: '/show', name: 'getshows', component: GetShows },
-    { path: '/show/create', name: 'createshow', component: CreateShow },
+    { path: '/show/create', name: 'createshow', component: CreateShow },    
+    { path: '/show/create/',
+      name: 'createshow',
+      component: CreateShow,
+      async beforeEnter(to, from, next) {
+        try {
+          var permissions = await msalInstance.getAccount().idTokenClaims.extension_permissions;
+          if (permissions.includes("show:owner") || permissions.includes("show:contributor")) {
+            next()
+          }
+        } catch (e) {
+          next({
+            name: "root" // back to safety route //
+          })
+        }
+      } 
+    },
     { path: '/show/:id', name: 'getshow', component: GetShow},
     { path: '/show/:id/edit', name: 'editshow', component: EditShow },
-    { path: '/admin/', name: 'AdminRoot', component: AdminRoot },
-    { path: '/admin/permissions', name: 'GetPermissions', component: GetPermissions },
+    { path: '/admin/',
+      name: 'AdminRoot',
+      component: AdminRoot,
+      async beforeEnter(to, from, next) {
+        try {
+          var permissions = await msalInstance.getAccount().idTokenClaims.extension_permissions;
+          if (permissions.includes("admin:owner") || permissions.includes("admin:contributor")) {
+            next()
+          }
+        } catch (e) {
+          next({
+            name: "root" // back to safety route //
+          })
+        }
+      } 
+    },
+    { path: '/admin/permissions',
+      name: 'GetPermissions',
+      component: GetPermissions,
+      async beforeEnter(to, from, next) {
+        try {
+          var permissions = await msalInstance.getAccount().idTokenClaims.extension_permissions;
+          if (permissions.includes("admin:owner") || permissions.includes("admin:contributor")) {
+            next()
+          }
+        } catch (e) {
+          next({
+            name: "root" // back to safety route //
+          })
+        }
+      } 
+    },
     { path: '/', name: 'root', component: Home }
   ]
 })
