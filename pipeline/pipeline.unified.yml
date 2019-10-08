@@ -184,8 +184,6 @@ stages:
       variables:
         aadClientId: '73e2635f-dadd-443b-9e47-89ac07f91485'
         aadB2cIssuer: 'https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn'
-        subscriptionServiceConnection: 'Theatreers Dev AzureDevOps ServPrin'
-        # Use a matrix strategy to repeat this set of tasks across multiple regions
       # It means that it will execute maxParallel number of instances at a time of this
       # phase, and use those key value pairs within each line item of the matrix to
       # outline the build steps.
@@ -209,7 +207,7 @@ stages:
           displayName: 'Copy ARM Templates relating to Show Service to Management Storage Account: $(artifactsAccountName)'
           inputs:
             SourcePath: '$(System.DefaultWorkingDirectory)/deploy/apim'
-            azureSubscription: '$(subscriptionServiceConnection)'
+            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             Destination: 'AzureBlob'
             storage: '$(artifactsAccountName)'
             ContainerName: 'templates'
@@ -219,7 +217,7 @@ stages:
         - task: AzureResourceGroupDeployment@2
           displayName: 'Deploy $(region) Show Resource Group for $(environmentName) in $(serviceResourceGroupName)'
           inputs:
-            azureSubscription: '$(subscriptionServiceConnection)'
+            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             action: 'Create Or Update Resource Group'
             resourceGroupName: '$(serviceResourceGroupName)'
             location: '$(region)'
@@ -231,7 +229,7 @@ stages:
         - task: AzureKeyVault@1
           displayName: 'Download secrets from $(keyvaultName)'
           inputs:
-            azureSubscription: '$(subscriptionServiceConnection)'
+            azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
             KeyVaultName: '$(keyvaultName)'
         # Deploy the application to the Azure Function, and update appropriate
         # configuration values on the Azure Function.
