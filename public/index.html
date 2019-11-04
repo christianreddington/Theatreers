@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <title>Theatreers</title>
+  <script src="https://secure.aadcdn.microsoftonline-p.com/lib/1.1.2/js/msal.min.js"></script>
+  <script type="text/javascript">
+    var sdkInstance = "appInsightsSDK"; window[sdkInstance] = "appInsights"; var aiName = window[sdkInstance], aisdk = window[aiName] || function (e) { function n(e) { t[e] = function () { var n = arguments; t.queue.push(function () { t[e].apply(t, n) }) } } var t = { config: e }; t.initialize = !0; var i = document, a = window; setTimeout(function () { var n = i.createElement("script"); n.src = e.url || "https://az416426.vo.msecnd.net/scripts/b/ai.2.min.js", i.getElementsByTagName("script")[0].parentNode.appendChild(n) }); try { t.cookie = i.cookie } catch (e) { } t.queue = [], t.version = 2; for (var r = ["Event", "PageView", "Exception", "Trace", "DependencyData", "Metric", "PageViewPerformance"]; r.length;)n("track" + r.pop()); n("startTrackPage"), n("stopTrackPage"); var s = "Track" + r[0]; if (n("start" + s), n("stop" + s), n("setAuthenticatedUserContext"), n("clearAuthenticatedUserContext"), n("flush"), !(!0 === e.disableExceptionTracking || e.extensionConfig && e.extensionConfig.ApplicationInsightsAnalytics && !0 === e.extensionConfig.ApplicationInsightsAnalytics.disableExceptionTracking)) { n("_" + (r = "onerror")); var o = a[r]; a[r] = function (e, n, i, a, s) { var c = o && o(e, n, i, a, s); return !0 !== c && t["_" + r]({ message: e, url: n, lineNumber: i, columnNumber: a, error: s }), c }, e.autoExceptionInstrumented = !0 } return t }(
+      {
+        instrumentationKey: "7207cd34-a0bd-452e-b76a-967b25358ea3",
+        disableFetchTracking: false,
+        enableCorsCorrelation: false,
+        enableAutoRouteTracking: true
+      }
+    ); window[aiName] = aisdk, aisdk.queue && 0 === aisdk.queue.length && aisdk.trackPageView({});
+
+    var config = {
+      clientId: "74568295-9e88-47db-bd81-e99a23fdcee8",
+      redirectUrl: 'https://www.theatreers.com',
+      //redirectUrl: "http://localhost:8080",
+      authority: "https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/B2C_1_SiUpIn",
+      apiUrl: "https://api.theatreers.com",
+      scopes: ["https://theatreers.onmicrosoft.com/show-api/user_impersonation", "https://theatreers.onmicrosoft.com/permissions/user_impersonation"]
+    };
+
+    var authConfig = {
+      auth: {
+        clientId: config.clientId,
+        authority: config.authority,
+        validateAuthority: false
+      },
+      cache: {
+        cacheLocation: 'localStorage',
+        storeAuthStateInCookie: true
+      }
+    };
+
+    const msalInstance = new Msal.UserAgentApplication(authConfig);
+    msalInstance.handleRedirectCallback((error, response) => {
+      // if error is not null, something went wrong
+      // if not, response is a successful login response
+    });
+
+
+    function login() {
+      var loginRequest = {
+        scopes: config.scopes
+      };
+      msalInstance.loginRedirect(loginRequest).then(function (loginResponse) {
+        var tokenRequest = {
+          scopes: config.scopes
+        };
+        msalInstance.acquireTokenSilent(tokenRequest).then(function (tokenResponse) {
+          const user = this.msalInstance.getUser()
+        }).catch(function (error) {
+          msalInstance.acquireTokenPopup(tokenRequest).then(function (tokenResponse) {
+          }).catch(function (error) {
+            console.log("Error acquiring the popup:\n" + error);
+          });
+        })
+      }).catch(function (error) {
+        console.log("Error during login:\n" + error);
+      });
+    };
+
+    function logout() {
+      //Msal._user = null
+      msalInstance.logout()
+    };
+
+    function getAccessToken(scopes) {
+      // console.log("Scopes passed in: " + scopes);
+      return msalInstance.acquireTokenSilent(scopes).then(
+        accessToken => {
+          // console.log("Looking for scopes " + scopes)
+          return accessToken
+        })
+        .catch(function (error) {
+          console.log(error)
+          return msalInstance
+            .acquireTokenPopup(scopes)
+            .then(
+              accessToken => {
+                return accessToken
+              }
+            )
+            .catch(function (error) {
+              console.log('could not get offers', error)
+            })
+        })
+    };
+
+    function getApiWithoutToken(uri) {
+      return fetch(uri, { method: 'GET' })
+    };
+
+    function getApiWithToken(uri, token) {
+      const headers = {
+        'Authorization': 'Bearer ' + token
+      }
+      return fetch(uri, { headers: headers, method: 'GET' })
+    };
+
+    function putApiWithToken(uri, body, token) {
+      const headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+      return fetch(uri, { headers: headers, method: 'PUT', body: body })
+    };
+    
+    
+    function postApiWithToken(uri, body, token) {
+      const headers = {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+      return fetch(uri, { headers: headers, method: 'POST', body: body })
+    };
+
+    // Utility
+    function getUser() {
+      return this.msalInstance.getUser()
+    };
+
+  </script>
+
+</head>
+
+<body>
+  <noscript>
+    <strong>We're sorry but theatreers.frontend.vue doesn't work properly without JavaScript enabled. Please enable it
+      to continue.</strong>
+  </noscript>
+  <div id="app"></div>
+  <!-- built files will be auto injected -->
+</body>
+
+</html>
