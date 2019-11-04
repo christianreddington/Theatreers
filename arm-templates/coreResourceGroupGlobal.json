@@ -1,0 +1,108 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {        
+        "templateContainerUri": {
+            "type": "string",
+            "metadata": {
+                 "description": "URI of the Blob Storage Container containing the ARM Templates"
+             }
+         },
+         "templateContainerSasToken": {
+            "type": "string",
+            "metadata": {
+                 "description": "The SAS token of the container containing the ARM Templates"
+             }
+         },
+         "namingPrefix": {
+             "type": "string",
+             "metadata": {
+                 "description": "Storage Account Name of the Origin"
+             }
+         }
+    },
+    "variables": {    
+        "bingSearchAccountName": "[concat(parameters('namingPrefix'), '-search')]",
+        "textAnalyticsAccountName": "[concat(parameters('namingPrefix'), '-text')]",
+        "cosmosDBAccountName": "[concat(parameters('namingPrefix'), '-cosmos')]",
+        "apiTrafficManagerNamePrefix": "[concat(parameters('namingPrefix'), '-api-')]"
+    },
+    "resources": [    
+        {
+            "apiVersion": "2017-05-10",
+            "name": "bingSearchDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/bingSearch.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "cogSvcAccountName": {
+                        "value": "[variables('bingSearchAccountName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy a Cognitive Services account for Bing Searches."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "textAnalyticsDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/textAnalytics.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "cogSvcAccountName": {
+                        "value": "[variables('textAnalyticsAccountName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy a Cognitive Services account for Text Analytics."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "cosmosDBAccountDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/cosmosDBAccount.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[variables('cosmosDBAccountName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy a CosmosDB Account to be used by many microservices."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "trafficManagerDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/trafficManager.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "namePrefix": {
+                        "value": "[variables('apiTrafficManagerNamePrefix')]"
+                    },
+                    "httpsProbeEnabled": {
+                        "value": true
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy the Traffic Manager to front the Regional API deployments"
+        }
+    ],
+    "outputs": {}
+}

@@ -1,0 +1,196 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {        
+        "templateContainerUri": {
+            "type": "string",
+            "metadata": {
+                 "description": "URI of the Blob Storage Container containing the ARM Templates"
+             }
+         },
+         "templateContainerSasToken": {
+            "type": "string",
+            "metadata": {
+                 "description": "The SAS token of the container containing the ARM Templates"
+             }
+         },
+         "namingPrefix": {
+             "type": "string",
+             "metadata": {
+                 "description": "Storage Account Name of the Origin"
+             }
+         },
+         "globalCoreResourcePrefix": {
+             "type": "string",
+             "metadata": {
+                 "description": "Prefix for the Core Global set of resources"
+             }
+         },
+         "coreResourceGroupName": {
+             "type": "string",
+             "metadata": {
+                 "description": "Name of the Core Resource Group"
+             }
+         },
+         "environmentName": {
+             "type": "string",
+             "metadata": {
+                 "description": "Name of the environment"
+             }
+         },
+         "subscriptionIdForKeyVaultHousingDomainCertificate": {
+             "type": "string",
+             "metadata": {
+                 "description": "Subscription ID where the KeyVault is held"
+             }
+         }
+    },
+    "variables": {
+        "apimServiceName": "[concat(parameters('namingPrefix'), '-apim')]",
+        "appInsightsName": "[concat(parameters('namingPrefix'), '-ai')]",        
+        "cogSvcAccountName": "[concat(parameters('namingPrefix'), '-search')]",
+        "coreApiTrafficManager": "[concat(parameters('globalCoreResourcePrefix'), '-api-')]",
+        "keyvaultNameHousingDomainCertificate": "th-mgt-prd-kv",
+        "keyVaultSecretId": "https://th-mgt-prd-kv.vault.azure.net/secrets/theatreers",
+        "resourceGroupForKeyVaultHousingDomainCertificate": "th-mgt-prd-rg",
+        "prefixNameWithoutDashes": "[replace(parameters('namingPrefix'), '-', '')]",
+        "regionalResourceGroupLocation": "[resourceGroup().location]",
+        "regionalResourceGroupName": "[resourceGroup().name]",
+        "dev": {
+            "apiManagementServiceCustomHostname": "api-tm.theatreers.com"
+        },
+        "prod": {
+            "apiManagementServiceCustomHostname": "prod.api-tm.theatreers.com"
+        },
+        "currentEnvironmentSettings": "[variables(parameters('environmentName'))]",
+        "apiManagementServiceCustomHostname": "[variables('currentEnvironmentSettings').apiManagementServiceCustomHostname]"
+    },
+    "resources": [        
+        {
+            "apiVersion": "2017-05-10",
+            "name": "storageAccountDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/storageAccount.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "accountName": {
+                        "value": "[concat(variables('prefixNameWithoutDashes'), 'stg')]"
+                    }
+                }
+            }
+        },      
+        {
+            "apiVersion": "2017-05-10",
+            "name": "apimDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/apim.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "namePrefix": {
+                        "value": "[variables('apiManagementServiceCustomHostname')]"
+                    },
+                    "hostName": {
+                        "value": "[parameters('namingPrefix')]"
+                    },
+                    "keyVaultSecretId": {
+                        "value": "[variables('keyVaultSecretId')]"
+                    },
+                    "subscriptionIdForKeyVaultHousingDomainCertificate": {
+                        "value": "[parameters('subscriptionIdForKeyVaultHousingDomainCertificate')]"
+                    },
+                    "resourceGroupForKeyVaultHousingDomainCertificate": {
+                        "value": "[variables('resourceGroupForKeyVaultHousingDomainCertificate')]"
+                    },
+                    "keyvaultNameHousingDomainCertificate": {
+                        "value": "[variables('keyvaultNameHousingDomainCertificate')]"
+                    },
+                    "templateContainerUri": {
+                        "value": "[parameters('templateContainerUri')]"
+                    },
+                    "templateContainerSasToken": {
+                        "value": "[parameters('templateContainerSasToken')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "apiLoggerDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "apimDeployment"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/apimBackendLogger.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "apimServiceName": {
+                        "value": "[variables('apimServiceName')]"
+                    },
+                    "appinsightsName": {
+                        "value": "[variables('appInsightsName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy the logger for an API Microservice"
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "appInsightsDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/applicationInsights.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "appinsightsName": {
+                        "value": "[variables('appInsightsName')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy an Azure Function (Function App, App Serivce Plan) and Storage Account, by using the Theatreers Azure Function Building Block."
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "trafficManagerEndpointDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('coreResourceGroupName')]",
+            "dependsOn": [
+                "apimDeployment"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateContainerUri'), '/trafficManagerEndpointUrl.json', parameters('templateContainerSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "namePrefix": {
+                        "value": "[variables('coreApiTrafficManager')]"
+                    },
+                    "endpointLocation": {
+                        "value": "[variables('regionalResourceGroupLocation')]"
+                    },
+                    "target": {
+                        "value": "[concat(parameters('namingPrefix'), '-apim.azure-api.net')]"
+                    }
+                }
+            },
+            "comments": "Downstream template to deploy the logger for an API Microservice"
+        }
+    ],
+    "outputs": {}
+}

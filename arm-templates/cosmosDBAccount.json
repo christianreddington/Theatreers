@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "accountName": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location of the APIM deployment"
+      },
+      "defaultValue": "[resourceGroup().location]"
+    }
+  },
+  "variables": {
+    "databaseName": "theatreers"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2015-04-08",
+      "name": "[parameters('accountName')]",
+      "location": "[parameters('location')]",
+      "kind": "GlobalDocumentDB",
+      "properties": {
+        "databaseAccountOfferType": "Standard",
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "Session"
+        },
+        "locations": [
+          {
+            "locationName": "West Europe",
+            "failoverPriority": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "[concat(parameters('accountName'), '/sql/', variables('databaseName'))]",
+      "type": "Microsoft.DocumentDB/databaseAccounts/apis/databases",
+      "apiVersion": "2015-04-08",
+      "properties": {
+        "resource": {
+          "id": "[variables('databaseName')]"
+        },
+        "options": {}
+      }
+    }
+  ]
+}

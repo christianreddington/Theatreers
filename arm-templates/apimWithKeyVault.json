@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Prefix of the resource"
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location of the APIM deployment"
+      },
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "hostName": {
+      "type": "string",
+      "metadata": {
+        "description": "Custom hostname of the APIM resuorce e.g. api.theatreers.com"
+      }
+    },
+    "keyVaultSecretId": {
+      "type": "string",
+      "metadata": {
+        "description": "http based route of the secret of the certificate e.g. https://constosovault.vault.azure.net/secrets/msitestingCert"
+      }
+    }
+  },
+  "variables": {
+    "apimName": "[concat(parameters('namePrefix'), '-apim')]"
+  },
+  "resources": [
+    {
+      "name": "[variables('apimName')]",
+      "type": "Microsoft.ApiManagement/service",
+      "location": "[parameters('location')]",
+      "apiVersion": "2019-01-01",
+      "properties": {
+        "publisherEmail": "chris@theatreers.com",
+        "publisherName": "Christian Reddington",
+        "hostnameConfigurations": [
+          {
+            "type": "Proxy",
+            "hostName": "[parameters('hostName')]",
+            "keyVaultId": "[parameters('keyVaultSecretId')]"
+          }
+        ]
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "sku": {
+        "name": "Consumption"
+      }
+    }
+  ],
+  "outputs": {}
+}

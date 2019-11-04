@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {          
+        "namePrefix": {
+            "type": "string",
+            "metadata": {
+              "description": "The name prefix"
+            }
+          },         
+          "endpointLocation": {
+              "type": "string",
+              "metadata": {
+                "description": "The region of the endpoint"
+              }
+            },      
+            "target": {
+                "type": "string",
+                "metadata": {
+                  "description": "The resource ID of the target endpoint"
+                }
+              }
+    },
+    "variables": {
+        "trafficManagerProfileName": "[concat(parameters('namePrefix'), 'tm')]"
+    },
+    "resources": [        
+        {
+            "apiVersion": "2018-04-01",
+            "type": "Microsoft.Network/trafficManagerProfiles/ExternalEndpoints",
+            "name": "[concat(variables('trafficManagerProfileName'), '/', parameters('endpointLocation'), '-endpoint')]",
+            "location": "global",
+            "properties": {
+                "target": "[parameters('target')]",
+                "endpointStatus": "Enabled",
+                "endpointLocation": "[parameters('endpointLocation')]"
+            },
+            "comments": "Building block for a traffic manager endpoint for an external url"
+        }
+    ]
+}

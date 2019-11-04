@@ -1,0 +1,178 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {        
+    "namePrefix": {
+        "type": "string",
+        "metadata": {
+          "description": "The name prefix"
+        }
+      },             
+      "namePrefixWithoutDashes": {
+          "type": "string",
+          "metadata": {
+            "description": "The name prefix with dashes removed"
+          }
+        },            
+        "aadClientId": {
+            "type": "string",
+            "metadata": {
+              "description": "Client ID of the AAD B2C Application linked to the API Auth"
+            }
+          },            
+          "aadB2cIssuer": {
+              "type": "string",
+              "metadata": {
+                "description": "Link to the well known Open ID Configuration for the sign in policy."
+              }
+            },            
+        "appInsightsResourceGroup": {
+            "type": "string",
+            "metadata": {
+              "description": "The name of the App Insights resource."
+            }
+          },         
+        "appInsightsName": {
+            "type": "string",
+            "metadata": {
+              "description": "The name of the App Insights resource."
+            }
+          },           
+          "cogSvcResourceGroup": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the App Insights resource."
+              }
+            },       
+          "cogSvcAccountName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the App Insights resource."
+              }
+            },           
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        }
+      },
+    "variables": {
+        "function": {
+            "planName": "[concat(parameters('namePrefix'), 'plan')]",
+            "appName": "[concat(parameters('namePrefix'), 'func')]",
+            "stgName": "[concat(parameters('namePrefixWithoutDashes'), 'funcstg')]"
+        },
+        "stgId": "[concat('Microsoft.Storage/storageAccounts/', variables('function').stgName)]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-02-01",
+            "name": "[variables('function').planName]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "name": "[variables('function').planName]",
+                "computeMode": "Dynamic"
+            },
+            "sku": {
+              "name": "Y1",
+              "tier": "Dynamic"
+            }
+        },
+        {
+            "apiVersion": "2018-11-01",
+            "type": "Microsoft.Web/sites",
+            "name": "[variables('function').appName]",
+            "location": "[parameters('location')]",
+            "kind": "functionapp",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('function').planName)]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('function').stgName)]"
+            ],
+            "properties": {
+                "cors": {
+                  "allowedOrigins": [
+                    "https://www.theatreers.com",
+                    "http://localhost:8080",
+                    "https://functions-next.azure.com",
+                    "https://functions-staging.azure.com",
+                    "https://functions.azure.com"
+                    ]
+                },
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('function').planName)]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('function').stgName, ';AccountKey=', listKeys(variables('stgId'),'2015-05-01-preview').key1)]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('function').stgName, ';AccountKey=', listKeys(variables('stgId'),'2015-05-01-preview').key1)]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTSHARE",
+                            "value": "[concat(toLower(variables('function').appName), uniqueString(resourcegroup().id))]"
+                        },
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "dotnet"
+                        },
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~2"
+                        },
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference(resourceId(parameters('appInsightsResourceGroup'), 'Microsoft.Insights/Components', parameters('appInsightsName')), '2015-05-01').InstrumentationKey]"
+                        },
+                        {
+                            "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                            "value": "10.14.1"
+                        },
+                        {
+                            "name": "bingSearchSubscriptionKey",
+                            "value": "[if(not(equals(parameters('cogSvcAccountName'), 'defaultValue')), listKeys(resourceId(parameters('cogSvcResourceGroup'), 'Microsoft.CognitiveServices/accounts', parameters('cogSvcAccountName')), '2016-02-01-preview').key1, 'defaultValue')]"
+                            
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "2018-11-01",
+            "type": "Microsoft.Web/sites/config",
+            "name": "[concat(variables('function').appName, '/authsettings')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', variables('function').appName)]"
+            ],
+            "properties": {
+              "enabled": true,
+              "unauthenticatedClientAction": null,
+              "tokenStoreEnabled": null,
+              "defaultProvider": null,
+              "clientId": "[parameters('aadClientId')]",
+              "issuer": "[parameters('aadB2cIssuer')]"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('function').stgName]",
+            "apiVersion": "2018-11-01",
+            "location": "[parameters('location')]",
+            "kind": "StorageV2",
+            "sku": {
+                "name": "Standard_LRS"
+            }
+        }
+    ],
+    "outputs": {
+        "targetResourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Web/sites', variables('function').appName)]"
+        }
+    }
+}

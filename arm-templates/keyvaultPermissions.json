@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "keyvaultName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the KeyVault"
+      }
+    },
+    "subscriptionIdHousingApiManagementService": {
+      "type": "string",
+      "metadata": {
+        "description": "Subscription ID of the Subscription that holds the API Management Service"
+      }
+    },
+    "resourceGroupdHousingApiManagementService": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Resource Group that holds the API Management Service"
+      }
+    },
+    "apiManagementServiceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the API management Service"
+      }
+    }
+  },
+  "variables": {
+    "apimServiceIdentityResourceId": "[concat(resourceId(parameters('subscriptionIdHousingApiManagementService'), parameters('resourceGroupdHousingApiManagementService'), 'Microsoft.ApiManagement/service', parameters('apiManagementServiceName')), '/providers/Microsoft.ManagedIdentity/Identities/default')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults/accessPolicies",
+      "name": "[concat(parameters('keyvaultName'), '/add')]",
+      "apiVersion": "2015-06-01",
+      "properties": {
+        "accessPolicies": [
+          {
+            "tenantId": "[reference(variables('apimServiceIdentityResourceId'), '2015-08-31-PREVIEW').tenantId]",
+            "objectId": "[reference(variables('apimServiceIdentityResourceId'), '2015-08-31-PREVIEW').principalId]",
+            "permissions": {
+              "secrets": [
+                "get",
+                "list"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -1,0 +1,29 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {        
+        "accountName": {
+            "type": "string",
+            "metadata": {
+                 "description": "Name of the Azure Storage Account"
+             }
+         },     
+         "containerName": {
+             "type": "string",
+             "metadata": {
+                  "description": "Name of the container in the Azure Storage Account"
+              }
+          }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "apiVersion": "2019-04-01",
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "name": "[concat(parameters('accountName'), '/default/', parameters('containerName'))]",
+            "properties": {
+                "publicAccess": "None"
+            }
+        }
+    ]
+}
