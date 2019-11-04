@@ -1,0 +1,109 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "cosmosDBAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Prefix of the resource"
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location of the APIM deployment"
+      },
+      "defaultValue": "[resourceGroup().location]"
+    }
+  },
+  "variables": {
+    "databaseName": "theatreers"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDb/databaseAccounts/apis/databases/containers",
+      "name": "[concat(parameters('cosmosDbAccountName'), '/sql/', variables('databaseName'), '/shows')]",
+      "apiVersion": "2016-03-31",
+      "properties": {
+        "resource": {
+          "id": "shows",
+          "partitionKey": {
+            "paths": [
+              "/showId"
+            ],
+            "kind": "Hash"
+          },
+          "defaultTtl": -1,
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "includedPaths": [
+              {
+                "path": "/showId/?",
+                "indexes": [
+                  {
+                    "kind": "Range",
+                    "dataType": "string",
+                    "precision": -1
+                  }
+                ]
+              },
+              {
+                "path": "/doctype/?",
+                "indexes": [
+                  {
+                    "kind": "Range",
+                    "dataType": "string",
+                    "precision": -1
+                  }
+                ]
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDb/databaseAccounts/apis/databases/containers",
+      "name": "[concat(parameters('cosmosDbAccountName'), '/sql/', variables('databaseName'), '/showListObjects')]",
+      "apiVersion": "2016-03-31",
+      "properties": {
+        "resource": {
+          "id": "showListObjects",
+          "partitionKey": {
+            "paths": [
+              "/partition"
+            ],
+            "kind": "Hash"
+          },
+          "defaultTtl": -1,
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "includedPaths": [
+              {
+                "path": "/partition/?",
+                "indexes": [
+                  {
+                    "kind": "Range",
+                    "dataType": "string",
+                    "precision": -1
+                  }
+                ]
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
