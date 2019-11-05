@@ -1,0 +1,9 @@
+stages:
+- stage: prod
+  condition: ${{ parameters.condition }}
+  jobs:
+  - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.prod.yml
+    parameters:
+      name: "prod"
+      environment: ${{ parameters.environment}}
+      service: ${{ parameters.service }}
