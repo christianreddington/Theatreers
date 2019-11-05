@@ -1,10 +1,10 @@
 variables:
   service: Theatreers.Admin
 
-  paths:
-    include:
-    - /src/${{ service }}/*
-    - /pipelines/${{ service }}*
+paths:
+  include:
+  - /src/${{ service }}/*
+  - /pipelines/${{ service }}*
 
 stages:
 - template: /pipelines/stages/lifecycle.yml
