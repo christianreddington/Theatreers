@@ -4,10 +4,10 @@ variables:
 trigger:
   paths:
     include:
-    - /src/${{ service }}/*
-    - /pipelines/${{ service }}/*
+    - /src/${{ variables.service }}/*
+    - /pipelines/${{ variables.service }}/*
 
 stages:
 - template: /pipelines/stages/lifecycle.yml
   parameters:
-    service: ${{ service }}
+    service: ${{ variables.service }}
