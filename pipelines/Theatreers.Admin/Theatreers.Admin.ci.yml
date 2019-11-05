@@ -5,3 +5,4 @@ jobs:
       inputs:
         script: |
           echo "Hello ${{ parameters.environment }}"
+          # Add some comment
