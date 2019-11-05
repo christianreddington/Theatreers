@@ -5,8 +5,8 @@ trigger:
   batch: true
   branches:
     include:
-    - refs/heads/master/
-    - refs/heads/feature/*
+    - master
+    - feature/*
   paths:
     include:
     - /src/$(service)/*
