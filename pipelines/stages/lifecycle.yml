@@ -5,23 +5,23 @@ stages:
     environment: ci
     service: ${{ parameters.service }}
 
-#- template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.dev.yml
-#  parameters:
-#    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
-#    dependsOn: ci
-#    environment: Dev
-#    service: ${{ parameters.service }}#####
+- template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.dev.yml
+  parameters:
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    dependsOn: ci
+    environment: dev
+    service: ${{ parameters.service }}
 
-#- template: /pipelines/${{ parameters.appName }}.preprod.yml
-#  parameters:
-#    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
- #   dependsOn: dev
- #   environment: preprod
- #   service: ${{ parameters.service }}
+- template: /pipelines/${{ parameters.appName }}.preprod.yml
+  parameters:
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
+    dependsOn: dev
+    environment: preprod
+    service: ${{ parameters.service }}
 
-#- template: /pipelines/${{ parameters.appName }}.prod.yml
-#  parameters:
-#    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
-#    dependsOn: preprod
-#    environment: prod
-#    service: ${{ parameters.service }}
+- template: /pipelines/${{ parameters.appName }}.prod.yml
+  parameters:
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
+    dependsOn: preprod
+    environment: prod
+    service: ${{ parameters.service }}
