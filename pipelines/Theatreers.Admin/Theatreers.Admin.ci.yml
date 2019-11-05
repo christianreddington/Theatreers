@@ -2,6 +2,6 @@ jobs:
   - job: ${{ parameters.name }}
     steps:
     - task: CmdLine@2
-    inputs:
-      script: |
-        echo "Hello ${{ parameters.environment }}"
+      inputs:
+        script: |
+          echo "Hello ${{ parameters.environment }}"
