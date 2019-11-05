@@ -2,6 +2,7 @@ variables:
   service: Theatreers.Admin
 
 trigger:
+  batch: true
   branches:
     include:
     - master
@@ -10,6 +11,11 @@ trigger:
     include:
     - /src/$(service)/*
     - /pipelines/$(service)/*
+    
+pr:
+  branches:
+    include:
+    - '*'  # must quote since "*" is a YAML reserved character; we want a string
 
 stages:
 - template: /pipelines/stages/lifecycle.yml
