@@ -7,6 +7,6 @@ variables:
     - /pipelines/${{ service }}*
 
 stages:
-- template: /templates/stages/lifecycle.yml
+- template: /pipelines/stages/lifecycle.yml
   parameters:
     service: ${{ service }}
