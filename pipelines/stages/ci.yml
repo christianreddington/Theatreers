@@ -1,0 +1,9 @@
+stages:
+- stage: CI
+  condition: ${{ parameters.condition }}
+  jobs:
+  - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.ci.yml
+    parameters:
+      name: "${{ parameters.service}} CI Build"
+      environment: ${{ parameters.environment}}
+      service: ${{ parameters.service }}

@@ -1,0 +1,10 @@
+jobs:
+  - job: ${{ parameters.name }}
+    workspace:
+      clean: outputs
+
+    steps:
+    - task: CmdLine@2
+    inputs:
+      script: |
+        echo "Hello ${{ parameters.environment }}"
