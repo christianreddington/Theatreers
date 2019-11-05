@@ -2,6 +2,10 @@ variables:
   service: Theatreers.Admin
 
 trigger:
+  branches:
+    include:
+    - master
+    - feature/*
   paths:
     include:
     - /src/$(service)/*
