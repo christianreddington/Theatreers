@@ -4,6 +4,6 @@ stages:
   jobs:
   - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.ci.yml
     parameters:
-      name: "${{ parameters.service}}_CI"
+      name: "CI"
       environment: ${{ parameters.environment}}
       service: ${{ parameters.service }}
