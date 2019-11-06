@@ -2,8 +2,26 @@ jobs:
   - job: ${{ parameters.name }}
     pool:
       vmImage: ubuntu-16.04
-    steps:
-    - task: CmdLine@2
-      inputs:
-        script: |
-          echo "Hello ${{ parameters.environment }}"
+    steps:      
+      #- task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+      #  displayName: 'Prepare analysis on SonarCloud'
+      #  inputs:
+      #    SonarCloud: 'Theatreers Sonarcloud'
+      #    organization: 'theatreers'
+      #    projectKey: $(projectName)
+      #    projectName: $(projectName) 
+      - task: DotNetCoreCLI@2
+        displayName: 'Restore project'
+        inputs:
+          command: 'restore'
+          projects: 'src/${{ parameters.service }}/${{ parameters.service }}.csproj'
+          feedsToUse: 'select'
+          vstsFeed: 'fa1af919-202e-4e5c-91a7-dafe6f7d519e'
+      - task: DotNetCoreCLI@2
+        displayName: 'Build project'
+        inputs:
+          projects: 'src/${{ parameters.service }}/${{ parameters.service }}.csproj'
+          arguments: '--output ${{ parameters.buildOutputPath }} --configuration Release'
+      # Execute the Sonar Cloud Analysis, and push to Sonar Cloud
+      #- task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
+      #  displayName: 'Run Code Analysis'

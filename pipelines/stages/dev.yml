@@ -5,6 +5,8 @@ stages:
   jobs:
   - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.dev.yml
     parameters:
+      buildOutputPath: '$(Build.ArtifactStagingDirectory)/build-output/'
+      buildPublishPath: '$(Build.ArtifactStagingDirectory)/publish-path/'
       name: "dev"
       environment: ${{ parameters.environment}}
       service: ${{ parameters.service }}
