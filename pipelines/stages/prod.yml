@@ -1,6 +1,7 @@
 stages:
 - stage: prod
   condition: ${{ parameters.condition }}
+  dependsOn: ${{ parameters.dependsOn }}
   jobs:
   - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.prod.yml
     parameters:

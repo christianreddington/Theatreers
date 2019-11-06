@@ -8,14 +8,14 @@ stages:
 - template: /pipelines/stages/dev.yml
   parameters:
     condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
-    dependsOn: ci
+    dependsOn: []
     environment: dev
     service: ${{ parameters.service }}
 
 - template: /pipelines/stages/preprod.yml
   parameters:
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
-    dependsOn: dev
+    dependsOn: []
     environment: preprod
     service: ${{ parameters.service }}
 

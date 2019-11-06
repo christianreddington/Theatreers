@@ -1,10 +1,10 @@
 stages:
 - stage: CI
   condition: ${{ parameters.condition }}
+  
   jobs:
   - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.ci.yml
     parameters:
       name: "CI"
       environment: ${{ parameters.environment}}
       service: ${{ parameters.service }}
-      #quick test

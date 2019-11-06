@@ -1,16 +1,20 @@
 variables:
   service: Theatreers.Admin
+  system.debug: true
 
 trigger:
-  batch: true
   branches:
     include:
-    - ref/head/master
-    - ref/head/feature/*
+    - master
+    - feature/*
   paths:
     include:
-    - /src/Theatreers.Admin/*
+    - src/Theatreers.Admin/*
+    - /pipelines/Theatreers.Admin.yml
     - /pipelines/Theatreers.Admin/*
+pr:
+  - master
+  - feature/*
 
 stages:
 - template: /pipelines/stages/lifecycle.yml
