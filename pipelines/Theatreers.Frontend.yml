@@ -1,0 +1,25 @@
+variables:
+  service: Theatreers.Frontend
+  src: "src/Theatreers.Frontend/"
+  system.debug: true
+
+trigger:
+  branches:
+    include:
+    - master
+    - feature/*
+  paths:
+    include:
+    - src/Theatreers.Frontend/*
+    - /pipelines/Theatreers.Frontend.yml
+    - /pipelines/Theatreers.Frontend/*
+pr:
+  - master
+  - feature/*
+
+stages:
+- template: /pipelines/stages/lifecycle.yml
+  parameters:
+    service: ${{ variables.service }}
+    src: ${{ variables.src }}
+    #TEST EDIT

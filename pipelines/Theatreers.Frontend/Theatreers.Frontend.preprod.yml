@@ -1,0 +1,26 @@
+jobs:
+  - job: ${{ parameters.name }}
+    pool:
+      vmImage: ubuntu-16.04
+    steps:    
+      - task: DownloadPipelineArtifact@1
+        inputs:
+          buildType: 'current'
+          targetPath: '$(System.ArtifactsDirectory)'
+      - task: AzureFileCopy@3
+        inputs:
+          SourcePath: '$(System.ArtifactsDirectory)/$(artifactName)'
+          azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+          Destination: 'AzureBlob'
+          storage: 'thfrontenddev'
+          ContainerName: '$web'
+      - task: AzureCLI@1
+        inputs:
+          azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+          scriptLocation: 'inlineScript'
+          inlineScript: 'az extension add --name front-door'
+      - task: AzureCLI@1
+        inputs:
+          azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+          scriptLocation: 'inlineScript'
+          inlineScript: 'az network front-door purge-endpoint --content-paths  "/*" --name "theatreers-dev" --resource-group "th-core-dev-rg"'

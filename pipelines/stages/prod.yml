@@ -8,3 +8,4 @@ stages:
       name: "prod"
       environment: ${{ parameters.environment}}
       service: ${{ parameters.service }}
+      src: ${{ parameters.src }}

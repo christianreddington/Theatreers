@@ -10,3 +10,4 @@ stages:
       name: "preprod"
       environment: ${{ parameters.environment}}
       service: ${{ parameters.service }}
+      src: ${{ parameters.src }}

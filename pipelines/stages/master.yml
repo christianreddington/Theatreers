@@ -1,13 +1,13 @@
 stages:
-- stage: dev
+- stage: master
   condition: ${{ parameters.condition }}
   dependsOn: ${{ parameters.dependsOn }}
   jobs:
-  - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.dev.yml
+  - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.master.yml
     parameters:
       buildOutputPath: '$(Build.ArtifactStagingDirectory)/build-output/'
       buildPublishPath: '$(Build.ArtifactStagingDirectory)/publish-path/'
-      name: "dev"
+      name: "master"
       environment: ${{ parameters.environment}}
       service: ${{ parameters.service }}
       src: ${{ parameters.src }}

@@ -3,7 +3,5 @@ jobs:
     pool:
       vmImage: ubuntu-16.04
     steps:
-    - task: CmdLine@2
-      inputs:
-        script: |
-          echo "Hello ${{ parameters.environment }}"
+    - script: 'echo "Hello ${{ parameters.environment }}"'
+      displayName: "Hello World"

@@ -1,4 +1,5 @@
 variables:
+  artifactName: 'drop'
   service: Theatreers.Admin
   system.debug: true
 
