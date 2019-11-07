@@ -13,5 +13,5 @@ jobs:
           npm run build
       - task: PublishPipelineArtifact@0
         inputs:
-          artifactName: '$(artifactName)'
+          artifactName: '${{ parameters.drop }}'
           targetPath: '$(System.DefaultWorkingDirectory)/${{ parameters.src }}/dist/'

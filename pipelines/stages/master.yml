@@ -5,6 +5,7 @@ stages:
   jobs:
   - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.master.yml
     parameters:
+      artifactName: ${{ parameters.artifactName }}
       buildOutputPath: '$(Build.ArtifactStagingDirectory)/build-output/'
       buildPublishPath: '$(Build.ArtifactStagingDirectory)/publish-path/'
       name: "master"

@@ -16,6 +16,7 @@ stages:
 
 - template: /pipelines/stages/master.yml
   parameters:
+    artifactName: ${{ parameters.artifactName }}
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
     dependsOn: []
     environment: master
@@ -24,6 +25,7 @@ stages:
 
 - template: /pipelines/stages/preprod.yml
   parameters:
+    artifactName: ${{ parameters.artifactName }}
     dependsOn: [master]
     environment: preprod
     service: ${{ parameters.service }}
@@ -31,6 +33,7 @@ stages:
 
 - template: /pipelines/stages/prod.yml
   parameters:
+    artifactName: ${{ parameters.artifactName }}
     dependsOn: [preprod]
     environment: prod
     service: ${{ parameters.service }}

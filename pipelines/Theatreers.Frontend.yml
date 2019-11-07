@@ -1,4 +1,5 @@
 variables:
+  artifactName: 'drop'
   service: Theatreers.Frontend
   src: "src/Theatreers.Frontend/"
   system.debug: true
@@ -20,6 +21,6 @@ pr:
 stages:
 - template: /pipelines/stages/lifecycle.yml
   parameters:
+    artifactName: ${{ variables.artifactName }}
     service: ${{ variables.service }}
     src: ${{ variables.src }}
-    #TEST EDIT

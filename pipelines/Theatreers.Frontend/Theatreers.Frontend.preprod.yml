@@ -9,7 +9,7 @@ jobs:
           targetPath: '$(System.ArtifactsDirectory)'
       - task: AzureFileCopy@3
         inputs:
-          SourcePath: '$(System.ArtifactsDirectory)/$(artifactName)'
+          SourcePath: '$(System.ArtifactsDirectory)/${{ parameters.drop }}'
           azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
           Destination: 'AzureBlob'
           storage: 'thfrontenddev'

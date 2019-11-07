@@ -12,3 +12,4 @@ jobs:
           npm install
           npm run build
         displayName: 'Install Dependencies and Build Frontend (Vue Based Web App)'
+        #test

@@ -5,6 +5,7 @@ stages:
   jobs:
   - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.prod.yml
     parameters:
+      artifactName: ${{ parameters.artifactName }}
       name: "prod"
       environment: ${{ parameters.environment}}
       service: ${{ parameters.service }}
