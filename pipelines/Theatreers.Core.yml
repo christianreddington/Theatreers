@@ -1,0 +1,33 @@
+variables:
+  artifactName: 'drop'
+  service: Theatreers.Core
+  src: "src/Theatreers.Core/"
+  system.debug: true
+
+trigger:
+  branches:
+    include:
+    - master
+    - feature/*
+  paths:
+    include:
+    - src/Theatreers.Core/*
+    - /pipelines/Theatreers.Core.yml
+    - /pipelines/Theatreers.Core/*
+pr:
+  branches:
+    include:
+    - master
+    - feature/*
+  paths:
+    include:
+    - src/Theatreers.Core/*
+    - /pipelines/Theatreers.Core.yml
+    - /pipelines/Theatreers.Core/*
+
+stages:
+- template: /pipelines/stages/lifecycle.yml
+  parameters:
+    artifactName: ${{ variables.artifactName }}
+    service: ${{ variables.service }}
+    src: ${{ variables.src }}
