@@ -3,6 +3,6 @@ jobs:
     pool:
       vmImage: ubuntu-16.04
     steps:
-    - script: 'echo "Hello ${{ parameters.environment }}"'
-      displayName: "Hello World"
-      #random commit test
+      - script: 'echo "Hello ${{ parameters.environment }}"'
+        displayName: "Hello World"
+        #random commit test

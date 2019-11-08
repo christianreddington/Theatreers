@@ -1,5 +1,5 @@
 variables:
-  artifactName: 'drop'
+  artifactName: "drop"
   service: Theatreers.Core
   src: "src/Theatreers.Core/"
   system.debug: true
@@ -7,27 +7,28 @@ variables:
 trigger:
   branches:
     include:
-    - master
-    - feature/*
+      - master
+      - feature/*
   paths:
     include:
-    - src/Theatreers.Core/*
-    - /pipelines/Theatreers.Core.yml
-    - /pipelines/Theatreers.Core/*
+      - src/Theatreers.Core/*
+      - /pipelines/Theatreers.Core.yml
+      - /pipelines/Theatreers.Core/*
 pr:
   branches:
     include:
-    - master
-    - feature/*
+      - master
+      - feature/*
   paths:
     include:
-    - src/Theatreers.Core/*
-    - /pipelines/Theatreers.Core.yml
-    - /pipelines/Theatreers.Core/*
+      - src/Theatreers.Core/*
+      - /pipelines/Theatreers.Core.yml
+      - /pipelines/Theatreers.Core/*
 
 stages:
-- template: /pipelines/stages/lifecycle.yml
-  parameters:
-    artifactName: ${{ variables.artifactName }}
-    service: ${{ variables.service }}
-    src: ${{ variables.src }}
+  - template: /pipelines/stages/lifecycle.yml
+    parameters:
+      artifactName: ${{ variables.artifactName }}
+      regions: ["core"]
+      service: ${{ variables.service }}
+      src: ${{ variables.src }}

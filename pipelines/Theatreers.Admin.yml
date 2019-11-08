@@ -1,30 +1,31 @@
 variables:
-  artifactName: 'drop'
+  artifactName: "drop"
   service: Theatreers.Admin
   system.debug: true
 
 trigger:
   branches:
     include:
-    - master
-    - feature/*
+      - master
+      - feature/*
   paths:
     include:
-    - src/Theatreers.Admin/*
-    - /pipelines/Theatreers.Admin.yml
-    - /pipelines/Theatreers.Admin/*
+      - src/Theatreers.Admin/*
+      - /pipelines/Theatreers.Admin.yml
+      - /pipelines/Theatreers.Admin/*
 pr:
   branches:
     include:
-    - master
-    - feature/*
+      - master
+      - feature/*
   paths:
     include:
-    - src/Theatreers.Admin/*
-    - /pipelines/Theatreers.Admin.yml
-    - /pipelines/Theatreers.Admin/*
+      - src/Theatreers.Admin/*
+      - /pipelines/Theatreers.Admin.yml
+      - /pipelines/Theatreers.Admin/*
 
 stages:
-- template: /pipelines/stages/lifecycle.yml
-  parameters:
-    service: ${{ variables.service }}
+  - template: /pipelines/stages/lifecycle.yml
+    parameters:
+      regions: ["northeurope", "westeurope"]
+      service: ${{ variables.service }}

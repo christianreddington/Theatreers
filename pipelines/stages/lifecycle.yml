@@ -1,40 +1,41 @@
 stages:
-- template: /pipelines/stages/ci.yml
-  parameters:
-    condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'), contains(variables['Build.SourceBranch'], 'refs/heads/feature/'))
-    environment: ci
-    service: ${{ parameters.service }}
-    src: ${{ parameters.src }}
+  - template: /pipelines/stages/ci.yml
+    parameters:
+      condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'), contains(variables['Build.SourceBranch'], 'refs/heads/feature/'))
+      environment: ci
+      service: ${{ parameters.service }}
+      src: ${{ parameters.src }}
 
-- template: /pipelines/stages/dev.yml
-  parameters:
-    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
-    dependsOn: []
-    environment: dev
-    service: ${{ parameters.service }}
-    src: ${{ parameters.src }}
+  - template: /pipelines/stages/dev.yml
+    parameters:
+      condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+      dependsOn: []
+      environment: dev
+      service: ${{ parameters.service }}
+      src: ${{ parameters.src }}
 
-- template: /pipelines/stages/master.yml
-  parameters:
-    artifactName: ${{ parameters.artifactName }}
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
-    dependsOn: []
-    environment: master
-    service: ${{ parameters.service }}
-    src: ${{ parameters.src }}
+  - template: /pipelines/stages/master.yml
+    parameters:
+      artifactName: ${{ parameters.artifactName }}
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
+      dependsOn: []
+      environment: master
+      service: ${{ parameters.service }}
+      src: ${{ parameters.src }}
 
-- template: /pipelines/stages/preprod.yml
-  parameters:
-    artifactName: ${{ parameters.artifactName }}
-    dependsOn: [master]
-    environment: preprod
-    service: ${{ parameters.service }}
-    src: ${{ parameters.src }}
+  - template: /pipelines/stages/preprod.yml
+    parameters:
+      artifactName: ${{ parameters.artifactName }}
+      dependsOn: [master]
+      environment: preprod
+      service: ${{ parameters.service }}
+      src: ${{ parameters.src }}
 
-- template: /pipelines/stages/prod.yml
-  parameters:
-    artifactName: ${{ parameters.artifactName }}
-    dependsOn: [preprod]
-    environment: prod
-    service: ${{ parameters.service }}
-    src: ${{ parameters.src }}
+  - template: /pipelines/stages/prod.yml
+    parameters:
+      artifactName: ${{ parameters.artifactName }}
+      dependsOn: [preprod]
+      environment: prod
+      regions: ${{ parameters.regions }}
+      service: ${{ parameters.service }}
+      src: ${{ parameters.src }}

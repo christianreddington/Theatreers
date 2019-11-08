@@ -11,22 +11,22 @@ jobs:
       #    projectKey: ${{ parameters.service }}
       #    projectName: ${{ parameters.service }}
       - task: DotNetCoreCLI@2
-        displayName: 'Restore project'
+        displayName: "Restore project"
         inputs:
-          command: 'restore'
-          projects: 'src/${{ parameters.service }}/${{ parameters.service }}.csproj'
-          feedsToUse: 'select'
-          vstsFeed: 'fa1af919-202e-4e5c-91a7-dafe6f7d519e'        
+          command: "restore"
+          projects: "src/${{ parameters.service }}/${{ parameters.service }}.csproj"
+          feedsToUse: "select"
+          vstsFeed: "fa1af919-202e-4e5c-91a7-dafe6f7d519e"
       - task: WhiteSource Bolt@19
-        displayName: 'Execute WhiteSource Scanning'
+        displayName: "Execute WhiteSource Scanning"
         inputs:
-          cwd: '$(System.DefaultWorkingDirectory)'          
+          cwd: "$(System.DefaultWorkingDirectory)"
       - task: DotNetCoreCLI@2
-        displayName: 'dotnet build'
+        displayName: "dotnet build"
         inputs:
-          command: 'build'
-          projects: 'src/${{ parameters.service }}/${{ parameters.service }}.csproj'
-          arguments: '--output ${{ parameters.buildOutputPath }} --configuration Release' 
+          command: "build"
+          projects: "src/${{ parameters.service }}/${{ parameters.service }}.csproj"
+          arguments: "--output ${{ parameters.buildOutputPath }} --configuration Release"
       # Execute the Sonar Cloud Analysis, and push to Sonar Cloud
       #- task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
       #  displayName: 'Run Code Analysis'
@@ -43,14 +43,14 @@ jobs:
       #  inputs:
       #    testResultsFormat: 'VSTest'
       #    testResultsFiles: '**/*.trx'
-      # Zip the files to be published      
+      # Zip the files to be published
       - task: DotNetCoreCLI@2
-        displayName: 'dotnet pack'
+        displayName: "dotnet pack"
         inputs:
           command: pack
-          packagesToPack: 'src/${{ parameters.service }}/${{ parameters.service }}.csproj'
+          packagesToPack: "src/${{ parameters.service }}/${{ parameters.service }}.csproj"
       - task: DotNetCoreCLI@2
-        displayName: 'dotnet push'
+        displayName: "dotnet push"
         inputs:
           command: push
-          publishVstsFeed: 'Theatreers.Artifacts'
+          publishVstsFeed: "Theatreers.Artifacts"

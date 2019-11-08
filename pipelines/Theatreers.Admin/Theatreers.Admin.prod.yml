@@ -3,5 +3,5 @@ jobs:
     pool:
       vmImage: ubuntu-16.04
     steps:
-    - script: 'echo "Hello ${{ parameters.environment }}"'
-      displayName: "Hello World"
+      - script: 'echo "Hello ${{ parameters.environment }} in ${{ parameters.region }}"'
+        displayName: "Hello World"
