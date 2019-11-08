@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -25,7 +26,7 @@ namespace Theatreers.Show.Functions
         methods: "post",
         Route = "show"
       )] HttpRequestMessage req,
-          [OrchestrationClient] DurableOrchestrationClientBase starter,
+          [DurableClient] IDurableOrchestrationClient starter,
           ILogger log,
           ClaimsPrincipal identity
         )

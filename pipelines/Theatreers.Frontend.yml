@@ -15,8 +15,15 @@ trigger:
     - /pipelines/Theatreers.Frontend.yml
     - /pipelines/Theatreers.Frontend/*
 pr:
-  - master
-  - feature/*
+  branches:
+    include:
+    - master
+    - feature/*
+  paths:
+    include:
+    - src/Theatreers.Frontend/*
+    - /pipelines/Theatreers.Frontend.yml
+    - /pipelines/Theatreers.Frontend/*
 
 stages:
 - template: /pipelines/stages/lifecycle.yml

@@ -1,0 +1,63 @@
+jobs:
+  - job: ${{ parameters.name }}
+    pool:
+      vmImage: ubuntu-16.04
+    steps:
+      - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+        displayName: 'Prepare analysis on SonarCloud'
+        inputs:
+          SonarCloud: 'Theatreers Sonarcloud'
+          organization: 'theatreers'
+          projectKey: ${{ parameters.service }}
+          projectName: ${{ parameters.service }}
+      - task: DotNetCoreCLI@2
+        displayName: 'Restore project'
+        inputs:
+          command: 'restore'
+          projects: 'src/${{ parameters.service }}/${{ parameters.service }}.csproj'
+          feedsToUse: 'select'
+          vstsFeed: 'fa1af919-202e-4e5c-91a7-dafe6f7d519e'        
+      - task: WhiteSource Bolt@19
+        displayName: 'Execute WhiteSource Scanning'
+        inputs:
+          cwd: '$(System.DefaultWorkingDirectory)'          
+      - task: DotNetCoreCLI@2
+        displayName: 'dotnet build'
+        inputs:
+          command: 'build'
+          projects: 'src/${{ parameters.service }}/${{ parameters.service }}.csproj'
+          arguments: '--output ${{ parameters.buildOutputPath }} --configuration Release' 
+      # Execute the Sonar Cloud Analysis, and push to Sonar Cloud
+      #- task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
+      #  displayName: 'Run Code Analysis'
+      #- task: CosmosDbEmulator@2
+      #  inputs:
+      #    containerName: 'azure-cosmosdb-emulator'
+      #    enableAPI: 'SQL'
+      #    portMapping: '8081:8081, 8901:8901, 8902:8902, 8979:8979, 10250:10250, 10251:10251, 10252:10252, 10253:10253, 10254:10254, 10255:10255, 10256:10256, 10350:10350'
+      #    hostDirectory: '$(Build.BinariesDirectory)\azure-cosmosdb-emulator'
+      #- script: dotnet test src/Theatreers.Show.Test/Theatreers.Show.Test.csproj --logger trx
+      #  displayName: 'Execute Tests'
+      #  env: { 'AZURE_COSMOS_DB_CONNECTION_STRING': "$(CosmosDbEmulator.Endpoint)", 'bingSearchSubscriptionKey': "$(bingSearchSubscriptionKey)" }
+      #- task: PublishTestResults@2
+      #  inputs:
+      #    testResultsFormat: 'VSTest'
+      #    testResultsFiles: '**/*.trx'
+      # Zip the files to be published
+      - task: ArchiveFiles@2
+        displayName: 'Zip files for later publishing to Azure Function'
+        inputs:
+          rootFolderOrFile: '${{ parameters.buildOutputPath }}'
+          includeRootFolder: false
+          archiveFile: '${{ parameters.buildPublishPath }}/src/$(Build.BuildId).zip'
+      # Copy the template to the deploy folder
+      #- task: CopyFiles@2
+      #  displayName: 'Copy ARM Template files for publishing: $(buildPublishPath)/templates'
+      #  inputs:
+      #    SourceFolder: deploy
+      #    TargetFolder: '$(buildPublishPath)/deploy'
+      # Publish the artifacts
+      - task: PublishPipelineArtifact@0
+        displayName: 'Publish Pipeline Artifact'
+        inputs:
+          targetPath: '${{ parameters.buildPublishPath }}'

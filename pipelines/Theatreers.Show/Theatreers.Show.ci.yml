@@ -1,0 +1,17 @@
+jobs:
+  - job: ${{ parameters.name }}
+    pool:
+      vmImage: ubuntu-16.04
+    steps:
+      - task: DotNetCoreCLI@2
+        displayName: 'Restore project'
+        inputs:
+          command: 'restore'
+          projects: 'src/${{ parameters.service }}/${{ parameters.service }}.csproj'
+          feedsToUse: 'select'
+          vstsFeed: 'fa1af919-202e-4e5c-91a7-dafe6f7d519e'
+      - task: DotNetCoreCLI@2
+        displayName: 'Build project'
+        inputs:
+          projects: 'src/${{ parameters.service }}/${{ parameters.service }}.csproj'
+          arguments: '--output ${{ parameters.buildOutputPath }} --configuration Release'
