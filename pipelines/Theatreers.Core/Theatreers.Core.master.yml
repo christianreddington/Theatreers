@@ -3,13 +3,13 @@ jobs:
     pool:
       vmImage: ubuntu-16.04
     steps:
-      - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
-        displayName: 'Prepare analysis on SonarCloud'
-        inputs:
-          SonarCloud: 'Theatreers Sonarcloud'
-          organization: 'theatreers'
-          projectKey: ${{ parameters.service }}
-          projectName: ${{ parameters.service }}
+      #- task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+      #  displayName: 'Prepare analysis on SonarCloud'
+      #  inputs:
+      # #   SonarCloud: 'Theatreers Sonarcloud'
+      #   organization: 'theatreers'
+      #    projectKey: ${{ parameters.service }}
+      #    projectName: ${{ parameters.service }}
       - task: DotNetCoreCLI@2
         displayName: 'Restore project'
         inputs:
