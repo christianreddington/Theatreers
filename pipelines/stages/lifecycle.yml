@@ -35,6 +35,7 @@ stages:
     parameters:
       artifactName: ${{ parameters.artifactName }}
       dependsOn: [preprod]
+      azureServiceGroupName: ${{ parameters.azureServiceGroupName }}
       environment: prod
       regions: ${{ parameters.regions }}
       service: ${{ parameters.service }}

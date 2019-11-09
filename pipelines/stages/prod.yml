@@ -1,14 +1,15 @@
 stages:
   - ${{ each region in parameters.regions }}:
-      - stage: "prod_${{ region }}"
-        condition: ${{ parameters.condition }}
-        dependsOn: ${{ parameters.dependsOn }}
-        jobs:
-          - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.prod.yml
-            parameters:
-              artifactName: ${{ parameters.artifactName }}
-              name: "prod"
-              environment: ${{ parameters.environment}}
-              region: ${{ region }}
-              service: ${{ parameters.service }}
-              src: ${{ parameters.src }}
+    - stage: "prod_${{ region.long }}"
+      condition: ${{ parameters.condition }}
+      dependsOn: ${{ parameters.dependsOn }}
+      jobs:
+        - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.prod.yml
+          parameters:
+            artifactName: ${{ parameters.artifactName }}
+            azureServiceGroupName: ${{ parameters.azureServiceGroupName }}
+            name: "prod"
+            environment: ${{ parameters.environment}}
+            region: ${{ region }}
+            service: ${{ parameters.service }}
+            src: ${{ parameters.src }}

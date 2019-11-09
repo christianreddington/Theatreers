@@ -1,6 +1,8 @@
 variables:
   artifactName: "drop"
-  service: Theatreers.Core
+  applicationServiceNameFull: "Theatreers.Core"
+  applicationServiceNameShort: "Core"
+  azureServiceGroupName: "core"
   src: "src/Theatreers.Core/"
   system.debug: true
 
@@ -29,6 +31,9 @@ stages:
   - template: /pipelines/stages/lifecycle.yml
     parameters:
       artifactName: ${{ variables.artifactName }}
-      regions: ["core"]
-      service: ${{ variables.service }}
+      azureServiceGroupName: ${{ variables.azureServiceGroupName }}
+      regions: [
+        { "short": "neu", "long": "northeurope"}
+      ]
+      service: ${{ variables.applicationServiceNameFull }}
       src: ${{ variables.src }}
