@@ -8,7 +8,7 @@
               <b-link :href="newsItem.url">{{ newsItem.name }}</b-link>
             </b-card-text>
           </b-card>
-      
+
         </b-col>
       </b-row>
     </div>
@@ -25,19 +25,19 @@ export default {
     }
   },
   methods: {
-    groupedImages(array, size) {
-      const chunked_arr = [];
-      let index = 0;
+    groupedImages (array, size) {
+      const chunkedArr = []
+      let index = 0
       while (index < array.length) {
-        chunked_arr.push(array.slice(index, size + index));
-        index += size;
+        chunkedArr.push(array.slice(index, size + index))
+        index += size
       }
-      return chunked_arr;
+      return chunkedArr
     }
   },
-  data() {
+  data () {
     return {
-      itemsPerRow: 3,
+      itemsPerRow: 3
     }
   }
 }

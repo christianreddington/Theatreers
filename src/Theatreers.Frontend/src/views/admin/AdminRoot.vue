@@ -5,17 +5,17 @@
 <script>
 
 export default {
-    mounted: function () {       
-      this.breadcrumbs = [
-        {
-          text: 'Theatreers',
-          href: this.$router.resolve({ name: 'root' }).href
-        },
-        {
-          text: 'Admin',
-          active: true
-        }
-      ]
-    }
+  mounted: function () {
+    this.breadcrumbs = [
+      {
+        text: 'Theatreers',
+        href: this.$router.resolve({ name: 'root' }).href
+      },
+      {
+        text: 'Admin',
+        active: true
+      }
+    ]
+  }
 }
 </script>

@@ -39,7 +39,7 @@
 </template>
 
 <script>
-  import HeaderDropdown from './components/HeaderDropdown'
+import HeaderDropdown from './components/HeaderDropdown'
 
 export default {
   components: {
@@ -47,7 +47,6 @@ export default {
   }
 }
 </script>
-
 
 <style lang="scss" scoped>
    @import './main.scss'

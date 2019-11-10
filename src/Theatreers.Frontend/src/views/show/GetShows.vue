@@ -97,10 +97,10 @@ export default {
     selectedPartition: {
       immediate: false,
       handler () {
-        this.isLoading = true        
-        self = this             
-          getApiWithoutToken(`https://api.theatreers.com/show/shows/${self.selectedPartition}`)  
-          .catch(function (error) { 
+        this.isLoading = true
+        self = this
+        getApiWithoutToken(`https://api.theatreers.com/show/shows/${self.selectedPartition}`)
+          .catch(function (error) {
             self.alert = {
               visible: true,
               content: `${error}`,

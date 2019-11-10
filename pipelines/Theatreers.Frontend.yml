@@ -1,33 +1,39 @@
 variables:
-  artifactName: 'drop'
-  service: Theatreers.Frontend
+  artifactName: "drop"
+  applicationServiceNameFull: "Theatreers.Frontend"
+  applicationServiceNameShort: "Frontend"
+  azureServiceGroupName: "web"
   src: "src/Theatreers.Frontend/"
   system.debug: true
 
 trigger:
   branches:
     include:
-    - master
-    - feature/*
+      - master
+      - feature/*
   paths:
     include:
-    - src/Theatreers.Frontend/*
-    - /pipelines/Theatreers.Frontend.yml
-    - /pipelines/Theatreers.Frontend/*
+      - src/Theatreers.Frontend/*
+      - /pipelines/Theatreers.Frontend.yml
+      - /pipelines/Theatreers.Frontend/*
 pr:
   branches:
     include:
-    - master
-    - feature/*
+      - master
+      - feature/*
   paths:
     include:
-    - src/Theatreers.Frontend/*
-    - /pipelines/Theatreers.Frontend.yml
-    - /pipelines/Theatreers.Frontend/*
+      - src/Theatreers.Frontend/*
+      - /pipelines/Theatreers.Frontend.yml
+      - /pipelines/Theatreers.Frontend/*
 
 stages:
-- template: /pipelines/stages/lifecycle.yml
-  parameters:
-    artifactName: ${{ variables.artifactName }}
-    service: ${{ variables.service }}
-    src: ${{ variables.src }}
+  - template: /pipelines/stages/lifecycle.yml
+    parameters:
+      artifactName: ${{ variables.artifactName }}
+      azureServiceGroupName: ${{ variables.azureServiceGroupName }}
+      regions: [
+        { "short": "neu", "long": "northeurope"}
+      ]
+      service: ${{ variables.applicationServiceNameFull }}
+      src: ${{ variables.src }}

@@ -25,7 +25,6 @@
         max-rows="6"
       ></b-form-textarea>
     </b-form-group>
-    
     <b-form-group
       id="label-author"
       label="Author:"
@@ -60,22 +59,22 @@
 </template>
 
 <script>
-  export default {
-    props: {
-      value: {
-          type: Object,
-          required: true
-      }
-    },
-    watch: {
-      value() {
-        this.$emit('input', this.value)
-      }
-    },
-    methods: {
-      onSubmit () {
-        this.$parent.onSubmit()
-      }
+export default {
+  props: {
+    value: {
+      type: Object,
+      required: true
+    }
+  },
+  watch: {
+    value () {
+      this.$emit('input', this.value)
+    }
+  },
+  methods: {
+    onSubmit () {
+      this.$parent.onSubmit()
     }
   }
+}
 </script>
