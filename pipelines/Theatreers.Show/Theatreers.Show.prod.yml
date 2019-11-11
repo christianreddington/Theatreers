@@ -5,5 +5,3 @@ jobs:
     steps:
     - script: 'echo "Hello ${{ parameters.environment }}"'
       displayName: "Hello World"
-      #test
-      #test2

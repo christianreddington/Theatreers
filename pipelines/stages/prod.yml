@@ -2,7 +2,7 @@ stages:
   - ${{ each region in parameters.regions }}:
     - stage: "prod_${{ region.long }}"
       condition: ${{ parameters.condition }}
-      dependsOn: ${{ join("preprod_", parameters.regions) }}
+      dependsOn: "preprod_${{ region.long }}"
       jobs:
         - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.prod.yml
           parameters:
