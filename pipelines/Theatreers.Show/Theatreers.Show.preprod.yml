@@ -42,7 +42,7 @@ jobs:
               azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
               action: 'Create Or Update Resource Group'
               resourceGroupName: '$(serviceResourceGroupName)'
-              location: '${{ parameters.region.long }}'
+              location: '${{ region.long }}'
               templateLocation: 'Linked artifact'
               csmFile: '$(System.DefaultWorkingDirectory)/deploy/show-regional.json'
               overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -cosmosDbAccountName $(cosmosDbAccountName) -cosmosDbResourceGroup $(cosmosDbResourceGroup) -aadClientId $(aadClientId) -aadB2cIssuer $(aadB2cIssuer)'
