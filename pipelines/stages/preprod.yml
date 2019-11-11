@@ -1,6 +1,6 @@
 stages:
   - ${{ each region in parameters.regions }}:
-    - stage: preprod
+    - stage: "preprod_${{ region.long }}"
       condition: ${{ parameters.condition }}
       dependsOn: ${{ parameters.dependsOn }}
       jobs:
