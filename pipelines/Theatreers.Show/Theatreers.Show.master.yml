@@ -51,11 +51,11 @@ jobs:
           includeRootFolder: false
           archiveFile: '${{ parameters.buildPublishPath }}/src/$(Build.BuildId).zip'
       # Copy the template to the deploy folder
-      #- task: CopyFiles@2
-      #  displayName: 'Copy ARM Template files for publishing: $(buildPublishPath)/templates'
-      #  inputs:
-      #    SourceFolder: deploy
-      #    TargetFolder: '$(buildPublishPath)/deploy'
+      - task: CopyFiles@2
+        displayName: 'Copy ARM Template files for publishing: $(buildPublishPath)/templates'
+        inputs:
+          SourceFolder: deploy/${{ parameters.service }}
+          TargetFolder: '${{ parameters.buildPublishPath }}/deploy'
       # Publish the artifacts
       - task: PublishPipelineArtifact@0
         displayName: 'Publish Pipeline Artifact'

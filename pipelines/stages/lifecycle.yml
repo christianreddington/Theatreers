@@ -27,7 +27,7 @@ stages:
     parameters:
       artifactName: ${{ parameters.artifactName }}
       dependsOn: [master]
-      environment: preprod
+      environment: dev
       service: ${{ parameters.service }}
       src: ${{ parameters.src }}
 
