@@ -37,3 +37,4 @@ stages:
       ]
       service: ${{ variables.applicationServiceNameFull }}
       src: ${{ variables.src }}
+      #FakeTrigger
