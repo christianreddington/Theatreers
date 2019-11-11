@@ -12,7 +12,7 @@ jobs:
       servicePrincipalObjectId: '6ee1bb40-e589-4884-90bc-c705d88bb3e0'
       serviceResourceGroupName: 'th-show-dev-rg'
     pool:
-      vmImage: ubuntu-16.04
+      vmImage: "Hosted Windows 2019 with VS2019"
     environment: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}"
     strategy:
       runOnce:
