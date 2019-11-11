@@ -64,5 +64,3 @@ jobs:
               package: '$(System.DefaultWorkingDirectory)/src/*.zip'
               appSettings: '-cosmosConnectionString $(cosmosConnectionString)'
               deploymentMethod: 'auto'
-          #trigger comment
-          #extra trigger
