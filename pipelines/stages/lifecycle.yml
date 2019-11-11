@@ -28,6 +28,7 @@ stages:
       artifactName: ${{ parameters.artifactName }}
       dependsOn: [master]
       environment: dev
+      regions: ${{ parameters.regions }}
       service: ${{ parameters.service }}
       src: ${{ parameters.src }}
 

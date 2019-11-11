@@ -33,7 +33,7 @@ stages:
       artifactName: ${{ variables.artifactName }}
       azureServiceGroupName: ${{ variables.azureServiceGroupName }}
       regions: [
-        { "short": "weu", "long": "westeurope"}
+        { "short": "weu", "long": "westeurope", "preprod_dependency": "preprod_westeurope" }
       ]
       service: ${{ variables.applicationServiceNameFull }}
       src: ${{ variables.src }}
