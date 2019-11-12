@@ -1,8 +1,21 @@
 jobs:
-  - job: ${{ parameters.name }}
+  - deployment: ${{ parameters.name }}
     pool:
       vmImage: ubuntu-16.04
-    steps:
-      - script: 'echo "Hello ${{ parameters.environment }}"'
-        displayName: "Hello World"
-        #random commit test
+    environment: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}"
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - script: 'echo "Hello ${{ parameters.environment }}"'
+              displayName: "Hello World"
+            #- task: DotNetCoreCLI@2
+            #  displayName: "dotnet pack"
+            #  inputs:
+            #    command: pack
+            #    packagesToPack: "src/${{ parameters.service }}/${{ parameters.service }}.csproj"
+            #- task: DotNetCoreCLI@2
+            #  displayName: "dotnet push"
+            #  inputs:
+            #    command: push
+            #    publishVstsFeed: "Theatreers.Artifacts"

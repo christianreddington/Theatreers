@@ -44,13 +44,3 @@ jobs:
       #    testResultsFormat: 'VSTest'
       #    testResultsFiles: '**/*.trx'
       # Zip the files to be published
-      - task: DotNetCoreCLI@2
-        displayName: "dotnet pack"
-        inputs:
-          command: pack
-          packagesToPack: "src/${{ parameters.service }}/${{ parameters.service }}.csproj"
-      - task: DotNetCoreCLI@2
-        displayName: "dotnet push"
-        inputs:
-          command: push
-          publishVstsFeed: "Theatreers.Artifacts"
