@@ -66,4 +66,4 @@ jobs:
               appSettings: '-cosmosConnectionString $(cosmosConnectionString)'
               deploymentMethod: 'auto'
               #Trigger
-              #Trigger
+              #Another Trigger
