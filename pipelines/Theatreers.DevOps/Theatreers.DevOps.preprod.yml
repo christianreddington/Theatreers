@@ -18,7 +18,7 @@ jobs:
                 azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
                 resourceGroupName: '$(managementResourceGroupName)'
                 location: '${{ parameters.region.long }})'
-                csmFile: '$(Pipeline.Workspace)/storageAccount.json'
+                csmFile: '$(Pipeline.Workspace)/drop/storageAccount.json'
                 overrideParameters: '-accountName $(managementStorageAccountName)'
             - task: AzureFileCopy@2
               displayName: 'Copy ARM Templates to Blob Storage'
