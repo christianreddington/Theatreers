@@ -9,6 +9,7 @@ jobs:
       cosmosDbResourceGroup: 'th-core-dev-rg'
       environmentName: 'dev'
       keyvaultName: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}-kv" 
+      regionalResourceGroupName: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}-rg" 
       servicePrincipalObjectId: '6ee1bb40-e589-4884-90bc-c705d88bb3e0'
       serviceResourceGroupName: 'th-show-dev-rg'
     pool:
@@ -41,7 +42,7 @@ jobs:
             inputs:
               azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
               action: 'Create Or Update Resource Group'
-              resourceGroupName: '$(serviceResourceGroupName)'
+              resourceGroupName: '$(regionalResourceGroupName)'
               location: '${{ parameters.region.long }}'
               templateLocation: 'Linked artifact'
               csmFile: '$(System.DefaultWorkingDirectory)/deploy/show-regional.json'
