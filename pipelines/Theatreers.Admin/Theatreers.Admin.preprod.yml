@@ -1,7 +1,68 @@
 jobs:
-  - job: ${{ parameters.name }}
+  - deployment: ${{ parameters.name }}
+    variables:
+      aadClientId: "73e2635f-dadd-443b-9e47-89ac07f91485"
+      aadB2cIssuer: "https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_SiUpIn"
+      artifactsAccountName: 'thmgtdevartifactstg'
+      artifactsResourceGroupName: 'th-mgt-dev-rg'
+      environmentName: 'dev'
+      functionAppName: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}-func" 
+      keyvaultName: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}-kv" 
+      regionalResourceGroupName: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}-rg" 
+      servicePrincipalObjectId: '6ee1bb40-e589-4884-90bc-c705d88bb3e0'
+      serviceResourceGroupName: 'th-show-admin-rg'
     pool:
-      vmImage: ubuntu-16.04
-    steps:
-    - script: 'echo "Hello ${{ parameters.environment }}"'
-      displayName: "Hello World"
+      vmImage: "windows-2019"
+    environment: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}"
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@1
+            displayName: 'Download Pipeline Artifacts'
+            inputs:
+              buildType: 'current'
+              artifactName: 'drop'
+              targetPath: '$(System.DefaultWorkingDirectory)/'
+          # Copy the files from APIM folder in Git to Storage Account
+          - task: AzureFileCopy@3
+            displayName: 'Copy ARM Templates relating to Show Service to Management Storage Account: $(artifactsAccountName)'
+            inputs:
+              SourcePath: '$(System.DefaultWorkingDirectory)/deploy'
+              azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+              Destination: 'AzureBlob'
+              storage: 'thmgtdevartifactstg'
+              ContainerName: 'templates'
+              outputStorageUri: 'templateContainerUri'
+              outputStorageContainerSasToken: 'templateContainerSasToken'
+          # Create the appropriate storage account
+          - task: AzureResourceGroupDeployment@2
+            displayName: 'Deploy ${{ parameters.region.long }} Show Resource Group for $(environmentName) in $(serviceResourceGroupName)'
+            inputs:
+              azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+              action: 'Create Or Update Resource Group'
+              resourceGroupName: '$(regionalResourceGroupName)'
+              location: '${{ parameters.region.long }}'
+              templateLocation: 'Linked artifact'
+              csmFile: '$(System.DefaultWorkingDirectory)/deploy/show-regional.json'
+              overrideParameters: '-templateContainerUri $(templateContainerUri) -templateContainerSasToken $(templateContainerSasToken) -environmentName $(environmentName) -tenantId $(tenantId) -servicePrincipalObjectId $(servicePrincipalObjectId) -aadClientId $(aadClientId) -aadB2cIssuer $(aadB2cIssuer)'
+              deploymentMode: 'Incremental'
+          # Download the secres from Azure KeyVault
+          - task: AzureKeyVault@1
+            displayName: 'Download secrets from $(keyvaultName)'
+            inputs:
+              azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+              KeyVaultName: '$(keyvaultName)'
+          # Deploy the application to the Azure Function, and update appropriate
+          # configuration values on the Azure Function.
+          - task: AzureFunctionApp@1
+            displayName: 'Deploy Code and App Configuration to $(functionAppName)'
+            inputs:
+              azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+              appType: 'functionApp'
+              appName: '$(functionAppName)'
+              package: '$(System.DefaultWorkingDirectory)/src/*.zip'
+              appSettings: '-TheatreersAdminClientId $(TheatreersAdminClientId) -TheatreersAdminClientSecret $(TheatreersAdminClientSecret)'
+              deploymentMethod: 'auto'
+              #Trigger
+              #Another Trigger
