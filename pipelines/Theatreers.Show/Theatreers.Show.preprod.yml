@@ -8,6 +8,7 @@ jobs:
       cosmosDbAccountName: 'th-core-dev-cosmos'
       cosmosDbResourceGroup: 'th-core-dev-rg'
       environmentName: 'dev'
+      functionAppName: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}-func" 
       keyvaultName: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}-kv" 
       regionalResourceGroupName: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}-rg" 
       servicePrincipalObjectId: '6ee1bb40-e589-4884-90bc-c705d88bb3e0'
