@@ -1,0 +1,11 @@
+jobs:
+  - deployment: ${{ parameters.name }}
+    pool:
+      vmImage: ubuntu-16.04
+    environment: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}"
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - script: 'echo "Hello ${{ parameters.environment }} in ${{ parameters.region.long }}"'
+              displayName: "Hello World"

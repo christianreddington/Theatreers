@@ -1,0 +1,28 @@
+jobs:
+  - job: ${{ parameters.name }}
+    pool:
+      vmImage: ubuntu-16.04
+    steps:
+      - task: PowerShell@2
+        displayName: "Execute PESTER Tests"
+        inputs:
+          targetType: 'inline'
+          script: |
+            Install-Module -Name Pester -Force -Verbose -Scope CurrentUser 
+            Import-Module Pester
+            Invoke-Pester -Script @{Path ='deploy/buildingblocks/arm-template-tests.ps1'; Parameters = @{folder = './deploy/buildingblocks' }} -OutputFile TEST-CoreArmTemplates.xml -OutputFormat NUnitXml
+      - task: PublishTestResults@2
+        displayName: 'Publish Test Results **/*.xml'
+        inputs:
+          testResultsFormat: NUnit
+          testResultsFiles: 'TEST-*.xml'
+      - task: CopyFiles@2
+        inputs:
+          sourceFolder: 'deploy/buildingblocks'# Optional
+          contents: '**' 
+          targetFolder: '$(Build.ArtifactStagingDirectory)/'
+      # Publish Pipeline Artifact
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'drop'
+          targetPath: '$(Build.ArtifactStagingDirectory)/'

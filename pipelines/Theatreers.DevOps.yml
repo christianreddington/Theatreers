@@ -1,0 +1,39 @@
+variables:
+  artifactName: "drop"
+  applicationServiceNameFull: "Theatreers.DevOps"
+  applicationServiceNameShort: "DevOps"
+  azureServiceGroupName: "devops"
+  src: "src/Theatreers.DevOps/"
+  system.debug: true
+
+trigger:
+  branches:
+    include:
+      - master
+      - feature/*
+  paths:
+    include:
+      - src/Theatreers.DevOps/*
+      - /pipelines/Theatreers.DevOps.yml
+      - /pipelines/Theatreers.DevOps/*
+pr:
+  branches:
+    include:
+      - master
+      - feature/*
+  paths:
+    include:
+      - src/Theatreers.DevOps/*
+      - /pipelines/Theatreers.DevOps.yml
+      - /pipelines/Theatreers.DevOps/*
+
+stages:
+  - template: /pipelines/stages/lifecycle.yml
+    parameters:
+      artifactName: ${{ variables.artifactName }}
+      azureServiceGroupName: ${{ variables.azureServiceGroupName }}
+      regions: [
+        { "short": "weu", "long": "westeurope", "preprod_dependency": "preprod_westeurope" }
+      ]
+      service: ${{ variables.applicationServiceNameFull }}
+      src: ${{ variables.src }}

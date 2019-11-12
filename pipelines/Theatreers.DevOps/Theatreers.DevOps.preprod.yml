@@ -1,0 +1,32 @@
+jobs:
+  - deployment: ${{ parameters.name }}
+    pool:
+      vmImage: ubuntu-16.04
+    environment: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}"
+    variables:
+      managementResourceGroupName: 'th-mgt-${{ parameters.environment }}-rg'
+      managementStorageAccountName: 'thmgt${{ parameters.environment }}artifactstg'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: DownloadPipelineArtifact@2
+              displayName: 'Download Pipeline Artifact'
+            - task: AzureResourceGroupDeployment@2
+              displayName: 'Azure Deployment:Create Or Update Resource Group action on $(managementResourceGroupName)'
+              inputs:
+                azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+                resourceGroupName: '$(managementResourceGroupName)'
+                location: '${{ parameters.region.long }})'
+                csmFile: '$(Pipeline.Workspace)/storageAccount.json'
+                overrideParameters: '-accountName $(managementStorageAccountName)'
+            - task: AzureFileCopy@2
+              displayName: 'Copy ARM Templates to Blob Storage'
+              inputs:
+                SourcePath: '$(Pipeline.Workspace)'
+                azureSubscription: 'Theatreers Dev AzureDevOps ServPrin'
+                Destination: AzureBlob
+                storage: '$(managementStorageAccountName)'
+                ContainerName: templates
+                outputStorageUri: templateContainerUri
+                outputStorageContainerSasToken: templateContainerSasToken
