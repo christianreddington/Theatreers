@@ -7,6 +7,7 @@ stages:
       - template: /pipelines/${{ parameters.service }}/${{ parameters.service }}.preprod.yml
         parameters:
           artifactName: ${{ parameters.artifactName }}
+          azureServiceGroupName: ${{ parameters.azureServiceGroupName }}
           buildOutputPath: '$(Build.ArtifactStagingDirectory)/build-output/'
           buildPublishPath: '$(Build.ArtifactStagingDirectory)/publish-path/'
           name: "preprod"
