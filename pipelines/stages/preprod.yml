@@ -11,5 +11,6 @@ stages:
           buildPublishPath: '$(Build.ArtifactStagingDirectory)/publish-path/'
           name: "preprod"
           environment: ${{ parameters.environment}}
+          region: ${{ region }}
           service: ${{ parameters.service }}
           src: ${{ parameters.src }}
