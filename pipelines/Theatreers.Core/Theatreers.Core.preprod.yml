@@ -7,13 +7,21 @@ jobs:
       runOnce:
         deploy:
           steps:
+            - task: gittools.gitversion.gitversion-task.GitVersion@4
+              displayName: GitVersion 
+              inputs: 
+                preferBundledVersion: false
             - task: DotNetCoreCLI@2
-              displayName: "dotnet pack"
-              inputs:
+              displayName: 'dotnet pack' 
+              inputs: 
                 command: pack
                 packagesToPack: "src/${{ parameters.service }}/${{ parameters.service }}.csproj"
-            - task: DotNetCoreCLI@2
-              displayName: "dotnet push"
-              inputs:
-                command: push
-                publishVstsFeed: "Theatreers.Artifacts"
+                nobuild: true 
+                versioningScheme: byEnvVar 
+                versionEnvVar: GitVersion.NuGetVersion
+            - task: DotNetCoreCLI@2 
+              displayName: 'dotnet nuget push' 
+              inputs: 
+                command: push 
+                publishVstsFeed: '168c2416-9cd1-4e62-e89vb-5665da67a44c' 
+                versioningScheme: byBuildNumber
