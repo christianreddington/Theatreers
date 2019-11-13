@@ -20,7 +20,7 @@ jobs:
         inputs:
           command: "build"
           projects: "src/${{ parameters.service }}/${{ parameters.service }}.csproj"
-          arguments: "--configuration Release /p:Version=$(GitVersion.NuGetVersion)"
+          arguments: "--output ${{ parameters.buildOutputPath }} --configuration Release /p:Version=$(GitVersion.NuGetVersion)"
           versioningScheme: byBuildNumber
       - task: DotNetCoreCLI@2
         displayName: 'dotnet pack' 
@@ -34,5 +34,5 @@ jobs:
         displayName: 'dotnet nuget push' 
         inputs: 
           command: push 
-          publishVstsFeed: 'fa1af919-202e-4e5c-91a7-dafe6f7d519e' 
+          publishVstsFeed: 'Theatreers.Artifacts' 
           versioningScheme: byBuildNumber
