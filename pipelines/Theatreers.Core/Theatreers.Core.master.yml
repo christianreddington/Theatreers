@@ -4,8 +4,8 @@ jobs:
       vmImage: ubuntu-16.04
     steps:
       - task: gittools.gitversion.gitversion-task.GitVersion@5
-        displayName: GitVersion 
-        inputs: 
+        displayName: GitVersion
+        inputs:
           preferBundledVersion: false
       - task: DotNetCoreCLI@2
         displayName: "Restore project"
@@ -23,18 +23,15 @@ jobs:
           arguments: "--configuration Release /p:Version=$(GitVersion.NuGetVersion)"
           versioningScheme: byBuildNumber
       - task: DotNetCoreCLI@2
-        displayName: 'dotnet pack' 
-        inputs: 
+        displayName: "dotnet pack"
+        inputs:
           command: pack
           packagesToPack: "src/${{ parameters.service }}/${{ parameters.service }}.csproj"
-          versioningScheme: byEnvVar 
+          versioningScheme: byEnvVar
           versionEnvVar: GitVersion.NuGetVersion
-      - task: DotNetCoreCLI@2 
-        displayName: 'dotnet nuget push' 
-        inputs: 
-          command: push 
-          publishVstsFeed: 'Theatreers.Artifacts' 
+      - task: DotNetCoreCLI@2
+        displayName: "dotnet nuget push"
+        inputs:
+          command: push
+          publishVstsFeed: "Theatreers.Artifacts"
           versioningScheme: byBuildNumber
-          #Some trigger
-          #Update
-          #Some update...

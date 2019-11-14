@@ -2,10 +2,10 @@ jobs:
   - job: ${{ parameters.name }}
     pool:
       vmImage: ubuntu-16.04
-    steps:    
+    steps:
       - task: gittools.gitversion.gitversion-task.GitVersion@5
-        displayName: GitVersion 
-        inputs: 
+        displayName: GitVersion
+        inputs:
           preferBundledVersion: false
       - task: DotNetCoreCLI@2
         displayName: "Restore project"
@@ -16,22 +16,22 @@ jobs:
           vstsFeed: "fa1af919-202e-4e5c-91a7-dafe6f7d519e"
           versioningScheme: byBuildNumber
       - task: DotNetCoreCLI@2
-        displayName: "Build project"
+        displayName: "dotnet build"
         inputs:
+          command: "build"
           projects: "src/${{ parameters.service }}/${{ parameters.service }}.csproj"
-          arguments: "--output ${{ parameters.buildOutputPath }} --configuration Release /p:Version=$(GitVersion.NuGetVersion)"
+          arguments: "--configuration Release /p:Version=$(GitVersion.NuGetVersion)"
           versioningScheme: byBuildNumber
       - task: DotNetCoreCLI@2
-        displayName: 'dotnet pack' 
-        inputs: 
+        displayName: "dotnet pack"
+        inputs:
           command: pack
           packagesToPack: "src/${{ parameters.service }}/${{ parameters.service }}.csproj"
-          nobuild: true 
-          versioningScheme: byEnvVar 
+          versioningScheme: byEnvVar
           versionEnvVar: GitVersion.NuGetVersion
-      - task: DotNetCoreCLI@2 
-        displayName: 'dotnet nuget push' 
-        inputs: 
-          command: push 
-          publishVstsFeed: '168c2416-9cd1-4e62-e89vb-5665da67a44c' 
+      - task: DotNetCoreCLI@2
+        displayName: "dotnet nuget push"
+        inputs:
+          command: push
+          publishVstsFeed: "Theatreers.Artifacts"
           versioningScheme: byBuildNumber
