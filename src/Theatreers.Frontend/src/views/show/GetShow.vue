@@ -12,6 +12,33 @@
     <p v-if="show">{{ show.showName }}</p>
     <p v-if="show">Composer: {{ show.composer }}</p>
     <p v-if="show">Author: {{ show.author }}</p>
+    <p v-if="show">Composer: {{ show.composer }}</p>
+
+    <h2>Songs</h2>
+    <div id="wrapper" v-if="show && show.songs">
+      <div class="list-group" v-for="song in show.songs" v-bind:key="song.name">
+        <a href="#" class="list-group-item list-group-item-action">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{song.name}}</h5>
+            <small>{{song.low}} - {{song.high}}, {{song.key}}</small>
+          </div>
+          <p class="mb-1">{{ song.participants.join(', ') }}</p>
+        </a>
+      </div>
+    </div>
+
+    <h2>Characters</h2>
+    <div id="wrapper" v-if="show && show.characters">
+      <div class="list-group" v-for="character in show.characters" v-bind:key="character.name">
+        <a href="#" class="list-group-item list-group-item-action">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{character.name}}</h5>
+            <small>{{character.vocalType}}</small>
+          </div>
+          <p class="mb-1">{{ character.description }}</p>
+        </a>
+      </div>
+    </div>
 
     <h1>News</h1>
     <ShowNews :newsObjects="news" v-if="news" />
