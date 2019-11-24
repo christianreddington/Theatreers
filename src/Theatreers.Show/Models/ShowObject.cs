@@ -39,7 +39,7 @@ namespace Theatreers.Show.Models
     public List<string> Participants { get; set; }
   }
 
-  public class Characters
+  public class Character
   {
     [JsonProperty("name")]    
     public string Name { get; set; }
