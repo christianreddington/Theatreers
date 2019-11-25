@@ -75,8 +75,8 @@ namespace Theatreers.Show.Functions
                     log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Show Update Fail :: {ex.Message}");
                     return new BadRequestErrorMessageResult(ex.Message);
                 }
-            }
-            /*else
+            /*}
+            else
             {
                 return new UnauthorizedResult();
             }*/
