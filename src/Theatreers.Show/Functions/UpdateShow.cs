@@ -39,9 +39,9 @@ namespace Theatreers.Show.Functions
         )
         {
 
-            string authorizationStatus = req.Headers.GetValues("AuthorizationStatus").FirstOrDefault();
-            if (Convert.ToInt32(authorizationStatus).Equals((int)HttpStatusCode.Accepted))
-            {
+           // string authorizationStatus = req.Headers.GetValues("AuthorizationStatus").FirstOrDefault();
+           // if (Convert.ToInt32(authorizationStatus).Equals((int)HttpStatusCode.Accepted))
+           // {
                 // Initialise a message object, based upon the information passed into the Microservice
                 MessageObject<ShowObject> message = new MessageObject<ShowObject>()
                 {
@@ -76,10 +76,10 @@ namespace Theatreers.Show.Functions
                     return new BadRequestErrorMessageResult(ex.Message);
                 }
             }
-            else
+            /*else
             {
                 return new UnauthorizedResult();
-            }
+            }*/
         }
     }
 }

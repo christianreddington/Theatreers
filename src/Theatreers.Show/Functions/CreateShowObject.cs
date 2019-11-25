@@ -69,8 +69,8 @@ namespace Theatreers.Show.Functions
         )
     {
 
-            string authorizationStatus = req.Headers.GetValues("AuthorizationStatus").FirstOrDefault();
-            if (Convert.ToInt32(authorizationStatus).Equals((int)HttpStatusCode.Accepted))
+          //  string authorizationStatus = req.Headers.GetValues("AuthorizationStatus").FirstOrDefault();
+          // if (Convert.ToInt32(authorizationStatus).Equals((int)HttpStatusCode.Accepted))
             {
                 string showId = Guid.NewGuid().ToString();
 
@@ -97,10 +97,10 @@ namespace Theatreers.Show.Functions
         log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Created of Show {message.Body.ShowName} succeeded");
         return new OkResult();
       }
-      else
+     /* else
       {
         return new UnauthorizedResult();
-      }
+      }*/
     }
   }
 }
