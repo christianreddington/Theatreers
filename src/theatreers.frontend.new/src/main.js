@@ -6,7 +6,9 @@ import "./plugins/bootstrap-vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
+import AuthService from "./msal";
 
+Vue.prototype.$AuthService = new AuthService();
 Vue.config.productionTip = false;
 
 new Vue({

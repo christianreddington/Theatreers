@@ -21,11 +21,6 @@ const actions = {
 const mutations = {
   setAlerts (state, alerts) {
     state.all = alerts
-  },
-
-  decrementAlertInventory (state, { id }) {
-    const alert = state.all.find(alert => alert.id === id)
-    alert.inventory--
   }
 }
 
