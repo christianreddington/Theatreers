@@ -56,9 +56,9 @@ namespace Theatreers.Show.Functions
                 string eventData = JsonConvert.SerializeObject(showObjectInput);
 
                 //Call the downstream "Activity" functions
-                string submitShowInstanceId = await starter.StartNewAsync("CreateShowObjectByOrchestrator", eventData);
-                string submitNewsInstanceId = await starter.StartNewAsync("CreateShowNewsObjectByOrchestrator", eventData);
-                string submitImageInstanceId = await starter.StartNewAsync("CreateShowImageObjectByOrchestrator", eventData);
+                string submitShowInstanceId = await starter.StartNewAsync<string>("CreateShowObjectByOrchestrator", eventData);
+                string submitNewsInstanceId = await starter.StartNewAsync<string>("CreateShowNewsObjectByOrchestrator", eventData);
+                string submitImageInstanceId = await starter.StartNewAsync<string>("CreateShowImageObjectByOrchestrator", eventData);
 
                 log.LogInformation($"[Request Correlation ID: {correlationId}] :: Begin Orchestration :: CreateShowObject instance ID: {submitShowInstanceId}");
                 log.LogInformation($"[Request Correlation ID: {correlationId}] :: Begin Orchestration :: CreateShowNewsObject instance ID: {submitNewsInstanceId}");
