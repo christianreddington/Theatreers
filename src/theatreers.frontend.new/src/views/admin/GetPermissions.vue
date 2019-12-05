@@ -1,7 +1,6 @@
 <template name="GetUsers">
   <div class="permissions">
-    <b-breadcrumb :items="breadcrumbs" id="breadcrumbs" v-if="breadcrumbs"></b-breadcrumb>
-     <h1>Permissions</h1>
+    <h1>Permissions</h1>
       <input v-model="search" class="form-control" placeholder="Filter users by Display Name"><br><br>
         <table class="table table-hover" id="table">
           <thead>
@@ -14,10 +13,10 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in sortedItems" v-bind:key="item.id">
-              <td>{{ item.id }}</td>
+            <tr v-for="item in sortedItems" v-bind:key="item.objectId">
+              <td>{{ item.objectId }}</td>
               <td>{{ item.displayName }}</td>
-              <td v-bind:id="item.id" v-bind:ref="item.id" contenteditable @focus="enterCell(item.id)" @blur="exitCell(item.id)">{{ item.extension_309951ebe380415e84418cf29a596f64_permissions }}</td>
+              <td v-bind:id="item.objectId" v-bind:ref="item.objectId" contenteditable @focus="enterCell(item.objectId)" @blur="exitCell(item.objectId)">{{ item.extension_309951ebe380415e84418cf29a596f64_permissions }}</td>
             </tr>
           </tbody>
         </table>
@@ -92,28 +91,29 @@ export default {
 
       var id = this.$refs[cellIdentifier][0].id
       var j = { 'PermissionString': this.cleanPermission }
-      var jsonBody = JSON.stringify(j) // '{"name":"binchen"}
+      var jsonBody = JSON.stringify(j)
 
       var tokenRequest = {
         scopes: ['https://theatreers.onmicrosoft.com/permissions/user_impersonation']
       }
 
-      getAccessToken(tokenRequest)
+      this.$AuthService.acquireToken(tokenRequest)
         .then(bearerToken => {
-          putApiWithToken('https://th-admin-dev-weu-func.azurewebsites.net/api/moderation/permission/' + id, jsonBody, bearerToken.accessToken)
+          this.$AuthService.putApi('https://th-admin-dev-weu-func.azurewebsites.net/api/moderation/permission/' + id, jsonBody, bearerToken.accessToken)
             .catch(function (error) {
-              // console.log('Error: ' + error)
+              console.log('Error: ' + error)
             })
             .then(function (response) {
-              // console.log('Succeeded')
+              console.log('Succeeded with response: ' + response)
             })
         })
       this.cleanPermission = null
       this.dirtyPermission = null
     }
   },
-  mounted: function () {
-    this.breadcrumbs = [
+  mounted: function () {    
+    this.$store.commit('breadcrumbs/setBreadcrumbs', 
+    [
       {
         text: 'Theatreers',
         href: this.$router.resolve({ name: 'root' }).href
@@ -126,15 +126,15 @@ export default {
         text: 'Get Permissions',
         active: true
       }
-    ]
+    ])
 
     var tokenRequest = {
       scopes: ['https://theatreers.onmicrosoft.com/permissions/user_impersonation']
     }
 
-    getAccessToken(tokenRequest)
+    this.$AuthService.acquireToken(tokenRequest)
       .then(bearerToken => {
-        getApiWithToken(`https://th-admin-dev-weu-func.azurewebsites.net/api/moderation/permission/`, bearerToken.accessToken)
+        this.$AuthService.getApiWithToken(`https://th-admin-dev-weu-func.azurewebsites.net/api/moderation/permission/`, bearerToken.accessToken)
           .catch(function (error) {
             self.alert = {
               visible: true,

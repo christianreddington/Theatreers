@@ -51,6 +51,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   props: {
     value: {
@@ -58,12 +59,17 @@ export default {
       required: true
     }
   },
+  computed: mapState({
+    notes: state => state.notes.all
+  }),
   data () {
     return {
       blockRemoval: true,
       songs: [],
-      notes: this.$notes
     }
+  },
+  created () {
+    this.$store.dispatch('notes/getAllNotes')
   },
   mounted: function () {
     if (this.$props.value.songs == null) {

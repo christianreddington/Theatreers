@@ -67,6 +67,15 @@ export default class AuthService {
   getApi(uri) {
     return fetch(uri, { method: 'GET' })
   };
+  
+  getApiWithToken(uri, token) {
+    const headers = {
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json'
+    }
+    
+    return fetch(uri, { headers: headers, method: 'GET' })
+  };
 
   postApi(uri, body, token) {
     const headers = {
@@ -74,6 +83,14 @@ export default class AuthService {
       'Content-Type': 'application/json'
     }
     return fetch(uri, { headers: headers, method: 'POST', body: body })
+  };
+
+  putApi(uri, body, token) {
+    const headers = {
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json'
+    }
+    return fetch(uri, { headers: headers, method: 'PUT', body: body })
   };
 
   acquireToken(scopes) {

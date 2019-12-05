@@ -80,6 +80,15 @@ export default {
       console.log(slide);
       this.sliding = false;
     }
+  },
+  mounted: function(){    
+    this.$store.commit('breadcrumbs/setBreadcrumbs', 
+    [
+        {
+          text: 'Theatreers',
+          active: true
+        }
+      ])
   }
 }
 </script>

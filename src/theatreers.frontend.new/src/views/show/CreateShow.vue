@@ -1,6 +1,5 @@
 <template name="CreateShow">
   <div class="about">
-    <b-breadcrumb :items="breadcrumbs" id="breadcrumbs" v-if="show"></b-breadcrumb>
     <h1 v-if="show">Create {{ show.showName }}</h1>
     <b-alert v-model="alert.visible" :variant="alert.type" dismissible>
       {{ alert.content }}
@@ -57,20 +56,22 @@ export default {
     }
   },
   mounted: function () {
-    this.breadcrumbs = [
-      {
-        text: 'Theatreers',
-        href: this.$router.resolve({ name: 'root' }).href
-      },
-      {
-        text: 'Shows',
-        href: this.$router.resolve({ name: 'getshows' }).href
-      },
-      {
-        text: 'Create new Show',
-        active: true
-      }
-    ]
+    
+        this.$store.commit('breadcrumbs/setBreadcrumbs', 
+        [
+          {
+            text: 'Theatreers',
+            href: this.$router.resolve({ name: 'root' }).href
+          },
+          {
+            text: 'Shows',
+            href: this.$router.resolve({ name: 'getshows' }).href
+          },
+          {
+            text: 'Create new Show',
+            active: true
+          }
+        ]);
   }
 }
 </script>

@@ -21,6 +21,9 @@ const EditShow = () => import('@/views/show/EditShow')
 const GetShow = () => import('@/views/show/GetShow')
 const GetShows = () => import('@/views/show/GetShows')
 
+
+
+
 export default new Router({
   routes: [
     { path: '/event', name: 'getevents', component: GetEvents },
@@ -28,17 +31,20 @@ export default new Router({
     { path: '/group', name: 'getgroups', component: GetGroups },
     { path: '/group/:id', name: 'getgroup', component: GetGroup },
     { path: '/show', name: 'getshows', component: GetShows },
-    { path: '/show/create', name: 'createshow', component: CreateShow },
     { path: '/show/create/',
       name: 'createshow',
       component: CreateShow,
       async beforeEnter (to, from, next) {
         try {
-          var permissions = await this.$AuthService.getAccount().idTokenClaims.extension_permissions
+          var permissions = await Vue.prototype.$AuthService.getAccount().idTokenClaims.extension_permissions
           if (permissions.includes('show:owner') || permissions.includes('show:contributor')) {
-            next()
+            
+          console.log("hello world!!!");
+          next()
           }
         } catch (e) {
+          console.log("ERROR: " + e)
+          console.log("DEBUG: " + Vue.prototype.$AuthService.getAccount().idTokenClaims.extension_permissions)
           next({
             name: 'root' // back to safety route //
           })
@@ -52,7 +58,7 @@ export default new Router({
       component: AdminRoot,
       async beforeEnter (to, from, next) {
         try {
-          var permissions = await this.$AuthService.getAccount().idTokenClaims.extension_permissions
+          var permissions = await Vue.prototype.$AuthService.getAccount().idTokenClaims.extension_permissions
           if (permissions.includes('admin:owner') || permissions.includes('admin:contributor')) {
             next()
           }
@@ -68,7 +74,7 @@ export default new Router({
       component: GetPermissions,
       async beforeEnter (to, from, next) {
         try {
-          var permissions = await this.$AuthService.getAccount().idTokenClaims.extension_permissions
+          var permissions = await Vue.prototype.$AuthService.getAccount().idTokenClaims.extension_permissions
           if (permissions.includes('admin:owner') || permissions.includes('admin:contributor')) {
             next()
           }

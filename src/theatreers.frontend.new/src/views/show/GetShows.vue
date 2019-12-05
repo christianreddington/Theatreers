@@ -1,6 +1,5 @@
 <template>
   <div class="overflow-auto">
-    <b-breadcrumb :items="breadcrumbs" id="breadcrumbs"></b-breadcrumb>
     <div align="right">
       <b-button variant="primary" :to="{ name: 'createshow' }">Create</b-button>
     </div>
@@ -44,16 +43,6 @@ export default {
     return {
       perPage: 3,
       currentPage: 1,
-      breadcrumbs: [
-        {
-          text: 'Theatreers',
-          href: this.$router.resolve({ name: 'root' }).href
-        },
-        {
-          text: 'Shows',
-          active: true
-        }
-      ],
       items: [],
       isLoading: false,
       selectedPartition: null,
@@ -88,6 +77,19 @@ export default {
       ]
     }
   },
+  mounted: function () {
+    this.$store.commit('breadcrumbs/setBreadcrumbs', 
+    [
+        {
+          text: 'Theatreers',
+          href: this.$router.resolve({ name: 'root' }).href
+        },
+        {
+          text: 'Shows',
+          active: true
+        }
+      ])
+  },
   computed: {
     rows () {
       return this.items.length
@@ -98,7 +100,7 @@ export default {
       immediate: false,
       handler () {
         this.isLoading = true
-        this.$AuthService.getApi(`https://api.theatreers.com/show/shows/${TouchList.selectedPartition}`)
+        this.$AuthService.getApi(`https://api.theatreers.com/show/shows/${this.selectedPartition}`)
           .catch(function (error) {
             console.log(error);
             //Add an alert here

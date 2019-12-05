@@ -1,6 +1,5 @@
 <template>
   <div class="about">
-    <b-breadcrumb :items="breadcrumbs" id="breadcrumbs" v-if="show"></b-breadcrumb>
     <h1 v-if="show">Edit {{ show.showName }}</h1>
     <ShowForm v-model="show" />
   </div>
@@ -26,20 +25,21 @@ export default {
   methods: {
     onSubmit (evt) {
       console.log(evt);
-      fetch(`https://api.theatreers.com/show/show/${this.$route.params.id}`, {
-        headers: {
-          'Accept': 'application/json'
-        },
-        method: 'PUT',
-        body: JSON.stringify(this.show)
-      })
-        .then(function (response) {
-          console.log(response);
-          alert('Form submitted')
-        })
-        .catch(function (error) {
-           console.log(error)
-          // // console.log('blah')
+      var tokenRequest = {
+        scopes: ['https://theatreers.onmicrosoft.com/show-api/user_impersonation']
+      }
+
+      var jsonBody = JSON.stringify(this.show)
+
+      this.$AuthService.acquireToken(tokenRequest)
+        .then(bearerToken => {
+          this.$AuthService.putApi(`https://api.theatreers.com/show/show/${this.$route.params.id}`, jsonBody, bearerToken.accessToken)
+            .catch(function (error) {
+              console.log('Error: ' + error)
+            })
+            .then(function (response) {
+              console.log(response);
+            })
         })
     }
   },
@@ -54,7 +54,8 @@ export default {
       .then((jsonData) => {
         this.isLoading = false
         this.show = jsonData
-        this.breadcrumbs = [
+        this.$store.commit('breadcrumbs/setBreadcrumbs', 
+        [
           {
             text: 'Theatreers',
             href: this.$router.resolve({ name: 'root' }).href
@@ -71,7 +72,7 @@ export default {
             text: 'Edit',
             active: true
           }
-        ]
+        ])  
       })
   }
 }

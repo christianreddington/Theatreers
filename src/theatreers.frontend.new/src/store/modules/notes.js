@@ -21,11 +21,6 @@ const actions = {
 const mutations = {
   setNotes (state, notes) {
     state.all = notes
-  },
-
-  decrementNoteInventory (state, { id }) {
-    const note = state.all.find(note => note.id === id)
-    note.inventory--
   }
 }
 
