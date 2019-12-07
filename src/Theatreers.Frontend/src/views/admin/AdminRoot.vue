@@ -6,7 +6,8 @@
 
 export default {
   mounted: function () {
-    this.breadcrumbs = [
+    this.$store.commit('breadcrumbs/setBreadcrumbs', 
+    [
       {
         text: 'Theatreers',
         href: this.$router.resolve({ name: 'root' }).href
@@ -15,7 +16,7 @@ export default {
         text: 'Admin',
         active: true
       }
-    ]
+    ])
   }
 }
 </script>
