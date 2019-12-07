@@ -24,18 +24,14 @@
 </template>
 
 <script>
-import { config } from '../config'
+import myConfig from '../config';
+console.log(myConfig);
 export default {
   data () {
     return {
-      editProfileLink: 'https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_SiPe&client_id=' + config.clientId + '&redirect_uri= ' + config.redirectUri + '&nonce=defaultNonce&scope=openid&response_type=id_token',
-      forgotPasswordLink: 'https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_SSPR&client_id=' + config.clientId + '&redirect_uri=' + config.redirectUri + '&nonce=defaultNonce&scope=openid&response_type=id_token&prompt=login'
+      editProfileLink: 'https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_SiPe&client_id=' + myConfig.clientId + '&redirect_uri= ' + myConfig.redirectUri + '&nonce=defaultNonce&scope=openid&response_type=id_token',
+      forgotPasswordLink: 'https://theatreers.b2clogin.com/theatreers.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_SSPR&client_id=' + myConfig.clientId + '&redirect_uri=' + myConfig.redirectUri + '&nonce=defaultNonce&scope=openid&response_type=id_token&prompt=login'
     
-    }
-  },
-  mounted () {
-    if (this.$AuthService.getAccount() != null) {
-      this.user = this.$AuthService.getAccount()
     }
   },
   methods: {
