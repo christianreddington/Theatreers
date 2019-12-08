@@ -22,7 +22,6 @@ namespace Theatreers.Show
 {
   public class Startup : FunctionsStartup
   {
-    //dummy comment
     private static string _databaseId = "theatreers";
     private static string _imageCollectionName = "shows";
     private static string _newsCollectionName = "shows";
