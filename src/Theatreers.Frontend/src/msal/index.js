@@ -85,6 +85,14 @@ export default class AuthService {
     return fetch(uri, { headers: headers, method: 'POST', body: body })
   };
 
+  deleteApi(uri, token) {
+    const headers = {
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json'
+    }
+    return fetch(uri, { headers: headers, method: 'DELETE' })
+  };
+
   putApi(uri, body, token) {
     const headers = {
       'Authorization': 'Bearer ' + token,

@@ -2,11 +2,7 @@
   <div class="about">
     <b-breadcrumb :items="breadcrumbs" id="breadcrumbs" v-if="breadcrumbs"></b-breadcrumb>
     <div align="right">
-      <b-button
-        variant="primary"
-        v-if="show"
-        :to="{ name: 'editshow', params: { id: $route.params.id } }"
-      >Edit</b-button>
+      <b-button variant="primary" v-if="show" :to="{ name: 'editshow', params: { id: $route.params.id } }" >Edit</b-button> <b-button variant="danger" v-if="show" @click="deleteShow">Delete</b-button>
     </div>
     <h1 v-if="show">{{ show.showName }}</h1>
     <p v-if="show">{{ show.showName }}</p>
@@ -22,7 +18,7 @@
             <h5 class="mb-1">{{song.name}}</h5>
             <small>{{ search(song.low, notes).text }} - {{ search(song.high, notes).text }}, {{ song.key }}</small>
           </div>
-          <p class="mb-1">{{ song.participants.join(', ') }}</p>
+          <p class="mb-1" v-if="song.participants">{{ song.participants.join(', ') }}</p>
         </a>
       </div>
     </div>
@@ -72,7 +68,49 @@ export default {
   methods: {
     search: function (nameKey, myArray) {
       return search(nameKey, myArray)
-    }    
+    },
+    deleteShow() {
+      this.$bvModal.msgBoxConfirm(`Please confirm that you want to delete the show ${this.show.showName}.`, {
+        title: 'Please Confirm',
+        size: 'sm',
+        buttonSize: 'sm',
+        okVariant: 'danger',
+        okTitle: 'YES',
+        cancelTitle: 'NO',
+        footerClass: 'p-2',
+        hideHeaderClose: false,
+        centered: true
+      })
+        .then(value => {
+          if (value){
+            var tokenRequest = {
+              scopes: ['https://theatreers.onmicrosoft.com/show-api/user_impersonation']
+            }
+
+            this.$AuthService.acquireToken(tokenRequest)
+              .then(bearerToken => {
+                let self = this
+                this.$AuthService.deleteApi(`https://api.theatreers.com/show/show/${this.$route.params.id}`, bearerToken.accessToken)
+                  .catch(function (error) {
+                    console.log('Error: ' + error)
+                  })
+                  .then(function (response) {
+                    console.log(response);
+                    //console.log(self);
+                    self.$router.push("/show/");
+                    self.$store.commit('alerts/setAlerts', [
+                      {"id": 1, "variant": "success", "message": `${self.show.showName} was successfully deleted`},
+                    ]);
+                  })
+              })
+
+          }
+        })
+        .catch(err => {
+          console.log(err);
+          // An error occurred
+        })
+    }
   },
   created () {
     this.$store.dispatch('notes/getAllNotes')

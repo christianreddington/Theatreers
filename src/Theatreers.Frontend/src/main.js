@@ -8,6 +8,7 @@ import store from "./store";
 import AuthService from "./msal";
 import router from "./router";
 
+Vue.use(router)
 Vue.prototype.$AuthService = new AuthService();
 Vue.config.productionTip = false;
 

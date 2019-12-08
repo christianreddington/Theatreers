@@ -21,9 +21,6 @@ const EditShow = () => import('@/views/show/EditShow')
 const GetShow = () => import('@/views/show/GetShow')
 const GetShows = () => import('@/views/show/GetShows')
 
-
-
-
 export default new Router({
   routes: [
     { path: '/event', name: 'getevents', component: GetEvents },

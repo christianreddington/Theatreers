@@ -14,9 +14,9 @@ export default {
   }),
   methods: mapActions('cart', [
     'addProductToCart'
-  ]),
+  ])/*,
   created () {
     this.$store.dispatch('alerts/getAllAlerts')
-  }
+  }*/
 }
 </script>

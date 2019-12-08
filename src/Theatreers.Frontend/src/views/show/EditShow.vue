@@ -33,12 +33,18 @@ export default {
 
       this.$AuthService.acquireToken(tokenRequest)
         .then(bearerToken => {
+          let self = this
           this.$AuthService.putApi(`https://api.theatreers.com/show/show/${this.$route.params.id}`, jsonBody, bearerToken.accessToken)
             .catch(function (error) {
               console.log('Error: ' + error)
             })
             .then(function (response) {
               console.log(response);
+              //console.log(self);
+              self.$router.push("/show/"+ self.$route.params.id);
+              self.$store.commit('alerts/setAlerts', [
+                {"id": 1, "variant": "success", "message": `${self.show.showName} was successfully updated`},
+              ]);
             })
         })
     }
