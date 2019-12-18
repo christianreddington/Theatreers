@@ -5,6 +5,7 @@
     <ProjectGuid>{1312CE06-E35B-4C51-8BFD-A9F77F5B1EA5}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="AzureFunctions.Extensions.Swashbuckle" Version="1.4.4" />
     <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.14" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions" Version="3.0.5" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.MicrosoftGraph" Version="1.0.0-beta6" />
