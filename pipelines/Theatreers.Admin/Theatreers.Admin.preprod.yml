@@ -63,7 +63,4 @@ jobs:
               appName: '$(functionAppName)'
               package: '$(System.DefaultWorkingDirectory)/src/*.zip'
               appSettings: '-TheatreersAdminClientId $(TheatreersAdminClientId) -TheatreersAdminClientSecret $(TheatreersAdminClientSecret)'
-              deploymentMethod: 'auto'
-              #Trigger
-              #Another Trigger
-              #Trigger
+              deploymentMethod: 'Zip Deploy'
