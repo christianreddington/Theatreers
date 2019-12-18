@@ -3,6 +3,7 @@ using AzureFunctions.Extensions.Swashbuckle;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Hosting;
 
+[assembly: WebJobsStartup(typeof(Theatreers.Admin.Startup))]
 namespace Theatreers.Admin
 {
     class Startup : IWebJobsStartup
