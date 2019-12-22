@@ -1,17 +1,14 @@
 <template>
   <div>
-    <div v-if="newsObjects.length > 0 && newsObjects != null">
-    <b-row v-for="(newsItems, groupIndex) in groupedImages(newsObjects, 5)" v-bind:key="groupIndex">
-      <b-col v-for="(newsItem, newsIndex) in newsItems" v-bind:key="newsIndex">
-          <b-card tag="article" style="max-width: 20rem;" class="mb-2">
-            <b-card-text>
-              <b-link :href="newsItem.url">{{ newsItem.name }}</b-link>
-            </b-card-text>
-          </b-card>
-
-        </b-col>
-      </b-row>
-    </div>
+		<div v-if="newsObjects.length > 0 && newsObjects != null">
+			<h4>Latest News</h4>
+			<ul class="timeline" v-for="item in newsObjects" v-bind:key="item.id">
+				<li>
+          <b-link :href="item.url">{{item.name}}</b-link>
+					<div class="float-right">{{item.datePublished}}</div>
+        </li>
+			</ul>
+		</div>
     <div v-else>
       <h4>There are no articles available</h4>
     </div>
@@ -42,3 +39,35 @@ export default {
   }
 }
 </script>
+<style scoped>
+ul.timeline {
+    list-style-type: none;
+    position: relative;
+}
+ul.timeline:before {
+    content: ' ';
+    background: #d4d9df;
+    display: inline-block;
+    position: absolute;
+    left: 29px;
+    width: 2px;
+    height: 100%;
+    z-index: 400;
+}
+ul.timeline > li {
+    margin: 20px 0;
+    padding-left: 20px;
+}
+ul.timeline > li:before {
+    content: ' ';
+    background: white;
+    display: inline-block;
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid #22c0e8;
+    left: 20px;
+    width: 20px;
+    height: 20px;
+    z-index: 400;
+}
+</style>

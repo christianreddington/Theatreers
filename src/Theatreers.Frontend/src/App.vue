@@ -27,6 +27,7 @@
     <b-container class="app-content">
       <router-view></router-view>
     </b-container>
+    <Footer />
   </div>
 </template>
 
@@ -34,12 +35,14 @@
 import HeaderDropdown from "./components/HeaderDropdown";
 import AlertsComponent from "./components/AlertsComponent";
 import BreadcrumbsComponent from "./components/BreadcrumbsComponent";
+import Footer from "./components/structure/Footer";
 
 export default {
   components: {
     HeaderDropdown,
     AlertsComponent,
-    BreadcrumbsComponent
+    BreadcrumbsComponent,
+    Footer
   }
 };
 </script>
