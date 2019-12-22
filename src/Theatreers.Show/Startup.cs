@@ -47,7 +47,6 @@ namespace Theatreers.Show
       builder.Services.AddScoped<IStorageProvider<ShowListObject>, CosmosStorageProvider<ShowListObject>>((s) => { return new CosmosStorageProvider<ShowListObject>(client, _showlistCollectionUri, _databaseId, _showlistCollectionName); });
       builder.Services.AddScoped<IDataLayer, DataLayer>();
       builder.Services.AddScoped<IShowDomain, ShowDomain>();
-      //dummy comment
     }
   }
 }
