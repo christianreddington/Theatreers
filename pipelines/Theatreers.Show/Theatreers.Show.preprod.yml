@@ -11,7 +11,7 @@ jobs:
       functionAppName: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}-func" 
       keyvaultName: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}-kv" 
       regionalResourceGroupName: "th-${{ parameters.azureServiceGroupName}}-${{ parameters.environment }}-${{ parameters.region.short }}-rg" 
-      servicePrincipalObjectId: '7bb21c70-bf3f-4c52-bcc3-f5e30303d0d8'
+      servicePrincipalObjectId: '44a97750-26a6-4079-bfe6-0c50b05b3c2e'
       serviceResourceGroupName: 'th-show-dev-rg'
     pool:
       vmImage: "windows-2019"
