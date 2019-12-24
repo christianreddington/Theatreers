@@ -99,7 +99,7 @@ export default {
                     //console.log(self);
                     self.$router.push("/show/");
                     self.$store.commit('alerts/setAlerts', [
-                      {"id": 1, "variant": "success", "message": `${self.show.showName} was successfully deleted`},
+                      {"variant": "success", "message": `${self.show.showName} was successfully deleted`},
                     ]);
                   })
               })

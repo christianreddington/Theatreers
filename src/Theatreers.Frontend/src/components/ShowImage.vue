@@ -43,6 +43,8 @@ export default {
             var tokenRequest = {
               scopes: ['https://theatreers.onmicrosoft.com/show-api/user_impersonation']
             }
+            
+            console.log(this.$store);
 
             this.$AuthService.acquireToken(tokenRequest)
               .then(bearerToken => {
