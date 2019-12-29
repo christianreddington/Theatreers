@@ -59,7 +59,7 @@ namespace Theatreers.Show.Functions
 
                 foreach (Song song in message.Body.Songs){
                     if (song.Participants == null){
-                        song.Participants = new List<Song>();
+                        song.Participants = new List<string>();
                     }
                 }
 
