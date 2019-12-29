@@ -44,7 +44,7 @@ namespace Theatreers.Show.Functions
 
             foreach (Song song in message.Body.Songs){
                 if (song.Participants == null){
-                    song.Participants = new string[];
+                    song.Participants = new List<Song>();
                 }
             }
 
@@ -92,7 +92,7 @@ namespace Theatreers.Show.Functions
 
                 foreach (Song song in message.Body.Songs){
                     if (song.Participants == null){
-                        song.Participants = new string[];
+                        song.Participants = new List<Song>();
                     }
                 }
 
