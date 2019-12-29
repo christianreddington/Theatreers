@@ -55,6 +55,12 @@ namespace Theatreers.Show.Functions
                 message.Body.Doctype = DocTypes.Show;
                 message.Body.Id = showId;
 
+                foreach (Song song in message.Body.Songs){
+                    if (song.Participants == null){
+                        song.Participants = new string[];
+                    }
+                }
+
                 // Try the UpdateObject method. If successful, return OK Result. Otherwise, return badrequestresult with an unexpected error.
                 // If an exception is generated, throw a BadRequestErrorMessage with the error message.
                 try

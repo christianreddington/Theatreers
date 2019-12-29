@@ -42,6 +42,12 @@ namespace Theatreers.Show.Functions
             message.Body.Id = message.Body.Partition;
             message.Body.CreatedAt = DateTime.Now;
 
+            foreach (Song song in message.Body.Songs){
+                if (song.Participants == null){
+                    song.Participants = new string[];
+                }
+            }
+
             try
             {
                 await _showDomain.CreateShowObject(message);
@@ -82,7 +88,13 @@ namespace Theatreers.Show.Functions
                         RequestCreatedAt = DateTime.Now
                     },
                     Body = JsonConvert.DeserializeObject<ShowObject>(await req.Content.ReadAsStringAsync())
-                };
+                };                
+
+                foreach (Song song in message.Body.Songs){
+                    if (song.Participants == null){
+                        song.Participants = new string[];
+                    }
+                }
 
                 try
                 {
