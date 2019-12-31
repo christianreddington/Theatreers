@@ -8,8 +8,9 @@ using Theatreers.Show.Models;
 namespace Theatreers.Show.Abstractions
 {
   public interface IShowDomain
-  {
+    {
     Task<ShowObject> GetShow(string id);
+    Task<ImageObject> GetImage(string id, string imageId);
     Task<ICollection<ShowListObject>> GetShowList(string letter);
     Task<ICollection<ImageObject>> GetImageByShow(string id);
     Task<ICollection<NewsObject>> GetNewsByShow(string id);
@@ -24,5 +25,6 @@ namespace Theatreers.Show.Abstractions
     Task<bool> UpdateShowObject(MessageObject<ShowObject> message);
     Task<bool> UpdateImageObject(MessageObject<ImageObject> message);
     Task<bool> UpdateNewsObject(MessageObject<NewsObject> message);
+    Task<bool> SaveToBlobStorage(string blobName, string showGuid, byte[] data);
   }
 }

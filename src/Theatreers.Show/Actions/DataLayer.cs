@@ -86,7 +86,18 @@ namespace Theatreers.Show
       return await _showStore.ReadAsync(_object);
     }
 
-    public async Task<ICollection<ShowListObject>> GetShowsAsync(string partitionKey)
+    public async Task<ImageObject> GetImageAsync (string showId, string imageId)
+    {
+        ImageObject _object = new ImageObject ()
+        {
+            Id = imageId,
+            Partition = showId
+        };
+
+        return await _imageStore.ReadAsync(_object);
+    }
+
+        public async Task<ICollection<ShowListObject>> GetShowsAsync(string partitionKey)
     {
       IQueryable<ShowListObject> query = await _showListStore.Query();
       return query.Where(e => e.Partition == partitionKey).ToList();

@@ -9,7 +9,6 @@ namespace Theatreers.Show.Models
     public ImageObject() : base()
     {
       ValidationRules.Add(new ValidationRule() { AppliedToField = "ContentUrl", Mandatory = true });
-      ValidationRules.Add(new ValidationRule() { AppliedToField = "Name", Mandatory = true });
     }
 
     [JsonProperty("ImageId")]

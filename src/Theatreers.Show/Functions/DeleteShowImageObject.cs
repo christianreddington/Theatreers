@@ -41,9 +41,9 @@ namespace Theatreers.Show.Functions
         )
         {
 
-            string authorizationStatus = req.Headers.GetValues("AuthorizationStatus").FirstOrDefault();
+            /*string authorizationStatus = req.Headers.GetValues("AuthorizationStatus").FirstOrDefault();
             if (Convert.ToInt32(authorizationStatus).Equals((int)HttpStatusCode.Accepted))
-            {
+            {*/
                 MessageObject<ImageObject> message = new MessageObject<ImageObject>()
                 {
                     Headers = new MessageHeaders()
@@ -75,11 +75,11 @@ namespace Theatreers.Show.Functions
                     log.LogInformation($"[Request Correlation ID: {message.Headers.RequestCorrelationId}] :: Image Deletion Fail ::  :: Object ID: {imageId} - {ex.Message}");
                     return new BadRequestResult();
                 }
-            }
+            /*}
             else
             {
                 return new UnauthorizedResult();
-            }
+            }*/
         }
     }
 }

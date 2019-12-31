@@ -18,6 +18,8 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Theatreers.Show.Actions
 {
@@ -65,9 +67,14 @@ namespace Theatreers.Show.Actions
 
     public async Task<ShowObject> GetShow(string id)
     {
-      return await _dataLayer.GetShowAsync(id);
+        return await _dataLayer.GetShowAsync(id);
     }
-    public async Task<ICollection<ShowListObject>> GetShowList(string letter)
+    public async Task<ImageObject> GetImage(string id, string imageId)
+    {
+        return await _dataLayer.GetImageAsync(id, imageId);
+    }
+
+        public async Task<ICollection<ShowListObject>> GetShowList(string letter)
     {
       return await _dataLayer.GetShowsAsync(letter);
     }
@@ -179,9 +186,20 @@ namespace Theatreers.Show.Actions
       await _dataLayer.CreateShowAsync(message);
     }
     public async Task<bool> DeleteImageObject(MessageObject<ImageObject> message)
-    {
-      return await _dataLayer.DeleteImageAsync(message.Body);
-    }
+        {
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("showServiceBlobConnectionString"));
+            CloudBlobClient client = storageAccount.CreateCloudBlobClient();
+            CloudBlobContainer container = client.GetContainerReference("show");
+
+            ImageObject image = await _dataLayer.GetImageAsync(message.Body.Partition, message.Body.Id);
+
+            var blob = container.GetBlobReference(image.ImageId);
+            await blob.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, null, null, null);
+
+            return await _dataLayer.DeleteImageAsync(message.Body);
+
+    
+        }
     public async Task<bool> DeleteNewsObject(MessageObject<NewsObject> message)
     {
       return await _dataLayer.DeleteNewsAsync(message.Body);
@@ -202,5 +220,17 @@ namespace Theatreers.Show.Actions
     {
       return await _dataLayer.UpdateShowAsync(message.Body);
     }
-  }
+    public async Task<bool> SaveToBlobStorage(string blobName, string showGuid, byte[] data)
+    {
+        CloudStorageAccount storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("showServiceBlobConnectionString"));
+        CloudBlobClient client = storageAccount.CreateCloudBlobClient();
+        CloudBlobContainer container = client.GetContainerReference($"show");
+        await container.CreateIfNotExistsAsync();
+
+        var blob = container.GetBlockBlobReference(blobName);
+        await blob.UploadFromByteArrayAsync(data, 0, data.Length);
+
+        return true;
+    }
+    }
 }

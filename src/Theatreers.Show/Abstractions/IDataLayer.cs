@@ -16,6 +16,7 @@ namespace Theatreers.Show.Abstractions
     Task<ICollection<ImageObject>> GetImagesByShowAsync(string showId);
     Task<ICollection<NewsObject>> GetNewsByShowAsync(string showId);
     Task<ShowObject> GetShowAsync(string showId);
+    Task<ImageObject> GetImageAsync(string showId, string imageId);
     Task<ICollection<ShowListObject>> GetShowsAsync(string partitionKey);
     Task<bool> UpdateImageAsync(ImageObject _object);
     Task<bool> UpdateNewsAsync(NewsObject _object);
