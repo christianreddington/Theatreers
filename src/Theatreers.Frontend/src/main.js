@@ -8,8 +8,10 @@ import store from "./store";
 import AuthService from "./msal";
 import router from "./router";
 import InputTag from 'vue-input-tag'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
 
-Vue.use(router)
+Vue.use(router, VueAxios, axios)
 Vue.prototype.$AuthService = new AuthService();
 Vue.config.productionTip = false;
 Vue.component('input-tag', InputTag)
