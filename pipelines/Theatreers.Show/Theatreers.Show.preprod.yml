@@ -64,7 +64,7 @@ jobs:
               appType: 'functionApp'
               appName: '$(functionAppName)'
               package: '$(System.DefaultWorkingDirectory)/src/*.zip'
-              appSettings: '-cosmosConnectionString $(cosmosConnectionString)'
+              appSettings: '-cosmosConnectionString $(cosmosConnectionString) -showServiceBlobConnectionString $(showServiceBlobConnectionString)'
               deploymentMethod: 'auto'
               #Trigger
               #Another Trigger
