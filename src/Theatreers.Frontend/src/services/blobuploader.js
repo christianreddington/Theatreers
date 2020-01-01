@@ -6,7 +6,7 @@ export default function upload(formData, showId, token) {
     
     return axios.post(url, formData, {
         headers: {
-            'Authorization': 'Bearer ' + token
+            'Authorization': `Bearer ${token.accessToken}`
         }
     })
     // get data

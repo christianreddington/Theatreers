@@ -131,13 +131,10 @@ export default {
         // upload data to the server
         this.currentStatus = STATUS_SAVING;
 
-
         var tokenRequest = {
             scopes: ['https://theatreers.onmicrosoft.com/show-api/user_impersonation']
           }
-
-          
-
+       
       this.$AuthService.acquireToken(tokenRequest)
         .then(bearerToken => {
           upload(formData, this.show.id, bearerToken)
